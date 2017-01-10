@@ -1,5 +1,5 @@
 #List of patterns to ignore.
 *
-!*/
+!**/
 !.gitignore
-!*.m
+!**/*.m
