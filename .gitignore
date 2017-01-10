@@ -1,5 +1,4 @@
 #List of patterns to ignore.
-/*
+**/*
 !.gitignore
-!/my_matlab_scripts/*.m
-!/my_matlab_scripts/**/*.m
+!**/*.m
