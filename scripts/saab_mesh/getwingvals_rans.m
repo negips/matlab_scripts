@@ -38,11 +38,11 @@ nu = 1/Rec;
 
 yplusmin = 0.64;
 yplusmax = 12;
-xplus = 31.0;
+xplus = 18.0;
 zplus = 9;
 ifxavg = 1;
 ifzavg = 1;
-lz = 0.1;
+lz = 0.25;
 
 % Data from xfoil
 

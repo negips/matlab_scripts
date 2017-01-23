@@ -1,14 +1,29 @@
 function SaveFig(h, filename, destn, col)
 % Save and move the figure
 
-if col
 
-     print( h, '-r600', '-depsc', filename)
+if ~isempty(strfind(lower(filename), '.eps'))
+  if col
+       print( h, '-r100', '-depsc2', filename)
+  else
+       print( h, '-r100', '-deps2', filename)
+  end
+  movefile([filename],destn)
+
+elseif ~isempty(strfind(lower(filename), '.pdf'))
+  print( h, '-r100', '-dpdf', filename)
+  movefile([filename],destn)
+
 else
-     print( h, '-r600', '-deps', filename)
+  if col
+       print( h, '-r100', '-depsc2', filename)
+  else
+       print( h, '-r100', '-deps2', filename)
+  end
+
+  movefile([filename '.eps'],destn)
 end
 
-movefile([filename '.eps'],destn)
 
 end
 
