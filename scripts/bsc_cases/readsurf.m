@@ -18,9 +18,9 @@ en='le';
 if ifhdr
 
   nread=132;
-  hdr=fread(fid,132,'*char')
+  hdr=fread(fid,132,'*char');
   hdr = transpose(hdr);
-  dummy = sscanf(hdr,['%s%d%d%d%d%s%d%f'] )
+  dummy = sscanf(hdr,['%s%d%d%d%d%s%d%f'] );
   hash = char(dummy(1));
   precision = dummy(2);
   sno = dummy(3);
