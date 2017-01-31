@@ -4,6 +4,7 @@ clear
 clc
 close all
 
+addpath '/home/prabal/workstation/git_kth/matlabscripts/scripts/'
 
 fol = 'beskow_p6';
 ifhdr = 1;
@@ -15,16 +16,16 @@ destn = 'plots/';
 [sfiles tout] = LoadSurfFiles(fol);
 
 nfiles = length(sfiles);
-tlast = 0.0;
+tlast = 6.0;
 maxframes = nfiles*100;
 
-h1=figure('units','normalized','outerposition',[0 0 1 1])
+h1=figure('units','normalized','outerposition',[0 0 0.4 0.6]);
 
-mov(1:maxframes) = struct('cdata', [],'colormap', []);            % Just allocating
-
+%mov(1:maxframes) = struct('cdata', [],'colormap', []);            % Just allocating
+%mov = VideoWriter('cp_movie.avi');
 
 nplots = 0;
-for i = 1:1
+for i = 1:nfiles
   if (tout(i)>=tlast)
     fname = sfiles{i};
         
@@ -37,28 +38,34 @@ for i = 1:1
          dtmpx = sdata(1).data(:,:,it);
          dtmpy = sdata(2).data(:,:,it);
          dtmp_v = sdata(3).data(:,:,it);    
+         dtmp_v = sdata(5).data(:,:,it);    
+
          pvar = plot(x(:),dtmp_v(:), 'b.', 'MarkerSize', 6);
          set(gca,'Ydir', 'reverse')
-         ylim([-3.5 1.1])
+%         ylim([-3.5 1.1]);
          hold on
          lgs{1} =  ['T=' num2str(tstamps(it))]; 
-         lg = legend(pvar,lgs, 'FontSize', lfs, 'Location', 'NorthEast', 'Fontsize', lfs);
-         if nplots == 0   
+         lg = legend(pvar,lgs, 'FontSize', lfs, 'Location', 'North', 'Fontsize', lfs, 'Box', 'off');
+         if nplots == 0 
            ylabel('$C_{p}$', 'Interpreter', 'Latex', 'Fontsize', fs);
            xlabel('$x/C$', 'Interpreter', 'Latex', 'Fontsize', fs);
          end   
          nplots = nplots+1;   
-         mov(nplots) = getframe(gcf);
- 
+%         mov(nplots) = getframe(gcf);
+
+         svfname = sprintf('%0.4d', nplots);   
+         svfname = ['cp_fig' svfname '.png'];
+         destn = 'plots/';   
+%         SaveFig(gcf, svfname, destn, 1)
       end
       tlast = tstamps(it);
-      pause(0.001)
+      pause(0.01)
     end
   end
 end           
 
-mov2 = mov(1:nplots);      
-movie2avi(mov2, 'cp_movie.avi', 'compression', 'None', 'fps', 20, 'quality', 50);
+%mov2 = mov(1:nplots); 
+%movie2avi(mov2, 'cp_movie.avi', 'compression', 'None', 'fps', 15, 'quality', 75);
 %      for ies=1:selt
 %      %     scatter(x(:,i),sdata(1).data(:,i,1), '.')
 %      %     scatter(x(:,i),sdata(1).data(:,i,maxtsaves), 'd')

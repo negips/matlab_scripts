@@ -10,44 +10,53 @@ addpath '../'
 
 %load('wing_prabal.mat');
 
-Rec = 400*1000;
+Rec = 100*1000;
 nu = 1/Rec;
 
 yplusmin = 0.64;
 yplusmax = 12;
 xplus = 18.8;
-zplus = 7;
+zplus = 9;
 ifxavg = 1;
 ifzavg = 1;
 
 N = 11;
 
-%l1 = length(top);
-%
-%for i = 1:l1
-%     xa(i) = top(i).xa;
-%     ya(i) = top(i).ya;
-%     ut(i) = top(i).ut;
-%     tauw(i) = top(i).tauw;
-%end
-%
-%l2 = length(bottom);
-%
-%for i = 1:l1
-%     xab(i) = bottom(i).xa;
-%     yab(i) = bottom(i).ya;
-%     utb(i) = bottom(i).ut;
-%     tauwb(i) = bottom(i).tauw;
-%end
+xfoil = importdata('integral_vals_re100k.out');
+l1 = length(xfoil.data(:,7));
+x0 = xfoil.data(1,2);
+cnt=0;
+rho=1;
+while(x0~=0)
+     cnt=cnt+1;
+     xa(cnt) = xfoil.data(cnt,2);
+     ya(cnt) = xfoil.data(cnt,3);
+     tauw(cnt) = abs(xfoil.data(cnt,7))*0.5;
+     ut(cnt) = sqrt(tauw(cnt)/rho);
 
-load('lstar_wing.mat');
+     x0 = xfoil.data(cnt+1,2);
+end
 
-xa = xupf;
-ya = yupf;
-xab = xbotf;
-yab = ybotf;
+cnt=cnt+1;
+xa(cnt) = xfoil.data(cnt,2);
+ya(cnt) = xfoil.data(cnt,3);
+tauw(cnt) = abs(xfoil.data(cnt,7))*0.5;
+ut(cnt) = sqrt(tauw(cnt)/rho);
 
-nek_dat = importdata('surf_data.dat');
+xa = fliplr(xa);
+ya = fliplr(ya);
+tauw = fliplr(tauw);
+ut = fliplr(ut);
+lstf_up = ut/nu;
+
+xab = transpose(xfoil.data(cnt+1:end,2));
+yab = transpose(xfoil.data(cnt+1:end,3));
+tauwb = transpose(abs(xfoil.data(cnt+1:end,7))*0.5);
+utb = sqrt(tauwb/rho);
+lstf_bot = utb/nu;
+
+%%
+nek_dat = importdata('pitch.N11');
 
 % Divide into top and bottom halves.
 % Using a simplistic criterion. Maybe something more robut later...
@@ -60,7 +69,7 @@ co_upp = [];
 co_low = [];
 for ii = 1:nx
 
-     if (nek_dat.data(ii,2)>=0)
+     if (nek_dat.data(ii,5)>=0)
 %          if up_cnt==0 || (abs(nek_dat.data(ii,1)-co_upp(up_cnt,1))>1e-7 || abs(nek_dat.data(ii,2)-co_upp(up_cnt,2))>1e-7)
                up_cnt=up_cnt+1;
                co_upp(up_cnt,:) = [nek_dat.data(ii,1) nek_dat.data(ii,2)];
