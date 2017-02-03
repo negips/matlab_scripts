@@ -65,6 +65,7 @@ function [segments] = split_segments(hfile, uoo, deltacase, dt)
         itaps(27) = false;
     end
     xtaps = xytaps(itaps,1);
+    ytaps = xytaps(itaps,2);
     
     % extract pressure segments
     tp = h5read(hfile, '/esp/time');
@@ -78,9 +79,12 @@ function [segments] = split_segments(hfile, uoo, deltacase, dt)
         it2 = find((tp+tshift)<=(evt(2*ki+1)), 1, 'last');
         segments(ki).ptime = tp(it1:it2) + tshift;
         segments(ki).pressure = p(it1:it2, :);
-        segments(ki).Cz = trapz(xtaps, p(it1:it2, itaps), 2) / qoo;
+        segments(ki).Cz = trapz(xtaps, p(it1:it2, itaps),2) / qoo;
         dxt = ones(it2-it1+1,1) * (0.25 - xtaps)';
         segments(ki).Cm = trapz(xtaps, (p(it1:it2, itaps).*dxt), 2) / qoo;
+        segments(ki).xtaps = xtaps;
+        segments(ki).ytaps = ytaps;
+        segments(ki).itaps = itaps;
     end
     
 end
