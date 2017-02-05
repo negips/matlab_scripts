@@ -7,8 +7,8 @@ close all
 
 addpath '/scratch/negi/git_repos/matlabscripts/scripts/'
 
-base = '/scratch/negi/exp_data/';
-fol = 'delta+11/';
+base = '/scratch/negi/git_repos/matlabscripts/scripts/david_data/';
+fol = 'delta+24/';
 folder = [base fol];
 % fname = 'u24_a3_d14_fsteps.h5';
 lfol = length(fol);
@@ -92,6 +92,7 @@ pitch_amp = [];         % pitch amplitude
 re_case = [];           % Case reynolds number
 re_ccode = [];          % color code for reynolds number
 files_all = [];         % store all file names
+hfiles_all = [];        % full path of files
 seg_all = [];           % store segment index as array
 U0_all = [];            % freestream
 delta_all = [];         % flap deflection
@@ -261,7 +262,8 @@ for i=1:nfiles
       kred_cases = [kred_cases k];              % Reduced frequencies
       pitch_amp = [pitch_amp amp];              % pitch amplitude
       re_case = [re_case Re];                   % Reynolds number
-      files_all{allcount} = hfile;              % filenames
+      files_all{allcount} = filenames{i};       % filenames
+      hfiles_all{allcount} = hfile;             % full path
       seg_all = [seg_all iseg];                 % segment index
       U0_all = [U0_all uoo];                    % free stream velocity
       delta_all = [delta_all deltacase];        % flap deflection 

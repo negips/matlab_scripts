@@ -6,7 +6,6 @@ close all
 
 addpath '/scratch/negi/git_repos/matlabscripts/scripts/'
 
-
 matfile = '14_collated_stats.mat';
 
 data = load(matfile);
@@ -28,6 +27,7 @@ kredr1=data.kred_cases(ind1);
 pitchr1=data.pitch_amp(ind1);
 rere1=data.re_case(ind1);
 filesr1=data.files_all(ind1);
+hfilesr1=data.hfiles_all(ind1);
 segr1=data.seg_all(ind1);
 reccoder1=data.re_ccode(ind1,:);
 U0r1=data.U0_all(ind1);
@@ -139,7 +139,8 @@ while button==1
     dist = sqrt((amp_ratio-yp).^2 + (kredr1-xp).^2);
   end
   [val ind2] = min(dist);
-  hfile = filesr1{ind2};
+
+  hfile = hfilesr1{ind2};
   iseg = segr1(ind2);
   uoo = U0r1(ind2);
   deltacase = deltar1(ind2);
@@ -169,9 +170,10 @@ while button==1
   disp(['Time Period (nek): ', num2str(nek_timeperiod)])
   legs{1} = ['\alpha=' num2str(mean_alpha) '; k=', num2str(k) '; \Delta\alpha=', num2str(amp) '; Re=',num2str(Re)  ]; 
 
-  figure(20)
   q_time = segments(iseg).qtime;
   q_alpha = segments(iseg).alpha;
+
+  figure(20)
   plot(segments(iseg).qtime,segments(iseg).alpha*180/pi, 'Color', col1(1,:))
   ylabel('\alpha', 'Interpreter', 'tex', 'FontSize', fs)
   legend(legs, 'Interpreter', 'tex', 'fontsize', fs)
@@ -197,11 +199,11 @@ while button==1
   % interpolate onto qtime
   figure(22)
   q_cm = interp1(p_time,p_cm,q_time,'pchip');
-  zero_mean_q_cm = q_cm - mean(q_cm);
-  norm_q_cm = zero_mean_q_cm/abs(max(zero_mean_q_cm));
-  shifted_q_cm = norm_q_cm + (iseg-1)*2;
+%  zero_mean_q_cm = q_cm - mean(q_cm);
+%  norm_q_cm = zero_mean_q_cm/abs(max(zero_mean_q_cm));
+%  shifted_q_cm = norm_q_cm + (iseg-1)*2;
 
-  plot(q_alpha*180/pi,shifted_q_cm, 'Color', col1(1,:))
+  plot(q_alpha*180/pi,q_cm, 'Color', col1(1,:))
   ylabel('C_{m}', 'Interpreter', 'tex', 'FontSize', fs)
   xlabel('\alpha', 'Interpreter', 'tex', 'FontSize', fs)
   legend(legs, 'Interpreter', 'tex', 'fontsize', fs)
@@ -267,7 +269,7 @@ while button==1
 end  
 
 % Plot pressure values at a few points
-ifpressure=1;
+ifpressure=0;
 
 locations = [0.6];
 nlocs = length(locations);

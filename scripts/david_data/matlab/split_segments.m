@@ -22,6 +22,12 @@ function [segments] = split_segments(hfile, uoo, deltacase, dt)
     b = 0.5*0.5;
     qoo = 0.5*1.225*uoo^2;
     evt = h5read(hfile, '/qsys/evtime');
+    if evt==0
+      alphasweep = 1;
+    else
+      alphasweep = 0;
+    end
+
     if ~isempty(strfind(hfile, 'afsteps'))
         rpms = [60, 150:150:2400];
     elseif ~isempty(strfind(hfile, 'hfsteps'))
@@ -44,10 +50,23 @@ function [segments] = split_segments(hfile, uoo, deltacase, dt)
     % split motion segments out 
     segments = struct([]);
     pos = h5read(hfile, '/qsys/pos');
+    if alphasweep
+      nseg=1;
+    end    
+
     for ki = 1:nseg
-        t1 = evt(2*ki);
-        t2 = evt(2*ki+1);
-        idx = (tq >= t1) & (tq <= t2);
+        if (alphasweep)  
+           segments(ki).rpm=0;
+           segments(ki).qtime=tq;
+           t1=1;
+           t2=length(tq);
+           idx=t1:t2;
+        else   
+           t1 = evt(2*ki);
+           t2 = evt(2*ki+1);
+           idx = (tq >= t1) & (tq <= t2);
+        end
+
         if isfsteps
             segments(ki).rpm = rpms(ki);
             segments(ki).rfreq = 2*pi*rpms(ki)/300. * b/uoo; 
@@ -73,18 +92,31 @@ function [segments] = split_segments(hfile, uoo, deltacase, dt)
     
     % DTC clock skew correction 
     tp = 1.002491251607135*tp;
-    
-    for ki = 1:nseg
-        it1 = find((tp+tshift)>=(evt(2*ki)), 1, 'first');
-        it2 = find((tp+tshift)<=(evt(2*ki+1)), 1, 'last');
-        segments(ki).ptime = tp(it1:it2) + tshift;
-        segments(ki).pressure = p(it1:it2, :);
-        segments(ki).Cz = trapz(xtaps, p(it1:it2, itaps),2) / qoo;
-        dxt = ones(it2-it1+1,1) * (0.25 - xtaps)';
-        segments(ki).Cm = trapz(xtaps, (p(it1:it2, itaps).*dxt), 2) / qoo;
-        segments(ki).xtaps = xtaps;
-        segments(ki).ytaps = ytaps;
-        segments(ki).itaps = itaps;
+
+    if alphasweep
+      segments(1).ptime=tp;
+      segments(1).pressure=p;    
+      segments(1).Cz = trapz(xtaps, p(:, itaps),2) / qoo;
+      [r1 c1] = size(p);
+      dxt = ones(r1,1) * (0.25 - xtaps)';
+      segments(1).Cm = trapz(xtaps, (p(:, itaps).*dxt), 2) / qoo;
+      segments(1).xtaps = xtaps;
+      segments(1).ytaps = ytaps;
+      segments(1).itaps = itaps;
+
+    else      
+      for ki = 1:nseg
+          it1 = find((tp+tshift)>=(evt(2*ki)), 1, 'first');
+          it2 = find((tp+tshift)<=(evt(2*ki+1)), 1, 'last');
+          segments(ki).ptime = tp(it1:it2) + tshift;
+          segments(ki).pressure = p(it1:it2, :);
+          segments(ki).Cz = trapz(xtaps, p(it1:it2, itaps),2) / qoo;
+          dxt = ones(it2-it1+1,1) * (0.25 - xtaps)';
+          segments(ki).Cm = trapz(xtaps, (p(it1:it2, itaps).*dxt), 2) / qoo;
+          segments(ki).xtaps = xtaps;
+          segments(ki).ytaps = ytaps;
+          segments(ki).itaps = itaps;
+      end
     end
     
 end
