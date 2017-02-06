@@ -15,7 +15,6 @@ phases= [10 70 90]*pi/180;
 nphase = length(phases)
 col = lines(nphase);
 
-
 % Phase lag with a hyperbolic tangent
 % varying between [-2.5 0]
 amin = -2.5;
@@ -48,6 +47,10 @@ for i=1:nphase
   subplot(nphase,1,i)
   plot(alpha,response, 'Color', col(i,:)); hold on;
 %  plot(alpha_all,model, '--')
+  ylim([-1.25 0.25])
+  xlabel('\alpha', 'Interpreter', 'tex', 'FontSize', fs)
+  ylabel('C_{m}', 'Interpreter', 'tex', 'FontSize', fs)
+
   legs{i} = ['\phi=',num2str(phi*180/pi)];
   legend(legs(i), 'Interpreter', 'tex', 'FontSize', lfs, 'Location', 'Best')
 
@@ -135,9 +138,6 @@ for ii = 1:ncases
   xlabel('\alpha', 'Interpreter', 'tex', 'FontSize', fs)
   legend(legs(ii), 'Interpreter', 'tex', 'fontsize', lfs)
   hold on
-  filename=['response_curve.eps'];
-  filename = [num2str(deltacase) '_' filename];
-  SaveFig(gcf,filename, destn, ifcols)
   
   %% PSD
   tmin = min(p_time);
@@ -194,4 +194,9 @@ for ii = 1:ncases
   
   disp(['--------------'])
 end
+
+figure(22)
+filename=['response_curve.eps'];
+filename = [num2str(deltacase) '_' filename];
+SaveFig(gcf,filename, destn, ifcols)
 

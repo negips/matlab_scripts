@@ -7,12 +7,15 @@ close all
 
 addpath '/scratch/negi/git_repos/matlabscripts/scripts/'
 
-base = '/scratch/negi/exp_data/';
+base = '/scratch/negi/git_repos/matlabscripts/scripts/david_data/';
 fol = 'delta+14/';
 folder = [base fol];
 lfol = length(fol);
 
 fs = 16;
+destn = 'plots/';
+ifcols = 1;
+
 
 [status,result] = system(['ls ' folder '*']);
 
@@ -24,6 +27,23 @@ U0=zeros(nfiles,1);
 alpha=zeros(nfiles,1)-99;
 defl=zeros(nfiles,1);
 
+if ~isempty(strfind(fol,'+0/'))
+   defl(1)=0;
+elseif ~isempty(strfind(fol,'+8/'))
+   defl(1)=8;   
+elseif ~isempty(strfind(fol,'+11/'))
+   defl(1)=11;   
+elseif ~isempty(strfind(fol,'+14/'))
+   defl(1)=14;   
+elseif ~isempty(strfind(fol,'+24/'))
+   defl(1)=24;
+else
+   disp('Unknow flap angle')
+   break
+end
+
+
+
 disp(['N files: ', num2str(nfiles)])
 
 for i=1:nfiles
@@ -31,9 +51,23 @@ for i=1:nfiles
     ind2 = inds2(i)+2;
     fname=result(ind1:ind2);
     filenames{i}=fname;
+
+    inds4=strfind(fname,'alphasweep');
     inds3=strfind(fname,'_');
-    inds4=strfind(fname,'');
-   
+
+    if ~isempty(inds4)
+      ind1=2;
+      ind2=inds3(1)-1;      
+      U0(i) = str2double(fname(ind1:ind2));
+      ind1=inds3(1)+2;
+      ind2=inds3(2)-1;
+      defl(i) = str2double(fname(ind1:ind2));
+      if isnan(defl(i)) && i>1 
+        defl(i)=defl(i-1);
+      end  
+      continue
+    end
+
     if (length(inds3)>2)
       % Freestream
       ind1=2;
@@ -69,10 +103,10 @@ interesting_counter = 0;
 for i=1:nfiles
 
   found=0;  
-  if alpha(i)~=-99   && U0(i)==30
+  if alpha(i)~=-99   && U0(i)<25
     found=1;  
     uoo = U0(i);
-    deltacase=14;
+    deltacase=defl(1);
     Re=uoo*c/nu;
     hfile = [folder filenames{i}];
 
@@ -99,7 +133,7 @@ for i=1:nfiles
     mean_alpha0 = mean_alpha0*180/pi;
     
     
-    if mean_alpha0>2 && mean_alpha0<6
+    if mean_alpha0<2 || mean_alpha0>5
        found=0;
        continue
     end
@@ -147,7 +181,7 @@ for i=1:nfiles
       q_alpha = segments(iseg).alpha;
       figure(h1)
       plot(segments(iseg).qtime,segments(iseg).alpha*180/pi, 'Color', col1(iseg,:))
-      ylabel('$\alpha$', 'Interpreter', 'Latex', 'FontSize', fs)
+      ylabel('\alpha', 'Interpreter', 'tex', 'FontSize', fs)
       legend(legs)
       hold on;
       
@@ -157,7 +191,7 @@ for i=1:nfiles
       p_cm = segments(iseg).Cm;
       figure(h2)
       plot(p_time,p_cm, 'Color', col1(iseg,:))
-      ylabel('$C_{m}$', 'Interpreter', 'Latex', 'Fontsize', fs)
+      ylabel('C_{m}', 'Interpreter', 'tex', 'Fontsize', fs)
       legend(legs)
       hold on
 
@@ -168,10 +202,15 @@ for i=1:nfiles
       norm_q_cz = zero_mean_q_cz/abs(max(zero_mean_q_cz));
       shifted_q_cz = norm_q_cz + (iseg-1)*2;
 
+      q_cm = interp1(p_time,p_cm,q_time,'pchip');
+      zero_mean_q_cm = q_cm - mean(q_cm);
+      norm_q_cm = zero_mean_q_cm/abs(max(zero_mean_q_cm));
+      shifted_q_cm = norm_q_cm + (iseg-1)*2;
+
       figure(h3)
-      plot(q_alpha*180/pi,shifted_q_cz, 'Color', col1(iseg,:))
-      ylabel('$C_{z}$', 'Interpreter', 'Latex', 'FontSize', fs)
-      xlabel('$\alpha$', 'Interpreter', 'Latex', 'FontSize', fs)
+      plot(q_alpha*180/pi,shifted_q_cm, '.', 'Color', col1(iseg,:))
+      ylabel('C_{m}', 'Interpreter', 'tex', 'FontSize', fs)
+      xlabel('\alpha', 'Interpreter', 'tex', 'FontSize', fs)
       legend(legs)
       hold on
 
@@ -202,30 +241,37 @@ for i=1:nfiles
 
 %      [pxx,f2] = pwelch(zero_mean_cz,window,n_overlap,nfft,p_fs);
       [pxx,f2] = pwelch(zero_mean_cm,window,n_overlap,nfft,p_fs);
-      % [pxx,f2] = pwelch(p_cz,window,n_overlap,nfft);
 
       k2 = 2*pi*f2*c/2/uoo;
-%      k2 = f2*c/2/uoo;
-      ind4 = find(k2<2);
+      ind4 = find(k2<1.5);
 
       figure(h4)
-%      subplot(2,1,1)
-%      plot(k2(ind4),pxx(ind4), 'Color', col1(iseg,:)); hold on
-%      legend(legs)
       pxx_norm = pxx(ind4)/max(pxx(ind4));
-%      pxx_log = log(pxx_norm+1e-10);
       pxx_shifted = pxx_norm + iseg-1;
       psd_all(iseg) = plot(k2(ind4),pxx_shifted, 'Color', col1(iseg,:)); hold on
       pxx_new = pxx(ind4);
       pxx_max = max(pxx_new);
 
-      tol_secondary_mode=0.1;
-      ind5 = find(pxx_new>tol_secondary_mode*pxx_max);
-      pxx_new(ind5) = 0.;
-      pxx_new_norm = pxx_new/(max(pxx_new)) +iseg-1;
-%      subplot(2,1,2)
-      psd_fil(iseg) = plot(k2(ind4),pxx_new_norm, '--', 'Color', col1(iseg,:)); hold on
-      legend(psd_all, legs)
+      [val ind5] = max(pxx);
+
+      kmax = k2(ind5);
+      ind6 = k2<1.5*kmax;
+      ind7 = k2>0.5*kmax;
+      ind8 = ind6.*ind7;
+      ind9 = find(ind8);
+      pxx_new = pxx;
+      pxx_new(ind9) = 0;
+
+      pxx_new_norm = pxx_new/(max(pxx_new));
+      pxx_new_shifted = pxx_new_norm +iseg-1;
+
+      psd_fil(iseg) = plot(k2(ind4),pxx_new_shifted(ind4), '--', 'Color', col1(iseg,:)); hold on
+      legend(psd_all, legs, 'Location', 'SouthEast')
+      title('Normalized and filtered PSD')
+      xlabel('k', 'Interpreter', 'tex', 'FontSize', fs)
+      ylabel('normalized psd', 'Interpreter', 'tex', 'FontSize', fs)
+
+
       disp(['--------------'])
    
     end % isegs
@@ -240,9 +286,25 @@ for i=1:nfiles
    
   end   % if alpha~=-99
 
+  if found
+    figure(h2)  
+    sfname='cm_time.eps';
+    sfname = [num2str(deltacase) '_' sfname];
+    SaveFig(h2, sfname, destn, ifcols)
+
+    figure(h3)  
+    sfname='cm_alpha.eps';
+    sfname = [num2str(deltacase) '_' sfname];
+    SaveFig(h3, sfname, destn, ifcols)
+   
+    figure(h4)  
+    sfname='psd.eps';
+    sfname = [num2str(deltacase) '_' sfname];
+    SaveFig(h4, sfname, destn, ifcols)
+  end
+
   validinput = 0;
   exitloop = 0;
-
 
   while (~validinput) && i~=nfiles && found==1
     inp = input('Next file(n)? or exit(e)?: ', 's')

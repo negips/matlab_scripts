@@ -8,7 +8,7 @@ close all
 addpath '/scratch/negi/git_repos/matlabscripts/scripts/'
 
 base = '/scratch/negi/git_repos/matlabscripts/scripts/david_data/';
-fol = 'delta+24/';
+fol = 'delta+14/';
 folder = [base fol];
 % fname = 'u24_a3_d14_fsteps.h5';
 lfol = length(fol);
@@ -275,7 +275,7 @@ for i=1:nfiles
       elseif (Re>600000 && Re < 900000)
         re_ccode = [re_ccode; blue];
       else
-        re_ccode = [re_ccode; green];
+        re_ccode = [re_ccode; cyan];
       end        
 
       disp(['--------------'])
@@ -299,7 +299,7 @@ scatter(aoa0,pitch_amp,[],re_ccode, 'LineWidth', lw);
 xlim([0 15])
 ylabel('\Delta\alpha (pitch amplitude)', 'Interpreter', 'tex', 'FontSize', fs)
 xlabel('\alpha', 'Interpreter', 'tex', 'FontSize', fs)
-filename='aoa_pitchamp.pdf'
+filename='aoa_pitchamp.eps'
 filename = [num2str(defl(1)) '_' filename];
 SaveFig(h1, filename, destn, ifcols)
 

@@ -11,7 +11,7 @@ matfile = '14_collated_stats.mat';
 data = load(matfile);
 
 fs = 16;
-tol_secondary= 0.05;
+tol_secondary= 0.01;
 
 %Refine by k2/k1 amplitude
 
@@ -130,6 +130,7 @@ while button==1
      close(21)
      close(22)
      close(23)
+     close(24)
   end
   counter=counter+1;
 
@@ -178,7 +179,7 @@ while button==1
   ylabel('\alpha', 'Interpreter', 'tex', 'FontSize', fs)
   legend(legs, 'Interpreter', 'tex', 'fontsize', fs)
   hold on;
-  filename=['alpha_time.pdf'];
+  filename=['alpha_time.eps'];
   filename = [num2str(deltar1(1)) '_' filename];
   SaveFig(gcf,filename, destn, ifcols)
 
@@ -187,11 +188,11 @@ while button==1
   p_time = segments(iseg).ptime;
   p_cz = segments(iseg).Cz;
   p_cm = segments(iseg).Cm;
-  plot(p_time,p_cm, 'Color', col1(1,:))
-  ylabel('C_{m}', 'Interpreter', 'tex', 'Fontsize', fs)
+  plot(p_time,p_cz, 'Color', col1(1,:))
+  ylabel('C_{z}', 'Interpreter', 'tex', 'Fontsize', fs)
   legend(legs, 'Interpreter', 'tex', 'fontsize', fs)
   hold on
-  filename=['cm_time.pdf'];
+  filename=['cz_time.eps'];
   filename = [num2str(deltar1(1)) '_' filename];
   SaveFig(gcf,filename, destn, ifcols)
 
@@ -208,9 +209,25 @@ while button==1
   xlabel('\alpha', 'Interpreter', 'tex', 'FontSize', fs)
   legend(legs, 'Interpreter', 'tex', 'fontsize', fs)
   hold on
-  filename=['cm_alpha.pdf'];
+  filename=['cm_alpha.eps'];
   filename = [num2str(deltar1(1)) '_' filename];
   SaveFig(gcf,filename, destn, ifcols)
+
+  figure(23)
+  q_cz = interp1(p_time,p_cz,q_time,'pchip');
+%  zero_mean_q_cm = q_cm - mean(q_cm);
+%  norm_q_cm = zero_mean_q_cm/abs(max(zero_mean_q_cm));
+%  shifted_q_cm = norm_q_cm + (iseg-1)*2;
+
+  plot(q_alpha*180/pi,q_cz, 'Color', col1(1,:))
+  ylabel('C_{z}', 'Interpreter', 'tex', 'FontSize', fs)
+  xlabel('\alpha', 'Interpreter', 'tex', 'FontSize', fs)
+  legend(legs, 'Interpreter', 'tex', 'fontsize', fs)
+  hold on
+  filename=['cz_alpha.eps'];
+  filename = [num2str(deltar1(1)) '_' filename];
+  SaveFig(gcf,filename, destn, ifcols)
+
 
   %% PSD
   tmin = min(p_time);
@@ -244,7 +261,7 @@ while button==1
 
   ind4 = find(k2<2);
 
-  figure(23)
+  figure(24)
   pxx_norm = pxx(ind4)/max(pxx(ind4));
   pxx_shifted = pxx_norm + iseg-1;
   psd_all = plot(k2(ind4),pxx_norm, 'Color', col1(1,:)); hold on
@@ -260,7 +277,7 @@ while button==1
   pxx_fil_shifted = pxx_fil_norm +iseg-1;
   psd_fil = plot(k2(ind4),pxx_fil_norm(ind4), '--', 'Color', col1(1,:)); hold on
   legend(psd_all, legs, 'Interpreter', 'tex', 'fontsize', fs)
-  filename=['psd.pdf'];
+  filename=['psd.eps'];
   filename = [num2str(deltar1(1)) '_' filename];
   SaveFig(gcf,filename, destn, ifcols)
 

@@ -13,7 +13,7 @@ folder = [base fol];
 lfol = length(fol);
 
 fs = 16;    % fontsize
-lfs = 12    % legend font size
+lfs = 12;    % legend font size
 lw = 1;     % linewidth
 
 [status,result] = system(['ls ' folder '*alphasweep*']);
@@ -142,9 +142,9 @@ for i=2:nfiles
       q_cm = interp1(p_time,p_cm,qtime3,'pchip');
  
       figure(3)
-%      plot_cq(allcount) = plot(alpha3,q_cz, '.', 'Color', col1(i,:));
-      plot_cq(allcount) = plot(alpha3,q_cm, '.', 'Color', col1(i,:));
-      ylabel('C_{m}', 'Interpreter', 'tex', 'FontSize', fs)
+      plot_cq(allcount) = plot(alpha3,q_cz, '.', 'Color', col1(i,:));
+%      plot_cq(allcount) = plot(alpha3,q_cm, '.', 'Color', col1(i,:));
+      ylabel('C_{z}', 'Interpreter', 'tex', 'FontSize', fs)
       xlabel('\alpha', 'Interpreter', 'tex', 'FontSize', fs)
       hold on
       xlim([-1 11])
@@ -161,7 +161,7 @@ legend(plot_aoa,legs,'Interpreter', 'tex', 'FontSize', lfs)
 figure(3)
 legend(plot_cq, legs,'Interpreter', 'tex', 'FontSize', lfs, 'Location', 'SouthEast')
 grid on
-filename=['cm_alpha_steady.pdf'];
+filename=['cm_alpha_steady.eps'];
 filename = [num2str(deltacase) '_' filename];
 SaveFig(gcf,filename, destn, ifcols)
 
@@ -169,7 +169,7 @@ ifunsteady = 1;
 
 if (ifunsteady)
 
-  hfile = '/scratch/negi/git_repos/matlabscripts/scripts/david_data/delta+14/u24_a2_d14_fsteps.h5'
+  hfile = '/scratch/negi/git_repos/matlabscripts/scripts/david_data/delta+14/u24_a2_d14_fsteps.h5';
   uoo = 24;
   deltacase=14;
   iseg=11;
@@ -181,16 +181,63 @@ if (ifunsteady)
 
   p_time = segments(iseg).ptime;
   p_cm = segments(iseg).Cm;
+  p_cz = segments(iseg).Cz;
 
   figure(3)
   q_cm = interp1(p_time,p_cm,q_time,'pchip');
-%  zero_mean_q_cm = q_cm - mean(q_cm);
+  q_cz = interp1(p_time,p_cz,q_time,'pchip');
+  %  zero_mean_q_cm = q_cm - mean(q_cm);
 %  norm_q_cm = zero_mean_q_cm/abs(max(zero_mean_q_cm));
 %  shifted_q_cm = norm_q_cm + (iseg-1)*2;
-  plot(q_alpha*180/pi,q_cm, 'Color', 'k')
-  filename=['cm_alpha_steady_unsteady.pdf'];
+  plot(q_alpha*180/pi,q_cz, 'Color', 'k')
+  filename=['cz_alpha_steady_unsteady.eps'];
   filename = [num2str(deltacase) '_' filename];
   SaveFig(gcf,filename, destn, ifcols)
 end
+
+%% David Eller's suggested case
+ifdavid = 1;
+
+if (ifdavid)
+
+  hfile = '/scratch/negi/git_repos/matlabscripts/scripts/david_data/delta+14/u30_a2_d14_fsteps.h5';
+  uoo = 30;
+  deltacase=14;
+  iseg=4;
+        
+  [segments] = split_segments(hfile, uoo, deltacase);
+
+  q_time = segments(iseg).qtime;
+  q_alpha = segments(iseg).alpha;
+
+  p_time = segments(iseg).ptime;
+  p_cm = segments(iseg).Cm;
+  p_cz = segments(iseg).Cz;
+
+  figure(3)
+  q_cz = interp1(p_time,p_cz,q_time,'pchip');
+  q_cm = interp1(p_time,p_cm,q_time,'pchip');
+  plot(q_alpha*180/pi,q_cz, 'Color', 'k')
+%  plot(q_alpha*180/pi,q_cm, 'Color', 'k')
+  filename=['cz_alpha_steady_david.eps'];
+  filename = [num2str(deltacase) '_' filename];
+  SaveFig(gcf,filename, destn, ifcols)
+end
+
+
+
+%%
+% Xfoil data
+
+ifxfoil = 0;
+
+if ifxfoil
+  xfile = 'polar_re1e6_ed36f128+14.dat';
+  
+  xfoil = importdata(xfile);
+  figure(3)
+  plot(xfoil.data(:,1), xfoil.data(:,5), '--k', 'LineWidth', 3)
+end
+
 
 

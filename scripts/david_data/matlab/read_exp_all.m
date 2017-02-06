@@ -7,7 +7,7 @@ close all
 
 addpath '/scratch/negi/git_repos/matlabscripts/scripts/'
 
-base = '/scratch/negi/exp_data/';
+base = '/scratch/negi/git_repos/matlabscripts/scripts/david_data/';
 fol = 'delta+14/';
 folder = [base fol];
 lfol = length(fol);
@@ -68,7 +68,7 @@ interesting_counter = 0;
 
 for i=1:nfiles
 
-  if alpha(i)~=-99   && U0(i)==30
+  if alpha(i)~=-99   && U0(i)>15
     uoo = U0(i);
     deltacase=14;
     Re=uoo*c/nu;
@@ -154,7 +154,7 @@ for i=1:nfiles
 
       % Phase plot
       % interpolate onto qtime
-      q_cz = interp1(p_time,p_cz,q_time,'cubic');
+      q_cz = interp1(p_time,p_cz,q_time,'pchip');
       zero_mean_q_cz = q_cz - mean(q_cz);
       norm_q_cz = zero_mean_q_cz/abs(max(zero_mean_q_cz));
       shifted_q_cz = norm_q_cz + (iseg-1)*2;
@@ -223,11 +223,11 @@ for i=1:nfiles
     figure(h1)
     plot([tmin tmax], [mean_alpha0 mean_alpha0], '--')
 
-    ifint = input('Save case file?: ');
-    if (ifint)
-      interesting_counter = interesting_counter+1;
-      interesting_case_files{interesting_counter} = hfile;
-    end 
+%    ifint = input('Save case file?: ');
+%    if (ifint)
+%      interesting_counter = interesting_counter+1;
+%      interesting_case_files{interesting_counter} = hfile;
+%    end 
    
   end   % if alpha~=-99
 
