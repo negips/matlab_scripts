@@ -6,7 +6,6 @@ function lsq = unsteady_force_model(par,time,cz,cz_model,alpha_model,k,uoo,alpha
   c=0.5;
   omega = 2*k*uoo/c;
 
-
   pitch = dalpha*sin(omega*time+theta);
   alpha_pred=alpha0+pitch;
   alpha_lagg=alpha0+dalpha*sin(omega*time+theta+phi);

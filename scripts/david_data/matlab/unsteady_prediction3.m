@@ -4,8 +4,6 @@ clear
 clc
 close all
 
-addpath '/scratch/negi/git_repos/matlabscripts/scripts/'
-
 destn = 'plots/';
 ifcols= 1;
 
@@ -30,13 +28,16 @@ lfs = 12;
 fname='u30_a2_d14_afsteps.h5';
 %fname='u24_a2_d14_fsteps.h5';
 
-hfile = [model.folder fname];
+hfile = ['../delta+14/' fname];
 [segments] = split_segments(hfile, uoo, deltacase);
 
 nsegs = length(segments);
 
-indicies = [2];
+indicies = [1:nsegs];
 ncases = length(indicies);
+
+kall=[];
+phiall=[];
 
 for ii = 1:ncases
   iseg=indicies(ii);    
@@ -67,7 +68,7 @@ for ii = 1:ncases
   % Phase plot
   % interpolate onto qtime
   figure(20)
-  subplot(ncases,1,ii)
+%  subplot(ncases,1,ii)
   q_cm = interp1(p_time,p_cm,q_time,'pchip');
   q_cz = interp1(p_time,p_cz,q_time,'pchip');
  
@@ -75,7 +76,7 @@ for ii = 1:ncases
   ylabel('C_{z}', 'Interpreter', 'tex', 'FontSize', fs)
   xlabel('\alpha', 'Interpreter', 'tex', 'FontSize', fs)
   legend(legs(ii), 'Interpreter', 'tex', 'fontsize', lfs, 'Location', 'Best')
-  hold on
+%  hold on
 
   % instantaneous rotational frequency
   mean_alpha2 = mean_alpha*pi/180;
@@ -87,64 +88,75 @@ for ii = 1:ncases
 
   
   disp(['--------------'])
+
+  theta=0;
+  ini_aoa=1;
+  amp2=1*pi/180;
+  par0(1)=theta;
+  par0(2)=ini_aoa;
+  par0(3)=amp2;
+  
+  options=optimset('MaxFunEvals',1000,'MaxIter',10000,'TolX',1e-8);
+  [par,fval,exitflag,output] = fminsearch(@(par) unsteady_alpha2(par,q_time,q_alpha,k,uoo,mean_alpha2,amp2), par0,options);
+  theta=par(1);
+  mean_alpha2=par(2);
+  amp2=par(3);
+  alpha_pred = mean_alpha2 +amp2*sin(omega*q_time + theta);
+  
+  figure(21)
+  plot(q_time,q_alpha*180/pi); hold on
+  plot(q_time,alpha_pred*180/pi, ' ok')
+  
+  % cm/cz model
+  phi=-5*pi/180;
+  intg_const=1;
+  par0(1)=phi;
+  par0(2)=intg_const;
+  
+  options=optimset('MaxFunEvals',100000,'MaxIter',100000,'TolX',1e-8,'TolFun', 1e-8);
+%  [par,fval,exitflag,output] = fminsearch(@(par) unsteady_force_model2(par,q_time,q_cz,model.cz,model.alpha,k,uoo,mean_alpha2,amp2,theta), par0,options);
+
+  [par,fval,exitflag,output] = fmincon(@(par) unsteady_force_model(par,q_time,q_cz,model.cz,model.alpha,k,uoo,mean_alpha2,amp2,theta),par0,[],[],[],[],[-pi -100],[pi 100],[],options);
+
+  phi=par(1);
+  intg_const=par(2);
+  %phi2=par(3)
+  
+  omega = 2*k*uoo/c;
+  
+  alpha_lagg=mean_alpha2+amp2*sin(omega*q_time + theta + phi);
+  
+  inst_OMEGA=omega*amp2*cos(omega*q_time+theta);
+  
+  p_motion = intg_const*(inst_OMEGA);
+  
+  cz_lagg = interp1(model.alpha,model.cz,alpha_lagg*180/pi,'linear');
+  
+  cz_pred = p_motion + cz_lagg;
+
+  kall=[kall k];
+  phiall = [phiall phi];
+
 end
 
-theta=0;
-par0=theta;
+figure(30)
+plot(kall,phiall*180/pi)
 
-options=optimset('MaxFunEvals',1000,'MaxIter',10000,'TolX',1e-8);
-[par,fval,exitflag,output] = fminsearch(@(par) unsteady_alpha(par,q_time,q_alpha,k,uoo,mean_alpha2,amp2), par0,options);
-theta=par;
-alpha_pred = mean_alpha2 +amp2*sin(omega*q_time + theta);
-
-figure(21)
-plot(q_time,q_alpha*180/pi); hold on
-plot(q_time,alpha_pred*180/pi, ' ok')
-
-% cm/cz model
-phi=0;
-phi2=0;
-intg_const=1;
-par0(1)=phi;
-par0(2)=intg_const;
-%par0(3)=phi2;
-
-options=optimset('MaxFunEvals',100000,'MaxIter',10000,'TolX',1e-8);
-[par,fval,exitflag,output] = fminsearch(@(par) unsteady_force_model(par,q_time,q_cz,model.cz,model.alpha,k,uoo,mean_alpha2,amp2,theta), par0,options);
-
-%[par,fval,exitflag,output] = fmincon(@(par) unsteady_force_model(par,q_time,q_cz,model.cz,model.alpha,k,uoo,mean_alpha2,amp2,theta),par0,[],[],[],[],[-pi -100],[pi 100],[],options);
-
-
-phi=par(1)
-intg_const=par(2)
-%phi2=par(3)
-
-omega = 2*k*uoo/c;
-
-alpha_lagg=mean_alpha2+amp2*sin(omega*q_time + theta + phi);
-
-inst_OMEGA=omega*amp2*cos(omega*q_time+theta);
-
-p_motion = intg_const*(inst_OMEGA);
-
-cz_lagg = interp1(model.alpha,model.cz,alpha_lagg*180/pi,'linear');
-
-cz_pred = p_motion + cz_lagg;
-
-figure(22)
-plot(q_time,q_cz); hold on
-plot(q_time,cz_pred, ' ok')
-%plot(q_time,p_motion+mean(cz_lagg), ' dm')
-filename=['model_cz_time.eps'];
-filename = [re_leg '_' filename];
-SaveFig(gcf,filename, destn, ifcols)
-
-
-figure(20)
-plot(alpha_pred*180/pi,cz_pred, '--m', 'LineWidth', 2)
-filename=['model_phase_potrait.eps'];
-filename = [re_leg '_' filename];
-SaveFig(gcf,filename, destn, ifcols)
+% figure(22)
+% plot(q_time,q_cz); hold on
+% plot(q_time,cz_pred, ' ok')
+% plot(q_time,cz_lagg, '--g')
+% plot(q_time,p_motion+mean(cz_lagg), ':m')
+% filename=['model_cz_time.eps'];
+% filename = [re_leg '_' filename];
+% %SaveFig(gcf,filename, destn, ifcols)
+% 
+% 
+% figure(20)
+% plot(alpha_pred*180/pi,cz_pred, '--m', 'LineWidth', 2)
+% filename=['model_phase_potrait.eps'];
+% filename = [re_leg '_' filename];
+% %SaveFig(gcf,filename, destn, ifcols)
 
 
 

@@ -31,8 +31,10 @@ hfile = [folder fname];
 
 
 nsegs = length(segments);
-cases=[4];
+cases=[12];
 ncases=length(cases);
+
+col1=lines(ncases);
 
 for ii=1:ncases
 
@@ -86,15 +88,24 @@ for ii=1:ncases
  
   figure(3)
   if ncases~=1
-    plot(q_alpha*180/pi,shifted_q_cm, 'Color', 'b')
+    plot(q_alpha*180/pi,shifted_q_cm, 'Color', col1(ii,:))
   else
     plot(q_alpha*180/pi,q_cm, 'Color', 'b')
   end
   hold on
 
   figure(4)
-  plot(segments(iseg).ptime,segments(iseg).Cm, 'Color', 'b')
+  if ncases~=1
+    plot(q_alpha*180/pi,shifted_q_cz, 'Color', col1(ii,:))
+  else
+    plot(q_alpha*180/pi,q_cz, 'Color', 'b')
+  end
   hold on
+ 
+  figure(5)
+  plot(segments(iseg).ptime,segments(iseg).Cm, 'Color', col1(ii,:))
+  hold on
+ 
 
   %% PSD
   tmin = min(p_time);
@@ -128,10 +139,14 @@ for ii=1:ncases
 
   ind4 = find(k2<2);
 
-  figure(5)
+  figure(6)
   pxx_norm = pxx(ind4)/max(pxx(ind4));
   pxx_shifted = pxx_norm + ii-1;
-  psd_all(ii) = plot(k2(ind4),pxx_norm, 'Color', 'b'); hold on
+  if ncases==1
+    psd_all(ii) = plot(k2(ind4),pxx_norm, 'Color', col1(ii,:)); hold on
+  else
+    psd_all(ii) = plot(k2(ind4),pxx_shifted, 'Color', col1(ii,:)); hold on
+  end  
 
   [val ind5] = max(pxx);    
   kmax = k2(ind5);
@@ -142,7 +157,12 @@ for ii=1:ncases
   pxx_fil(find(ind8)) = 1e-15;
   pxx_fil_norm = pxx_fil/(max(pxx_fil));
   pxx_fil_shifted = pxx_fil_norm +ii-1;
-  psd_fil(ii) = plot(k2(ind4),pxx_fil_norm(ind4), '--', 'Color', 'b'); hold on
+  if ncases==1
+    psd_fil(ii) = plot(k2(ind4),pxx_fil_norm(ind4), '--', 'Color', col1(ii,:)); hold on
+  else
+    psd_fil(ii) = plot(k2(ind4),pxx_fil_shifted(ind4), '--', 'Color', col1(ii,:)); hold on
+  end 
+       
   legend(psd_all, legs, 'Interpreter', 'tex', 'fontsize', fs)
 
   disp(['--------------'])
@@ -176,6 +196,21 @@ filename = [num2str(deltacase) '_' filename];
 SaveFig(gcf,filename, destn, ifcols)
 
 figure(4)
+ylabel('C_{z}', 'Interpreter', 'tex', 'FontSize', fs)
+xlabel('\alpha', 'Interpreter', 'tex', 'FontSize', fs)
+legend(legs, 'Interpreter', 'tex', 'FontSize',lfs)
+ylim([1 1.3])
+%%
+hold on;
+model=load('14_static_models_950k.mat');
+plot(model.alpha,model.cz, '--k', 'LineWidth', 2)
+xlim([1 4.5])
+filename=['cz_alpha.eps'];
+filename = [num2str(deltacase) '_' filename];
+SaveFig(gcf,filename, destn, ifcols)
+%%
+
+figure(5)
 ylabel('C_{m}', 'Interpreter', 'tex', 'FontSize', fs)
 xlabel('time', 'Interpreter', 'tex', 'FontSize', fs)
 legend(legs, 'Interpreter', 'tex', 'FontSize',lfs)
@@ -184,7 +219,7 @@ filename = [num2str(deltacase) '_' filename];
 SaveFig(gcf,filename, destn, ifcols)
 
 
-figure(5)
+figure(6)
 filename=['psd.eps'];
 filename = [num2str(deltacase) '_' filename];
 SaveFig(gcf,filename, destn, ifcols)
