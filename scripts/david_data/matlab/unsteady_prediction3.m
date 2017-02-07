@@ -8,6 +8,7 @@ destn = 'plots/';
 ifcols= 1;
 
 model=load('14_static_models_950k.mat');
+model.alpha=model.alpha-1;
 
 uoo=model.uoo;
 deltacase=model.deltacase;
@@ -136,6 +137,11 @@ for ii = 1:ncases
 
   kall=[kall k];
   phiall = [phiall phi];
+
+ figure(22)
+ plot(q_time,q_cz); hold on
+ plot(q_time,cz_pred, ' ok')
+
 
 end
 

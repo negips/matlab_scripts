@@ -10,6 +10,7 @@ destn = 'plots/';
 ifcols= 1;
 
 model=load('14_static_models_950k.mat');
+model.alpha=model.alpha-1;
 
 uoo=model.uoo;
 deltacase=model.deltacase;
@@ -35,7 +36,7 @@ hfile = [model.folder fname];
 
 nsegs = length(segments);
 
-indicies = [2];
+indicies = [4];
 ncases = length(indicies);
 
 for ii = 1:ncases

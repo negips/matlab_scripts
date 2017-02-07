@@ -18,9 +18,9 @@ ifcols=1;
 fs = 16;
 lfs = 12;
 
-%fname = 'u30_a2_d14_afsteps.h5'
-fname = 'u24_a2_d14_fsteps.h5'
-uoo = 24.0;
+fname = 'u30_a2_d14_afsteps.h5'
+%fname = 'u24_a2_d14_fsteps.h5'
+uoo = 30.0;
 deltacase=14.0;
 c=0.5;
 nu = 1.568E-5;
@@ -30,7 +30,7 @@ hfile = [folder fname];
 [segments] = split_segments(hfile, uoo, deltacase);
 
 nsegs = length(segments);
-cases=[3,6,9,11];
+cases=[1,6,10,13];
 ncases=length(cases);
 ifshift=0;
 
@@ -202,8 +202,8 @@ legend(legs, 'Interpreter', 'tex', 'FontSize',lfs)
 ylim([0.9 1.4])
 %%
 hold on;
-model=load('14_static_models_765k.mat');
-plot(model.alpha,model.cz, '--k', 'LineWidth', 2)
+model=load('14_static_models_950k.mat');
+plot(model.alpha-1,model.cz, '--k', 'LineWidth', 2)
 xlim([1 4.5])
 filename=['cz_alpha.eps'];
 filename = [num2str(deltacase) '_' filename];

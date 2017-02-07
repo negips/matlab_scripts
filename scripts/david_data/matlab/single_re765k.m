@@ -1,9 +1,9 @@
 % Read experimental data provided by David Eller.
 
 %
-clear
-clc
-close all
+%clear
+%clc
+%close all
 
 
 addpath '/scratch/negi/git_repos/matlabscripts/scripts/'
@@ -19,7 +19,8 @@ fs = 16;
 lfs = 12;
 
 %fname = 'u30_a2_d14_afsteps.h5'
-fname = 'u24_a2_d14_fsteps.h5'
+fname='u24_a3_d14_fsteps.h5';
+%fname = 'u24_a2_d14_fsteps.h5'
 uoo = 24.0;
 deltacase=14.0;
 c=0.5;
@@ -30,7 +31,7 @@ hfile = [folder fname];
 [segments] = split_segments(hfile, uoo, deltacase);
 
 nsegs = length(segments);
-cases=[3,6,9,11];
+cases=[1,5,8,11];
 ncases=length(cases);
 ifshift=0;
 
@@ -204,7 +205,7 @@ ylim([0.9 1.4])
 hold on;
 model=load('14_static_models_765k.mat');
 plot(model.alpha,model.cz, '--k', 'LineWidth', 2)
-xlim([1 4.5])
+xlim([1 6])
 filename=['cz_alpha.eps'];
 filename = [num2str(deltacase) '_' filename];
 SaveFig(gcf,filename, destn, ifcols)
