@@ -1,4 +1,4 @@
-function lsq = unsteady_alpha2(par,time,alpha,k,uoo,alpha0,dalpha)
+function lsq = unsteady_alpha2(par,time,alpha,k,uoo)
 
   theta=par(1);
   alpha0=par(2);

@@ -29,19 +29,19 @@ lfs = 12;
 filenames{1}='u30_a2_d14_afsteps.h5';
 filenames{2}='u30_a0_d14_fsteps.h5';
 filenames{3}='u30_a5_d14_afsteps.h5';
-filenames{4}='u30_a7_d14_afsteps.h5';
+%filenames{4}='u30_a7_d14_afsteps.h5';
 
-indicies=[1];
+indicies=[1:4];
 filenames=filenames(indicies);
 
-
 nfiles=length(filenames);
+col1=lines(nfiles);
 
 for jj=1:nfiles
   fname=filenames{jj};
   %fname='u24_a2_d14_fsteps.h5';
   
-  hfile = ['../delta+14/' fname];
+  hfile = [model.folder fname];
   [segments] = split_segments(hfile, uoo, deltacase);
   
   nsegs = length(segments);
@@ -107,7 +107,6 @@ for jj=1:nfiles
     inst_OMEGA = amp2*omega*cos(omega*q_time);
   
     integrated_dp = inst_OMEGA.^2;          % times some constantant
-  
     
     disp(['--------------'])
   
@@ -136,7 +135,7 @@ for jj=1:nfiles
     par0(2)=intg_const;
     
     options=optimset('MaxFunEvals',100000,'MaxIter',100000,'TolX',1e-8,'TolFun', 1e-8);
-   [par,fval,exitflag,output] = fminsearch(@(par) unsteady_force_model2(par,q_time,q_cz,model.cz,model.alpha,k,uoo,mean_alpha2,amp2,theta), par0,options);
+   [par,fval,exitflag,output] = fminsearch(@(par) unsteady_force_model(par,q_time,q_cz,model.cz,model.alpha,k,uoo,mean_alpha2,amp2,theta), par0,options);
   
 %    [par,fval,exitflag,output] = fmincon(@(par) unsteady_force_model(par,q_time,q_cz,model.cz,model.alpha,k,uoo,mean_alpha2,amp2,theta),par0,[],[],[],[],[-pi/2 -100],[pi/2 100],[],options);
   
@@ -168,12 +167,12 @@ for jj=1:nfiles
   end
   
   figure(30)
-  plot(kall,phiall*180/pi)
+  plot(kall,phiall*180/pi, '.', 'Color', col1(jj,:))
   hold on    
 
 
   figure(31)
-  plot(kall,kall.*intgall)
+  plot(kall,kall.*intgall, 'o', 'Color', col1(jj,:), 'filled')
   hold on
 
 end
