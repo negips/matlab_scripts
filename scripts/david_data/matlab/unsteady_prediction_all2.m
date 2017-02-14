@@ -8,7 +8,7 @@ destn = 'plots/';
 ifcols= 1;
 
 model=load('14_static_models_950k.mat');
-model.alpha=model.alpha-1;
+%model.alpha=model.alpha;
 
 c=0.5;
 nu = 1.568E-5;
@@ -30,10 +30,12 @@ nfiles = length(inds2);
 U0=zeros(nfiles,1);
 alpha=zeros(nfiles,1)-99;
 defl=zeros(nfiles,1)-99;
+ifturb=zeros(nfiles,1);
 
 disp(['N files: ', num2str(nfiles)])
 
 for i=1:nfiles
+
     ind1 = inds1(i)+lfol;
     ind2 = inds2(i)+2;
     fname=result(ind1:ind2);
@@ -78,11 +80,21 @@ for i=1:nfiles
       % flap deflection
       defl(i) = str2double(fname(ind1:ind2));
     end
+
+    inds4=strfind(fname,'turb');
+    if ~isempty(inds4)
+      ifturb(i)=1;
+    end  
     
 end
 
 fs = 16;
 lfs = 12;
+
+%% issues
+remove_files = [-1];                      % steady curve seems shifted
+%remove_files = [remove_files 32];         % steady curve seems shifted
+nosteady_shift= [-1];
 
 nfiles=length(filenames);
 col1=lines(nfiles);
@@ -101,15 +113,14 @@ for jj=1:nfiles
     found=0;
     continue
   end
-  case_count=case_count+1;
-
-  if (Re<600000)
-    re_leg = '565k';
-  elseif (Re>600000 && Re < 900000)
-    re_leg = '765k';
-  else
-    re_leg = '950k';
-  end        
+  if ifturb(jj)
+    found=0;
+    continue;
+  end
+  if max(remove_files==jj)
+    found=0;
+    continue;
+  end
   
   [segments] = split_segments(hfile, uoo, deltacase);
 
@@ -120,34 +131,58 @@ for jj=1:nfiles
     continue
   end
 
-  
-  nsegs = length(segments);
-  ncases=nsegs; 
-%  indicies = [1:nsegs];
-%  ncases = length(indicies);
-  
-  kall=[];
-  phiall=[];
-  intgall=[];
-  alpha_all=[];
-  theta_all=[];
-  ampall=[];
-
-  if (case_count>1)
-    close(20)
-%    close(21)
-%    close(22)
-  end
   iseg=1;    
   rms_alpha  = rms(segments(iseg).alpha - mean(segments(iseg).alpha));
   mean_alpha = mean(segments(iseg).alpha);
   amp        = (rms_alpha*sqrt(2))*180/pi;
   mean_alpha = mean_alpha*180/pi;
 
+  if mean_alpha>9
+    found=0;
+    continue;
+  end
+
+  case_count=case_count+1;
+  
+  nsegs = length(segments);
+  ncases=nsegs; 
+%  indicies = [1:nsegs];
+%  ncases = length(indicies);
+  if (Re<600000)
+    re_leg = '565k';
+  elseif (Re>600000 && Re < 900000)
+    re_leg = '765k';
+  else
+    re_leg = '950k';
+  end
+
+  if max(nosteady_shift==jj)
+    modelalpha = model.alpha;
+  else    
+    modelalpha = model.alpha-1;
+  end  
+  modelcz = model.cz; 
+ 
+  kall=[];
+  phiall=[];
+  intgall=[];
+  alpha_all=[];
+  theta_all=[];
+  ampall=[];
+  toffall=[];
+
+  if (case_count>1)
+    figure(20)
+    clf
+%    close(21)
+%    close(22)
+  end
+
   legs_f{case_count} = [re_leg '; \alpha= ' num2str(mean_alpha)];
 
   col2=lines(ncases); 
  
+  ksegs=0;
   for ii = 1:ncases
 
     iseg=ii;    
@@ -161,8 +196,12 @@ for jj=1:nfiles
     f = omega/(2*pi);
     nek_omega = 2*k;
     nek_timeperiod = 2*pi/nek_omega;
+
+    if k<0.05
+      continue
+    end
    
-    disp('File: ', fname) 
+    disp(['File: ', fname, '; No:', num2str(jj)]) 
     disp(['Reduced Frequency: ', num2str(k), ';  iseg= ', num2str(iseg)])
     disp(['Mean alpha: ', num2str(mean_alpha)])
     disp(['Amplitude: ', num2str(amp)])
@@ -176,19 +215,9 @@ for jj=1:nfiles
     p_cz = segments(iseg).Cz;
     p_cm = segments(iseg).Cm;
     
-    % Phase plot
-    % interpolate onto qtime
-    figure(20)
-  %  subplot(ncases,1,ii)
     q_cm = interp1(p_time,p_cm,q_time,'pchip');
     q_cz = interp1(p_time,p_cz,q_time,'pchip');
-   
-    plot(q_alpha*180/pi,q_cz, ' .', 'Color', col2(ii,:)); hold on
-    ylabel('C_{z}', 'Interpreter', 'tex', 'FontSize', fs)
-    xlabel('\alpha', 'Interpreter', 'tex', 'FontSize', fs)
-    legend(legs(ii), 'Interpreter', 'tex', 'fontsize', lfs, 'Location', 'Best')
-  %  hold on
-  
+ 
     % instantaneous rotational frequency
 %    mean_alpha2 = mean_alpha*pi/180;
 %    amp2 = amp*pi/180;
@@ -218,29 +247,38 @@ for jj=1:nfiles
     % cm/cz model
     phi=-5*pi/180;
     intg_const=1;
+    toff=0.;
     par0(1)=phi;
     par0(2)=intg_const;
+    par0(3)=toff;
     
     options=optimset('MaxFunEvals',10000,'MaxIter',10000,'TolX',1e-8,'TolFun', 1e-8);
-   [par,fval,exitflag,output] = fminsearch(@(par) unsteady_force_model(par,q_time,q_cz,model.cz,model.alpha,k,uoo,mean_alpha2,amp2,theta), par0,options);
+   [par,fval,exitflag,output] = fminsearch(@(par) unsteady_force_model2(par,q_time,q_cz,modelcz,modelalpha,k,uoo,mean_alpha2,amp2,theta), par0,options);
   
 %    [par,fval,exitflag,output] = fmincon(@(par) unsteady_force_model(par,q_time,q_cz,model.cz,model.alpha,k,uoo,mean_alpha2,amp2,theta),par0,[],[],[],[],[-pi/2 -100],[pi/2 100],[],options);
   
     phi=par(1);
     intg_const=par(2);
-    %phi2=par(3)
+    toff=par(3);
 
-    [[mean_alpha2 amp2 theta phi]*180/pi intg_const]
+    if (isnan(fval))
+      fval    
+      continue
+    end
+    ksegs=ksegs+1;
+
+%    [[mean_alpha2 amp2 theta phi]*180/pi intg_const]
     
     omega = 2*k*uoo/c;
+    time=q_time-toff;
     
-    alpha_lagg=mean_alpha2+amp2*sin(omega*q_time + theta + phi);
+    alpha_lagg=mean_alpha2+amp2*sin(omega*time + theta + phi);
     
-    inst_OMEGA=omega*amp2*cos(omega*q_time+theta);
+    inst_OMEGA=omega*amp2*cos(omega*time+theta);
     
     p_motion = intg_const*(inst_OMEGA);
     
-    cz_lagg = interp1(model.alpha,model.cz,alpha_lagg*180/pi,'linear');
+    cz_lagg = interp1(modelalpha,modelcz,alpha_lagg*180/pi,'linear');
     
     cz_pred = p_motion + cz_lagg;
   
@@ -250,24 +288,51 @@ for jj=1:nfiles
     alpha_all=[alpha_all mean_alpha2];
     theta_all=[theta_all theta];
     ampall = [ampall amp2];
-  
-%    figure(22)
-%    plot(q_time,q_cz); hold on
-%    plot(q_time,cz_pred, ' ok')
-  
+    toffall = [toffall toff];    
+
+    % Phase plot
+    % interpolate onto qtime
+
+  %  subplot(ncases,1,ii)
+   
+    figure(20)
+    phase_plot = plot(q_alpha*180/pi,q_cz, ' .', 'Color', col2(ii,:)); hold on
+    ylabel('C_{z}', 'Interpreter', 'tex', 'FontSize', fs)
+    xlabel('\alpha', 'Interpreter', 'tex', 'FontSize', fs)
+    legend(phase_plot, legs(ii), 'Interpreter', 'tex', 'fontsize', lfs, 'Location', 'Best')
+    figure(20)
+    plot(q_alpha*180/pi,cz_pred, '--', 'Color', col2(ii,:));
+
+    if ksegs==1
+      plot(modelalpha,modelcz,'--k', 'LineWidth', 2)
+      xlim([mean_alpha2*180/pi-1.5 mean_alpha2*180/pi+1.5])
+    end  
+
   
   end
 
   if found  
     figure(30)
-    plot(kall,phiall*180/pi, '.', 'Color', col1(jj,:))
-    legend(legs_f, 'Interpreter', 'tex', 'FontSize', lfs)
+    plot(kall,phiall*180/pi, '-.', 'Color', col1(jj,:))
+    ylabel('\phi', 'Interpreter', 'tex', 'FontSize', fs)
+    xlabel('k', 'Interpreter', 'tex', 'FontSize', fs)
+    legend(legs_f, 'Interpreter', 'tex', 'FontSize', lfs, 'Location', 'Best')
     hold on    
 
     figure(31)
-    plot(kall,kall.*intgall, 'o', 'Color', col1(jj,:))
-    legend(legs_f, 'Interpreter', 'tex', 'FontSize', lfs)
+    plot(kall,intgall, '-o', 'Color', col1(jj,:))
+    ylabel('Integration constant', 'Interpreter', 'tex', 'FontSize', fs)
+    xlabel('k', 'Interpreter', 'tex', 'FontSize', fs)
+    legend(legs_f, 'Interpreter', 'tex', 'FontSize', lfs, 'Location', 'Best')
     hold on
+
+    figure(32)
+    plot(kall,toffall, '-d', 'Color', col1(jj,:))
+    ylabel('Time offset', 'Interpreter', 'tex', 'FontSize', fs)
+    xlabel('k', 'Interpreter', 'tex', 'FontSize', fs)
+    legend(legs_f, 'Interpreter', 'tex', 'FontSize', lfs, 'Location', 'Best')
+    hold on
+
   end
 
 end
