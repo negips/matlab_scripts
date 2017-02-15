@@ -24,23 +24,25 @@ for j=1:nsmooths
 end
 
 figure(10)
-plot(k,phi, '*'); hold on
-plot(movk,movphi, 'LineWidth', 2)
+plot(k,phi*180/pi, '*'); hold on
+plot(movk,movphi*180/pi, 'LineWidth', 2)
 
 figure(11)
 plot(k,intgbydalpha, 'd'); hold on
 plot(movk,movintg, 'LineWidth', 2)
 
-static_model = load('14_static_models_950k.mat')
+static_model = load('14_static_models_765k.mat');
 
-mean_aoa=3.2;
-dalpha=0.8;
-k=0.02;
+mean_aoa=2.9;
+dalpha=0.9;
+k=0.3;           % min value is 0.02
 
-omegat = linspace(0,2*pi,1000);
+omegat = linspace(0,4*pi,1000);
 intg_const = interp1(movk,movintg,k,'linear');
-intg_const = intg_const*dalpha*pi/180;
+intg_const = 1.0*intg_const*dalpha*pi/180;
 philag = interp1(movk,movphi,k,'linear');
+
+[intg_const philag*180/pi]
 
 aoa = mean_aoa + dalpha*sin(omegat);
 pitch = intg_const*cos(omegat);
@@ -57,8 +59,18 @@ xmin = mean_aoa-dalpha*1.2;
 xmax = mean_aoa+dalpha*1.2;
 xlim([xmin xmax])
 title('Phase Potrait')
+grid on
 
-
+figure(13)
+plot(omegat,cz, 'LineWidth', 2);
+ax1=gca;
+%ax1_pos=get(ax1,'Position');
+%ax2=axes('Position',ax1_pos, 'YAxisLocation', 'right', 'XAxisLocation', 'top', 'Color', 'none')
+%plot(omegat,aoa, 'Parent',ax2,'Color','r', 'LineStyle','--','LineWidth',2);
+%xmin = mean_aoa-dalpha*1.2;
+%xmax = mean_aoa+dalpha*1.2;
+%xlim([xmin xmax])
+title('Cz-time')
 
 
 
