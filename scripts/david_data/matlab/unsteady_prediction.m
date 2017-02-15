@@ -7,7 +7,6 @@ close all
 destn = 'plots/';
 ifcols= 1;
 
-model=load('14_static_models_950k.mat');
 %model.alpha=model.alpha;
 
 c=0.5;
@@ -92,27 +91,50 @@ fs = 16;
 lfs = 12;
 
 %% issues
-remove_files = [-1];                      % steady curve seems shifted
-%remove_files = [remove_files 32];         % steady curve seems shifted
-nosteady_shift= [-1];
+remove_files = [-22 29 31 32 35 37];                      % steady curve seems shifted
+nostd_shift  = [10  12 14 22  41   45   47  49    51    52  54     55];
+steady_shift = [0.1 0  0  0.1 0.08 -0.8 0   1.8  -0.75  0   -0.8   0.25];
+bad_fits = [16 20 43 53 59 60];                       % 16,53,59,60 - alpha out of range, 20 - something funny here.
+bad_fits = [bad_fits 22 51 55 54];
+good_fits = [22 28 33 39 41 45 47 49 51 52 54 55];   % 55 - data is a bit noisy
 
 nfiles=length(filenames);
 col1=lines(nfiles);
 
 case_count=0;
+
+kall2=[];
+phiall2=[];
+intgall2=[];
+intgbydalpha2=[];
+intgnorm2=[];
+alpha_all2=[];
+theta_all2=[];
+ampall2=[];
+toffall2=[];
+sofstall2=[];
+
 for jj=1:nfiles
 
   fname=filenames{jj};
   uoo=U0(jj);
   deltacase=defl(1); 
-  hfile = [model.folder fname];
+  hfile = [folder fname];
   Re=uoo*c/nu;
 
   found=1;
-  if uoo~=model.uoo || deltacase~=model.deltacase
+%  if case_count>0
+%     found=0;   
+%     continue;
+%  end   
+  if deltacase~=14
     found=0;
     continue
   end
+  if uoo~=24 && uoo ~= 30
+    found=0;
+    continue;
+  end    
   if ifturb(jj)
     found=0;
     continue;
@@ -121,7 +143,15 @@ for jj=1:nfiles
     found=0;
     continue;
   end
-  
+  if max(bad_fits==jj)
+    found=0;
+    continue;
+  end
+%  if max(good_fits==jj)
+%    found=0;
+%    continue;
+%  end
+
   [segments] = split_segments(hfile, uoo, deltacase);
 
   flds = fieldnames(segments);
@@ -138,12 +168,21 @@ for jj=1:nfiles
   mean_alpha = mean_alpha*180/pi;
 
   if mean_alpha>9
+    disp(['Mean alpha out of range: ' num2str(mean_alpha) '; File no:', num2str(jj)])    
     found=0;
     continue;
   end
 
-  case_count=case_count+1;
+  if uoo==30
+    model=load('14_static_models_950k.mat');
+  elseif uoo==24  
+    model=load('14_static_models_765k.mat');
+  else
+    found=0;
+    continue    
+  end  
   
+  case_count=case_count+1;
   nsegs = length(segments);
   ncases=nsegs; 
 %  indicies = [1:nsegs];
@@ -156,8 +195,9 @@ for jj=1:nfiles
     re_leg = '950k';
   end
 
-  if max(nosteady_shift==jj)
-    modelalpha = model.alpha;
+  if max(nostd_shift==jj)
+    index=find(nostd_shift==jj);
+    modelalpha = model.alpha + steady_shift(index);
   else    
     modelalpha = model.alpha-1;
   end  
@@ -166,19 +206,21 @@ for jj=1:nfiles
   kall=[];
   phiall=[];
   intgall=[];
+  intgbydalpha=[];
+  intgnorm=[];
   alpha_all=[];
   theta_all=[];
   ampall=[];
   toffall=[];
+  sofstall=[];
+%  if (case_count>1)
+%    figure(20)
+%    clf
+%%    close(21)
+%%    close(22)
+%  end
 
-  if (case_count>1)
-    figure(20)
-    clf
-%    close(21)
-%    close(22)
-  end
-
-  legs_f{case_count} = [re_leg '; \alpha= ' num2str(mean_alpha)];
+  legs_f{case_count} = [re_leg '; \alpha= ' num2str(mean_alpha), '; No:' num2str(jj)];
 
   col2=lines(ncases); 
  
@@ -238,6 +280,12 @@ for jj=1:nfiles
     theta=par(1);
     mean_alpha2=par(2);
     amp2=par(3);
+
+    if amp2<0
+      amp2=abs(amp2);
+      theta=theta+pi;
+    end
+
     alpha_pred = mean_alpha2 +amp2*sin(omega*q_time + theta);
     
 %    figure(21)
@@ -251,16 +299,22 @@ for jj=1:nfiles
     par0(1)=phi;
     par0(2)=intg_const;
     par0(3)=toff;
-    
+%    par0(4)=0;    % steady curve offset      
     options=optimset('MaxFunEvals',10000,'MaxIter',10000,'TolX',1e-8,'TolFun', 1e-8);
-   [par,fval,exitflag,output] = fminsearch(@(par) unsteady_force_model2(par,q_time,q_cz,modelcz,modelalpha,k,uoo,mean_alpha2,amp2,theta), par0,options);
-  
+
+%     [par,fval,exitflag,output] = fminsearch(@(par) unsteady_force_model3(par,q_time,q_cz,modelcz,modelalpha,k,uoo,mean_alpha2,amp2,theta), par0,options);
+
+    [par,fval,exitflag,output] = fminsearch(@(par) unsteady_force_model2(par,q_time,q_cz,modelcz,modelalpha,k,uoo,mean_alpha2,amp2,theta), par0,options);
+
+%   [par,fval,exitflag,output] = fminsearch(@(par) unsteady_force_model(par,q_time,q_cz,modelcz,modelalpha,k,uoo,mean_alpha2,amp2,theta), par0,options);
+
 %    [par,fval,exitflag,output] = fmincon(@(par) unsteady_force_model(par,q_time,q_cz,model.cz,model.alpha,k,uoo,mean_alpha2,amp2,theta),par0,[],[],[],[],[-pi/2 -100],[pi/2 100],[],options);
   
     phi=par(1);
     intg_const=par(2);
     toff=par(3);
-
+%    steady_offset=par(4);
+    
     if (isnan(fval))
       fval    
       continue
@@ -274,8 +328,9 @@ for jj=1:nfiles
     
     alpha_lagg=mean_alpha2+amp2*sin(omega*time + theta + phi);
     
-    inst_OMEGA=omega*amp2*cos(omega*time+theta);
-    
+%    inst_OMEGA=omega*amp2*cos(omega*time+theta);
+    inst_OMEGA=cos(omega*time+theta);
+   
     p_motion = intg_const*(inst_OMEGA);
     
     cz_lagg = interp1(modelalpha,modelcz,alpha_lagg*180/pi,'linear');
@@ -285,25 +340,27 @@ for jj=1:nfiles
     kall=[kall k];
     phiall = [phiall phi];
     intgall = [intgall intg_const];
+    intgbydalpha=[intgbydalpha intg_const/amp2];
+    intgnorm=[intgnorm intg_const/amp2/(k-0.5)];
     alpha_all=[alpha_all mean_alpha2];
     theta_all=[theta_all theta];
     ampall = [ampall amp2];
     toffall = [toffall toff];    
+%    sofstall = [sofstall steady_offset];  
 
     % Phase plot
     % interpolate onto qtime
-
-  %  subplot(ncases,1,ii)
    
-    figure(20)
+    figure(10+ii)
+    clf
+%    subplot(ncases,1,ii)
     phase_plot = plot(q_alpha*180/pi,q_cz, ' .', 'Color', col2(ii,:)); hold on
     ylabel('C_{z}', 'Interpreter', 'tex', 'FontSize', fs)
     xlabel('\alpha', 'Interpreter', 'tex', 'FontSize', fs)
     legend(phase_plot, legs(ii), 'Interpreter', 'tex', 'fontsize', lfs, 'Location', 'Best')
-    figure(20)
     plot(q_alpha*180/pi,cz_pred, '--', 'Color', col2(ii,:));
 
-    if ksegs==1
+    if ksegs~=-1
       plot(modelalpha,modelcz,'--k', 'LineWidth', 2)
       xlim([mean_alpha2*180/pi-1.5 mean_alpha2*180/pi+1.5])
     end  
@@ -311,33 +368,57 @@ for jj=1:nfiles
   
   end
 
-  if found  
+  if found
+
+    if uoo==30
+      mkr='-o';
+    else
+      mkr='-d';
+    end  
+
     figure(30)
-    plot(kall,phiall*180/pi, '-.', 'Color', col1(jj,:))
+    plot(kall,phiall*180/pi, mkr, 'Color', col1(jj,:), 'LineWidth', 2)
     ylabel('\phi', 'Interpreter', 'tex', 'FontSize', fs)
     xlabel('k', 'Interpreter', 'tex', 'FontSize', fs)
     legend(legs_f, 'Interpreter', 'tex', 'FontSize', lfs, 'Location', 'Best')
     hold on    
 
     figure(31)
-    plot(kall,intgall, '-o', 'Color', col1(jj,:))
+    plot(kall,intgbydalpha, mkr, 'Color', col1(jj,:), 'LineWidth', 2)
     ylabel('Integration constant', 'Interpreter', 'tex', 'FontSize', fs)
     xlabel('k', 'Interpreter', 'tex', 'FontSize', fs)
     legend(legs_f, 'Interpreter', 'tex', 'FontSize', lfs, 'Location', 'Best')
     hold on
+    grid on
 
     figure(32)
-    plot(kall,toffall, '-d', 'Color', col1(jj,:))
+    plot(kall,toffall, mkr, 'Color', col1(jj,:), 'LineWidth', 2)
     ylabel('Time offset', 'Interpreter', 'tex', 'FontSize', fs)
     xlabel('k', 'Interpreter', 'tex', 'FontSize', fs)
     legend(legs_f, 'Interpreter', 'tex', 'FontSize', lfs, 'Location', 'Best')
     hold on
 
+%    figure(33)
+%    plot(kall,sofstall, '-d', 'Color', col1(jj,:))
+%    ylabel('Steady offset', 'Interpreter', 'tex', 'FontSize', fs)
+%    xlabel('k', 'Interpreter', 'tex', 'FontSize', fs)
+%    legend(legs_f, 'Interpreter', 'tex', 'FontSize', lfs, 'Location', 'Best')
+%    hold on
+    kall2=[kall2 kall];
+    phiall2 = [phiall2 phiall];
+    intgall2 = [intgall2 intgall];
+    intgbydalpha2=[intgbydalpha2 intgbydalpha];
+    intgnorm2 = [intgnorm2 intgnorm];
+    alpha_all2=[alpha_all2 alpha_all];
+    theta_all2=[theta_all2 theta_all];
+    ampall2=[ampall2 ampall];
+    toffall2=[toffall2 toffall]; 
+
   end
 
 end
 
-save 'all_predictions.mat'
+save('all_predictions.mat', 'kall2','phiall2','intgall2','intgbydalpha2','intgnorm2','alpha_all2','theta_all2','ampall2','toffall2')
 
 
 % figure(22)
