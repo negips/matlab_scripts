@@ -4,6 +4,9 @@ clear
 clc
 close all
 
+fs=16;
+lfs=12;
+
 all = load('all_predictions.mat');;
 
 [k ind] = sort(all.kall2);
@@ -25,44 +28,91 @@ end
 
 figure(10)
 plot(k,phi*180/pi, '*'); hold on
-plot(movk,movphi*180/pi, 'LineWidth', 2)
+plot(movk,movphi*180/pi, '-k', 'LineWidth', 2)
+plot(movk,1.2*movphi*180/pi, '--r', 'LineWidth', 1)
+plot(movk,0.8*movphi*180/pi, '--r', 'LineWidth', 1)
+ylabel('\phi', 'Interpreter', 'tex', 'FontSize', fs)
+xlabel('k', 'Interpreter', 'tex', 'FontSize', fs)
+
 
 figure(11)
 plot(k,intgbydalpha, 'd'); hold on
-plot(movk,movintg, 'LineWidth', 2)
+plot(movk,movintg, '-k', 'LineWidth', 2)
+plot(movk,1.15*movintg, '--r', 'LineWidth', 1)
+plot(movk,0.85*movintg, '--r', 'LineWidth', 1)
+ylabel('Integ const', 'Interpreter', 'tex', 'FontSize', fs)
+xlabel('k', 'Interpreter', 'tex', 'FontSize', fs)
 
 static_model = load('14_static_models_765k.mat');
 
-mean_aoa=2.9;
+mean_aoa=3.0;
 dalpha=0.9;
-k=0.3;           % min value is 0.02
+k=0.4;           % min value is 0.02
+U0=1.;
+c=1.0;
+semichord=c/2;
+omega=k*U0/semichord;
 
 omegat = linspace(0,4*pi,1000);
+time=omegat/omega;
 intg_const = interp1(movk,movintg,k,'linear');
-intg_const = 1.0*intg_const*dalpha*pi/180;
+intg_const = intg_const*dalpha*pi/180;
+intg_min = intg_const*0.85;
+intg_max = intg_const*1.15;
+
 philag = interp1(movk,movphi,k,'linear');
+philag_min=0.8*philag;
+philag_max=1.2*philag;
 
 [intg_const philag*180/pi]
 
 aoa = mean_aoa + dalpha*sin(omegat);
 pitch = intg_const*cos(omegat);
+pitch_min = intg_min*cos(omegat);
+pitch_max = intg_max*cos(omegat);
 
 alphalagg =  mean_aoa + dalpha*sin(omegat + philag);
+alphalagg_min =  mean_aoa + dalpha*sin(omegat + philag_min);
+alphalagg_max =  mean_aoa + dalpha*sin(omegat + philag_max);
+
 cz_lag = interp1(static_model.alpha,static_model.cz,alphalagg,'linear');
+cz_lagmin = interp1(static_model.alpha,static_model.cz,alphalagg_min,'linear');
+cz_lagmax = interp1(static_model.alpha,static_model.cz,alphalagg_max,'linear');
 
 cz = pitch + cz_lag;
+cz_1 = pitch_min+cz_lagmin;
+cz_2 = pitch_max+cz_lagmax;
+cz_3 = pitch_min+cz_lagmax;
+cz_4 = pitch_max+cz_lagmin;
+
+col1 = lines(5);
+legs = {'Cz' 'Cz1' 'Cz2' 'Cz3' 'Cz4' 'Static Cz'};
 
 figure(12)
-plot(aoa,cz, 'LineWidth', 2); hold on
-plot(static_model.alpha,static_model.cz, '--k', 'LineWidth', 2)
-xmin = mean_aoa-dalpha*1.2;
-xmax = mean_aoa+dalpha*1.2;
+plot(aoa,cz, 'LineWidth', 4, 'Color', 'k'); hold on
+plot(aoa,cz_1, '-.', 'LineWidth', 2, 'Color', col1(2,:));
+plot(aoa,cz_2, '-.', 'LineWidth', 2, 'Color', col1(3,:));
+plot(aoa,cz_3, '-.', 'LineWidth', 2, 'Color', col1(4,:));
+plot(aoa,cz_4, '-.', 'LineWidth', 2, 'Color', col1(5,:));
+plot(static_model.alpha,static_model.cz, '-b', 'LineWidth', 2)
+legend(legs, 'Interpreter', 'tex', 'FontSize', lfs)
+xmin = mean_aoa-dalpha*1.4;
+xmax = mean_aoa+dalpha*1.4;
 xlim([xmin xmax])
 title('Phase Potrait')
+ylabel('C_{z}', 'Interpreter', 'tex', 'FontSize', fs)
+xlabel('\alpha', 'Interpreter', 'tex', 'FontSize', fs)
 grid on
 
+legs = {'Cz' 'Cz1' 'Cz2' 'Cz3' 'Cz4'};
 figure(13)
-plot(omegat,cz, 'LineWidth', 2);
+plot(time,cz, 'LineWidth', 3, 'Color', 'k'); hold on
+plot(time,cz_1, '-.', 'LineWidth', 2, 'Color', col1(2,:));
+plot(time,cz_2, '-.', 'LineWidth', 2, 'Color', col1(3,:));
+plot(time,cz_3, '-.', 'LineWidth', 2, 'Color', col1(4,:));
+plot(time,cz_4, '-.', 'LineWidth', 2, 'Color', col1(5,:));
+legend(legs, 'Interpreter', 'tex', 'FontSize', lfs)
+
 ax1=gca;
 %ax1_pos=get(ax1,'Position');
 %ax2=axes('Position',ax1_pos, 'YAxisLocation', 'right', 'XAxisLocation', 'top', 'Color', 'none')
@@ -71,6 +121,9 @@ ax1=gca;
 %xmax = mean_aoa+dalpha*1.2;
 %xlim([xmin xmax])
 title('Cz-time')
+ylabel('C_{z}', 'Interpreter', 'tex', 'FontSize', fs)
+xlabel('t', 'Interpreter', 'tex', 'FontSize', fs)
+
 
 
 

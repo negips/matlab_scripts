@@ -167,7 +167,7 @@ for jj=1:nfiles
   amp        = (rms_alpha*sqrt(2))*180/pi;
   mean_alpha = mean_alpha*180/pi;
 
-  if mean_alpha>9
+  if mean_alpha>6
     disp(['Mean alpha out of range: ' num2str(mean_alpha) '; File no:', num2str(jj)])    
     found=0;
     continue;
@@ -418,7 +418,7 @@ for jj=1:nfiles
 
 end
 
-save('all_predictions.mat', 'kall2','phiall2','intgall2','intgbydalpha2','intgnorm2','alpha_all2','theta_all2','ampall2','toffall2')
+save('765_predictions.mat', 'kall2','phiall2','intgall2','intgbydalpha2','intgnorm2','alpha_all2','theta_all2','ampall2','toffall2')
 
 
 % figure(22)
