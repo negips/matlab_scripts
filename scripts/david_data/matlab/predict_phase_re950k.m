@@ -6,7 +6,7 @@ close all
 
 fs=16;
 lfs=12;
-onlymean = 0;
+onlymean = 1;
 
 all = load('all_predictions.mat');;
 
@@ -54,14 +54,18 @@ plot(movk,0.85*movintg, '--r', 'LineWidth', 1)
 ylabel('Integ const', 'Interpreter', 'tex', 'FontSize', fs)
 xlabel('k', 'Interpreter', 'tex', 'FontSize', fs)
 
-static_model = load('14_static_models_765k.mat');
+static_model = load('14_static_models_950k.mat');
 steady_shift = 0.;
 
 %% ideal numbers
-mean_aoa=2.9;
+mean_aoa=3.0;
 dalpha=0.9;
 k=0.4;           % min value is 0.02
 %%
+
+%mean_aoa=3.1251+steady_shift;
+%dalpha=0.888;
+%k=0.32725;           % min value is 0.02
 
 U0=1.;
 c=1.0;

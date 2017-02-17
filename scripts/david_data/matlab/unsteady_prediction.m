@@ -440,7 +440,7 @@ for jj=1:10%nfiles
 
 end
 
-save('all_predictions.mat', 'kall2','phiall2','gammaall2','intgall2','intgbydalpha2','intgnorm2','alpha_all2','theta_all2','ampall2','toffall2')
+% save('all_predictions.mat', 'kall2','phiall2','gammaall2','intgall2','intgbydalpha2','intgnorm2','alpha_all2','theta_all2','ampall2','toffall2')
 
 
 % figure(22)

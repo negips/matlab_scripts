@@ -6,7 +6,7 @@ close all
 
 fs=16;
 lfs=12;
-onlymean = 0;
+onlymean = 1;
 
 all = load('all_predictions.mat');;
 
@@ -54,12 +54,16 @@ plot(movk,0.85*movintg, '--r', 'LineWidth', 1)
 ylabel('Integ const', 'Interpreter', 'tex', 'FontSize', fs)
 xlabel('k', 'Interpreter', 'tex', 'FontSize', fs)
 
-static_model = load('14_static_models_765k.mat');
+
+%static_model = load('14_static_models_765k.mat');
+xfoil = importdata('polar_re1e5_ed36f128+14.dat');
+static_model.alpha = xfoil.data(:,1);
+static_model.cz = xfoil.data(:,2);
 steady_shift = 0.;
 
 %% ideal numbers
-mean_aoa=2.9;
-dalpha=0.9;
+mean_aoa=6.3;
+dalpha=1.3;
 k=0.4;           % min value is 0.02
 %%
 
@@ -70,16 +74,16 @@ omega=k*U0/semichord;
 
 omegat = linspace(0,4*pi,1000);
 time=omegat/omega;
-intg_const = interp1(movk,movintg,k,'linear');
-intg_const = intg_const*dalpha*pi/180;
+intg_const = interp1(movk,movintg,k,'linear', 'extrap');
+intg_const = 1.2*intg_const*dalpha*pi/180;
 intg_min = intg_const*0.85;
 intg_max = intg_const*1.15;
 
-philag = interp1(movk,movphi,k,'linear');
+philag = interp1(movk,movphi,k,'linear', 'extrap');
 philag_min=0.8*philag;
 philag_max=1.2*philag;
 
-gammalag = interp1(movk,movgamma,k,'linear');
+gammalag = interp1(movk,movgamma,k,'linear', 'extrap');
 gammalag_min=0.7*gammalag;
 gammalag_max=1.3*gammalag;
 
@@ -94,9 +98,9 @@ alphalagg =  mean_aoa + dalpha*sin(omegat + philag);
 alphalagg_min =  mean_aoa + dalpha*sin(omegat + philag_min);
 alphalagg_max =  mean_aoa + dalpha*sin(omegat + philag_max);
 
-cz_lag = interp1(static_model.alpha,static_model.cz,alphalagg,'linear');
-cz_lagmin = interp1(static_model.alpha,static_model.cz,alphalagg_min,'linear');
-cz_lagmax = interp1(static_model.alpha,static_model.cz,alphalagg_max,'linear');
+cz_lag = interp1(static_model.alpha,static_model.cz,alphalagg,'linear', 'extrap');
+cz_lagmin = interp1(static_model.alpha,static_model.cz,alphalagg_min,'linear', 'extrap');
+cz_lagmax = interp1(static_model.alpha,static_model.cz,alphalagg_max,'linear', 'extrap');
 
 cz = pitch + cz_lag;
 cz_1 = pitch_min+cz_lagmin;
@@ -151,7 +155,7 @@ xlabel('t', 'Interpreter', 'tex', 'FontSize', fs)
 
 
 %% Xfoil
-ifxfoil = 1;
+ifxfoil = 0;
 if ifxfoil
   xfoil = importdata('polar_re765k_ed36f128+14.dat');
   figure(20)
