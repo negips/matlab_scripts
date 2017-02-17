@@ -105,6 +105,7 @@ case_count=0;
 
 kall2=[];
 phiall2=[];
+gammaall2=[];
 intgall2=[];
 intgbydalpha2=[];
 intgnorm2=[];
@@ -114,7 +115,7 @@ ampall2=[];
 toffall2=[];
 sofstall2=[];
 
-for jj=1:nfiles
+for jj=1:10%nfiles
 
   fname=filenames{jj};
   uoo=U0(jj);
@@ -197,14 +198,17 @@ for jj=1:nfiles
 
   if max(nostd_shift==jj)
     index=find(nostd_shift==jj);
+    steadyphaseshift=steady_shift(index);
     modelalpha = model.alpha + steady_shift(index);
   else    
-    modelalpha = model.alpha-1;
+    steadyphaseshift=-1;
+    modelalpha = model.alpha + steadyphaseshift;
   end  
   modelcz = model.cz; 
  
   kall=[];
   phiall=[];
+  gammaall=[];
   intgall=[];
   intgbydalpha=[];
   intgnorm=[];
@@ -225,6 +229,8 @@ for jj=1:nfiles
   col2=lines(ncases); 
  
   ksegs=0;
+  figure(50)
+  clf
   for ii = 1:ncases
 
     iseg=ii;    
@@ -325,7 +331,8 @@ for jj=1:nfiles
     
     omega = 2*k*uoo/c;
     time=q_time-toff;
-    
+ 
+    alpha_pred2 = mean_alpha2 +amp2*sin(omega*time + theta);
     alpha_lagg=mean_alpha2+amp2*sin(omega*time + theta + phi);
     
 %    inst_OMEGA=omega*amp2*cos(omega*time+theta);
@@ -339,6 +346,7 @@ for jj=1:nfiles
   
     kall=[kall k];
     phiall = [phiall phi];
+    gammaall = [gammaall phi - omega*toff];
     intgall = [intgall intg_const];
     intgbydalpha=[intgbydalpha intg_const/amp2];
     intgnorm=[intgnorm intg_const/amp2/(k-0.5)];
@@ -354,18 +362,24 @@ for jj=1:nfiles
     figure(10+ii)
     clf
 %    subplot(ncases,1,ii)
-    phase_plot = plot(q_alpha*180/pi,q_cz, ' .', 'Color', col2(ii,:)); hold on
+%    phase_plot = plot(q_alpha*180/pi,q_cz, ' .', 'Color', col2(ii,:)); hold on
+    phase_plot = plot(alpha_pred2*180/pi,q_cz, ' .', 'Color', col2(ii,:)); hold on
     ylabel('C_{z}', 'Interpreter', 'tex', 'FontSize', fs)
     xlabel('\alpha', 'Interpreter', 'tex', 'FontSize', fs)
     legend(phase_plot, legs(ii), 'Interpreter', 'tex', 'fontsize', lfs, 'Location', 'Best')
-    plot(q_alpha*180/pi,cz_pred, '--', 'Color', col2(ii,:));
+%    plot(q_alpha*180/pi,cz_pred, '--', 'Color', col2(ii,:));
+    plot(alpha_pred2*180/pi,cz_pred, '--', 'Color', col2(ii,:));
 
     if ksegs~=-1
       plot(modelalpha,modelcz,'--k', 'LineWidth', 2)
       xlim([mean_alpha2*180/pi-1.5 mean_alpha2*180/pi+1.5])
     end  
 
-  
+    figure(50)
+    time_plot = plot(q_time,q_cz, 'Color', col2(ii,:)); hold on
+    ylabel('C_{z}', 'Interpreter', 'tex', 'FontSize', fs)
+    xlabel('time', 'Interpreter', 'tex', 'FontSize', fs)
+ 
   end
 
   if found
@@ -398,6 +412,13 @@ for jj=1:nfiles
     legend(legs_f, 'Interpreter', 'tex', 'FontSize', lfs, 'Location', 'Best')
     hold on
 
+    figure(33)
+    plot(kall,gammaall*180/pi, mkr, 'Color', col1(jj,:), 'LineWidth', 2)
+    ylabel('\gamma', 'Interpreter', 'tex', 'FontSize', fs)
+    xlabel('k', 'Interpreter', 'tex', 'FontSize', fs)
+    legend(legs_f, 'Interpreter', 'tex', 'FontSize', lfs, 'Location', 'Best')
+    hold on    
+   
 %    figure(33)
 %    plot(kall,sofstall, '-d', 'Color', col1(jj,:))
 %    ylabel('Steady offset', 'Interpreter', 'tex', 'FontSize', fs)
@@ -406,6 +427,7 @@ for jj=1:nfiles
 %    hold on
     kall2=[kall2 kall];
     phiall2 = [phiall2 phiall];
+    gammaall2 = [gammaall2 gammaall];
     intgall2 = [intgall2 intgall];
     intgbydalpha2=[intgbydalpha2 intgbydalpha];
     intgnorm2 = [intgnorm2 intgnorm];
@@ -418,7 +440,7 @@ for jj=1:nfiles
 
 end
 
-save('765_predictions.mat', 'kall2','phiall2','intgall2','intgbydalpha2','intgnorm2','alpha_all2','theta_all2','ampall2','toffall2')
+save('all_predictions.mat', 'kall2','phiall2','gammaall2','intgall2','intgbydalpha2','intgnorm2','alpha_all2','theta_all2','ampall2','toffall2')
 
 
 % figure(22)

@@ -48,9 +48,9 @@ xfoil = importdata('polar_re4e5_ed36f128+14.dat');
 static_model.alpha=xfoil.data(:,1);
 static_model.cz=xfoil.data(:,2);
 
-mean_aoa=4.5;
-dalpha=1.0;
-k=0.4;           % min value is 0.02
+mean_aoa=4.2;
+dalpha=1.5;
+k=0.5;           % min value is 0.02
 U0=1.;
 c=1.0;
 semichord=c/2;
@@ -58,12 +58,12 @@ omega=k*U0/semichord;
 
 omegat = linspace(0,4*pi,1000);
 time=omegat/omega;
-intg_const = interp1(movk,movintg,k,'linear');
+intg_const = interp1(movk,movintg,k,'linear', 'extrap');
 intg_const = 1.2*intg_const*dalpha*pi/180;
 intg_min = intg_const*0.85;
 intg_max = intg_const*1.15;
 
-philag = interp1(movk,movphi,k,'linear');
+philag = interp1(movk,movphi,k,'linear', 'extrap');
 philag_min=0.8*philag;
 philag_max=1.2*philag;
 
@@ -78,9 +78,9 @@ alphalagg =  mean_aoa + dalpha*sin(omegat + philag);
 alphalagg_min =  mean_aoa + dalpha*sin(omegat + philag_min);
 alphalagg_max =  mean_aoa + dalpha*sin(omegat + philag_max);
 
-cz_lag = interp1(static_model.alpha,static_model.cz,alphalagg,'linear');
-cz_lagmin = interp1(static_model.alpha,static_model.cz,alphalagg_min,'linear');
-cz_lagmax = interp1(static_model.alpha,static_model.cz,alphalagg_max,'linear');
+cz_lag = interp1(static_model.alpha,static_model.cz,alphalagg,'linear', 'extrap');
+cz_lagmin = interp1(static_model.alpha,static_model.cz,alphalagg_min,'linear', 'extrap');
+cz_lagmax = interp1(static_model.alpha,static_model.cz,alphalagg_max,'linear', 'extrap');
 
 cz = pitch + cz_lag;
 cz_1 = pitch_min+cz_lagmin;
