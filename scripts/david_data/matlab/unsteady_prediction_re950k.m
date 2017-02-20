@@ -92,16 +92,11 @@ lfs = 12;
 
 %% issues
 remove_files = [-22 29 31 32 35 37];                      % steady curve seems shifted
-nostd_shift  = [10  12 14 22  41    45   47  49    51    52  54     55];
-steady_shift = [0.1 0  0  0.1 0.08  -0.8 -0.1   1.8  -0.75  0   -0.8   0.25];
-bad_fits = [16 20 28 43 -53 59 60];                       % 16,53,59,60 - alpha out of range. 
-                                                          % 20 - Some cases seem phase shifted by 90 deg.                                                     
-                                                          % 28 - continuous offset in alpha.
-                                                          % 43 - does not match
-
-% bad_fits = [bad_fits 22 51 55 54];
-good_fits = [22 33 39 41 45 47 49 51 52 54 55];   % 55 - data is a bit noisy
-                                                  % 22 - has spikes in some data points.
+nostd_shift  = [10  12 14 22  41   45   47  49    51    52  54     55];
+steady_shift = [0.1 0  0  0.1 0.08 -0.8 0   1.8  -0.75  0   -0.8   0.25];
+bad_fits = [16 20 43 53 59 60];                       % 16,53,59,60 - alpha out of range, 20 - something funny here.
+bad_fits = [bad_fits 22 51 55 54];
+good_fits = [22 28 33 39 41 45 47 49 51 52 54 55];   % 55 - data is a bit noisy
 
 nfiles=length(filenames);
 col1=lines(nfiles);
@@ -120,7 +115,7 @@ ampall2=[];
 toffall2=[];
 sofstall2=[];
 
-for jj=1:10% nfiles
+for jj=33:33% nfiles
 
   fname=filenames{jj};
   uoo=U0(jj);
@@ -137,7 +132,7 @@ for jj=1:10% nfiles
     found=0;
     continue
   end
-  if uoo~=24 && uoo ~= 30
+  if uoo ~= 30
     found=0;
     continue;
   end    
@@ -235,7 +230,7 @@ for jj=1:10% nfiles
 
   legs_f{case_count} = [re_leg '; \alpha= ' num2str(mean_alpha), '; No:' num2str(jj)];
 
-  col2=lines(ncases+1); 
+  col2=lines(ncases); 
  
   ksegs=0;
   figure(50)
@@ -254,15 +249,10 @@ for jj=1:10% nfiles
     nek_omega = 2*k;
     nek_timeperiod = 2*pi/nek_omega;
 
-    if k<0.02
+    if k<0.05
       continue
     end
-%   if jj==22 && iseg==10
-%    disp(['Something is wrong in this case: ' fname '; iseg: ' num2str(iseg)])
-%    continue;
-%  end  
-
-  
+   
     disp(['File: ', fname, '; No:', num2str(jj)]) 
     disp(['Reduced Frequency: ', num2str(k), ';  iseg= ', num2str(iseg)])
     disp(['Mean alpha: ', num2str(mean_alpha)])
@@ -363,7 +353,7 @@ for jj=1:10% nfiles
     gammaall = [gammaall phi - omega*toff];
     intgall = [intgall intg_const];
     intgbydalpha=[intgbydalpha intg_const/amp2];
-    intgnorm=[intgnorm intg_const/amp2/uoo*30];
+    intgnorm=[intgnorm intg_const/amp2/(k-0.5)];
     alpha_all=[alpha_all mean_alpha2];
     theta_all=[theta_all theta];
     ampall = [ampall amp2];
@@ -391,7 +381,6 @@ for jj=1:10% nfiles
 
     figure(50)
     time_plot = plot(q_time,q_cz, 'Color', col2(ii,:)); hold on
-    time_pred = plot(q_time,cz_pred, '--', 'Color', col2(ncases+1,:), 'LineWidth', 2);
     ylabel('C_{z}', 'Interpreter', 'tex', 'FontSize', fs)
     xlabel('time', 'Interpreter', 'tex', 'FontSize', fs)
  

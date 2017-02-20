@@ -61,9 +61,9 @@ static_model.cz = xfoil.data(:,2);
 steady_shift = 0.;
 
 %% ideal numbers
-mean_aoa=4.5;
+mean_aoa=4.7;
 dalpha=1.0;
-k=0.4;           % min value is 0.02
+k=0.35;           % min value is 0.02
 %%
 
 U0=1.;

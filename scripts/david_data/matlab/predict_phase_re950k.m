@@ -60,7 +60,7 @@ steady_shift = 0.;
 %% ideal numbers
 mean_aoa=3.0;
 dalpha=0.9;
-k=0.4;           % min value is 0.02
+k=0.07;           % min value is 0.02
 %%
 
 %mean_aoa=3.1251+steady_shift;

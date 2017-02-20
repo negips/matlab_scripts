@@ -58,10 +58,14 @@ static_model = load('14_static_models_765k.mat');
 steady_shift = 0.;
 
 %% ideal numbers
-mean_aoa=2.9;
+mean_aoa=3.3;
 dalpha=0.9;
-k=0.4;           % min value is 0.02
+k=0.3;           % min value is 0.02
 %%
+
+mean_aoa=3.3;
+dalpha=0.9;
+k=0.30;           % min value is 0.02
 
 U0=1.;
 c=1.0;
