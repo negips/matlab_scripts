@@ -115,7 +115,7 @@ ampall2=[];
 toffall2=[];
 sofstall2=[];
 
-for jj=33:33% nfiles
+for jj=1:nfiles
 
   fname=filenames{jj};
   uoo=U0(jj);
@@ -353,7 +353,7 @@ for jj=33:33% nfiles
     gammaall = [gammaall phi - omega*toff];
     intgall = [intgall intg_const];
     intgbydalpha=[intgbydalpha intg_const/amp2];
-    intgnorm=[intgnorm intg_const/amp2/(k-0.5)];
+    intgnorm=[intgnorm intg_const/amp2/uoo*30];       % 30/uoo to keep the factor ~ O(1)
     alpha_all=[alpha_all mean_alpha2];
     theta_all=[theta_all theta];
     ampall = [ampall amp2];
@@ -422,13 +422,16 @@ for jj=33:33% nfiles
     xlabel('k', 'Interpreter', 'tex', 'FontSize', fs)
     legend(legs_f, 'Interpreter', 'tex', 'FontSize', lfs, 'Location', 'Best')
     hold on    
-   
-%    figure(33)
-%    plot(kall,sofstall, '-d', 'Color', col1(jj,:))
-%    ylabel('Steady offset', 'Interpreter', 'tex', 'FontSize', fs)
-%    xlabel('k', 'Interpreter', 'tex', 'FontSize', fs)
-%    legend(legs_f, 'Interpreter', 'tex', 'FontSize', lfs, 'Location', 'Best')
-%    hold on
+
+    figure(34)
+    plot(kall,intgnorm, mkr, 'Color', col1(jj,:), 'LineWidth', 2)
+    ylabel('Integration constant', 'Interpreter', 'tex', 'FontSize', fs)
+    xlabel('k', 'Interpreter', 'tex', 'FontSize', fs)
+    legend(legs_f, 'Interpreter', 'tex', 'FontSize', lfs, 'Location', 'Best')
+    hold on
+    grid on
+
+
     kall2=[kall2 kall];
     phiall2 = [phiall2 phiall];
     gammaall2 = [gammaall2 gammaall];

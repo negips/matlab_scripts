@@ -4,62 +4,14 @@ clear
 clc
 close all
 
-fs=16;
-lfs=12;
-onlymean = 1;
-
-all = load('all_predictions.mat');;
-
-[k ind] = sort(all.kall2);
-k = [0 k];
-phi = [0 all.phiall2(ind)];
-gamma = [0 all.gammaall2(ind)];
-intgbydalpha = [0 all.intgbydalpha2(ind)];
-
-nsmooths=50; 
-movk=k;
-movphi=phi;
-movgamma=gamma;
-movintg=intgbydalpha;
-for j=1:nsmooths
-  order=1;
-  framelen=3;  
-  movk = sgolayfilt(movk,order,framelen);
-  movphi = sgolayfilt(movphi,order,framelen);
-  movgamma = sgolayfilt(movgamma,order,framelen);
-  movintg = sgolayfilt(movintg,order,framelen);
-end
-
-figure(10)
-plot(k,phi*180/pi, '*'); hold on
-plot(movk,movphi*180/pi, '-k', 'LineWidth', 2)
-plot(movk,1.2*movphi*180/pi, '--r', 'LineWidth', 1)
-plot(movk,0.8*movphi*180/pi, '--r', 'LineWidth', 1)
-ylabel('\phi', 'Interpreter', 'tex', 'FontSize', fs)
-xlabel('k', 'Interpreter', 'tex', 'FontSize', fs)
-
-figure(11)
-plot(k,gamma*180/pi, '*'); hold on
-plot(movk,movgamma*180/pi, '-k', 'LineWidth', 2)
-plot(movk,1.3*movgamma*180/pi, '--r', 'LineWidth', 1)
-plot(movk,0.7*movgamma*180/pi, '--r', 'LineWidth', 1)
-ylabel('\phi', 'Interpreter', 'tex', 'FontSize', fs)
-xlabel('k', 'Interpreter', 'tex', 'FontSize', fs)
-
-figure(12)
-plot(k,intgbydalpha, 'd'); hold on
-plot(movk,movintg, '-k', 'LineWidth', 2)
-plot(movk,1.15*movintg, '--r', 'LineWidth', 1)
-plot(movk,0.85*movintg, '--r', 'LineWidth', 1)
-ylabel('Integ const', 'Interpreter', 'tex', 'FontSize', fs)
-xlabel('k', 'Interpreter', 'tex', 'FontSize', fs)
-
+run get_predictions
 
 %static_model = load('14_static_models_765k.mat');
 xfoil = importdata('polar_re1e5_ed36f128+14.dat');
 static_model.alpha = xfoil.data(:,1);
 static_model.cz = xfoil.data(:,2);
 steady_shift = 0.;
+uoo=100/955*30;
 
 %% ideal numbers
 mean_aoa=6.2;
@@ -78,6 +30,12 @@ intg_const = interp1(movk,movintg,k,'linear', 'extrap');
 intg_const = 1.2*intg_const*dalpha*pi/180;
 intg_min = intg_const*0.85;
 intg_max = intg_const*1.15;
+
+norm_intg_const = interp1(movk,movintgnorm,k,'linear');
+% intg_const = norm_intg_const*dalpha*pi/180*30/uoo;
+% intg_min = intg_const*0.9;
+% intg_max = intg_const*1.1;
+
 
 philag = interp1(movk,movphi,k,'linear', 'extrap');
 philag_min=0.8*philag;
