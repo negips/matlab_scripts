@@ -6,6 +6,8 @@ close all
 
 run get_predictions
 
+onlymean = 0;
+
 static_model = load('14_static_models_765k.mat');
 steady_shift = 0.;
 uoo=24;
@@ -16,9 +18,16 @@ dalpha=0.9;
 k=0.3;           % min value is 0.02
 %%
 
+%% closest to data
 mean_aoa=3.2;
-dalpha=0.9;
+dalpha=0.94;
+k=0.32;           % min value is 0.02
+
+%% propose
+mean_aoa=3.2;
+dalpha=1.0;
 k=0.4;           % min value is 0.02
+
 
 U0=1.;
 c=1.0;
@@ -115,7 +124,7 @@ xlabel('t', 'Interpreter', 'tex', 'FontSize', fs)
 
 
 %% Xfoil
-ifxfoil = 0;
+ifxfoil = 1;
 if ifxfoil
   xfoil = importdata('polar_re765k_ed36f128+14.dat');
   figure(20)

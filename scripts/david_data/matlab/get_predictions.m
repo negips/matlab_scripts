@@ -9,7 +9,6 @@ ifcols= 1;
 
 fs=16;
 lfs=12;
-onlymean = 0;
 
 all = load('all_predictions.mat');;
 

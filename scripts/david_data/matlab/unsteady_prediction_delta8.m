@@ -14,94 +14,32 @@ c=0.5;
 nu = 1.568E-5;
 
 base = '/scratch/negi/git_repos/matlabscripts/scripts/david_data/';
-fol = 'delta+14/';
+fol = 'delta+8/';
 folder = [base fol];
 lfol = length(fol);
 
-fs = 16;    % fontsize
-lw = 1;     % linewidth
-
-[status,result] = system(['ls ' folder '*']);
-
-inds1 = strfind(result,fol);
-inds2 = strfind(result,'.h5');
-
-nfiles = length(inds2);
-U0=zeros(nfiles,1);
-alpha=zeros(nfiles,1)-99;
-defl=zeros(nfiles,1)-99;
-ifturb=zeros(nfiles,1);
-
-disp(['N files: ', num2str(nfiles)])
-
-for i=1:nfiles
-
-    ind1 = inds1(i)+lfol;
-    ind2 = inds2(i)+2;
-    fname=result(ind1:ind2);
-    filenames{i}=fname;
-
-    inds4=strfind(fname,'alphasweep');
-    inds3=strfind(fname,'_');
-
-    if ~isempty(inds4)
-      ind1=2;
-      ind2=inds3(1)-1;      
-      U0(i) = str2double(fname(ind1:ind2));
-      ind1=inds3(1)+2;
-      ind2=inds3(2)-1;
-      defl(i) = str2double(fname(ind1:ind2));
-      if isnan(defl(i)) && i>1 
-        defl(i)=defl(i-1);
-      end  
-      continue
-    end
-   
-    if (length(inds3)>2)
-      % Freestream
-      ind1=2;
-      ind2=inds3(1)-1;
-      U0(i) = str2double(fname(ind1:ind2));
-      % apha
-      ind1=inds3(1)+2;
-      ind2=inds3(2)-1;
-      alpha(i) = str2double(fname(ind1:ind2));
-      % flap deflection      
-      ind1=inds3(2)+2;
-      ind2=inds3(3)-1;
-      defl(i) = str2double(fname(ind1:ind2));
-    else
-      % Freestream
-      ind1=2;
-      ind2=inds3(1)-1;
-      U0(i) = str2double(fname(ind1:ind2));
-      ind1=inds3(1)+1;
-      ind2=inds3(2)-1;
-      % flap deflection
-      defl(i) = str2double(fname(ind1:ind2));
-    end
-
-    inds4=strfind(fname,'turb');
-    if ~isempty(inds4)
-      ifturb(i)=1;
-    end  
-    
-end
+run get_files
 
 fs = 16;
 lfs = 10;
+lw = 1;     % linewidth
 
 %% issues
-remove_files = [-22 29 31 32 35 37];                      % steady curve seems shifted
-nostd_shift  = [10   12     14    22   41     45    47    49    51    52  54     55];
-steady_shift = [0.1  0.1    0     0.1  0.08   -0.8  0.   1.8  -0.75  0   -0.8   0.25];
-bad_fits = [16 20 28 43 53 59 60];                       % 16,53,59,60 - alpha out of range. 
+remove_files = [];                                                          
+bad_fits = [];
+nostd_shift = [];
+steady_shift = [];
+
+%remove_files = [];                      % steady curve seems shifted
+%nostd_shift  = [1];
+%steady_shift = [0.02];
+%bad_fits = [];                       % 16,53,59,60 - alpha out of range. 
                                                           % 20 - Some cases seem phase shifted by 90 deg.                                                     
                                                           % 28 - continuous offset in alpha.
-                                                          % 43 - can't figure out steady offset
+                                                          % 43 - does not match
 
-bad_fits = [bad_fits 22];
-good_fits = [22 33 39 41 45 47 49 51 52 54 55];   % 55 - data is a bit noisy
+
+good_fits = -1*[];   % 55 - data is a bit noisy
                                                   % 22 - has spikes in some data points.
                                                   % 33 - eller case          
 
@@ -122,8 +60,9 @@ ampall2=[];
 toffall2=[];
 sofstall2=[];
 
-for jj=10:10% nfiles
+for jj=1:nfiles
 
+  clc    
   fname=filenames{jj};
   uoo=U0(jj);
   deltacase=defl(1); 
@@ -135,7 +74,7 @@ for jj=10:10% nfiles
 %     found=0;   
 %     continue;
 %  end   
-  if deltacase~=14
+  if deltacase~=8
     found=0;
     continue
   end
@@ -179,16 +118,16 @@ for jj=10:10% nfiles
   amp        = (rms_alpha*sqrt(2))*180/pi;
   mean_alpha = mean_alpha*180/pi;
 
-  if mean_alpha>6
+  if mean_alpha>8.5
     disp(['Mean alpha out of range: ' num2str(mean_alpha) '; File no:', num2str(jj)])    
     found=0;
     continue;
   end
 
-  if uoo==30
-    model=load('14_static_models_950k.mat');
+  if uoo==30       
+    model=load('8_static_models_950k.mat');
   elseif uoo==24  
-    model=load('14_static_models_765k.mat');
+    model=load('8_static_models_765k.mat');
   else
     found=0;
     continue    
@@ -212,7 +151,7 @@ for jj=10:10% nfiles
     steadyphaseshift=steady_shift(index);
     modelalpha = model.alpha + steady_shift(index);
   else    
-    steadyphaseshift=-1;
+    steadyphaseshift=0;
     modelalpha = model.alpha + steadyphaseshift;
   end  
   modelcz = model.cz; 
@@ -228,15 +167,9 @@ for jj=10:10% nfiles
   ampall=[];
   toffall=[];
   sofstall=[];
-%  if (case_count>1)
-%    figure(20)
-%    clf
-%%    close(21)
-%%    close(22)
-%  end
 
-%  legs_f{case_count} = [re_leg '; \alpha= ' num2str(mean_alpha), '; No:' num2str(jj)];
-  legs_f{case_count} = [re_leg '; \alpha= ' num2str(mean_alpha)];
+  legs_f{case_count} = [re_leg '; \alpha= ' num2str(mean_alpha), '; No:' num2str(jj)];
+%  legs_f{case_count} = [re_leg '; \alpha= ' num2str(mean_alpha)];
 
   dum=1;
   col2=lines(ncases+dum); 
@@ -244,6 +177,8 @@ for jj=10:10% nfiles
   ksegs=0;
   figure(50)
   clf
+  alpha_ofst = 0;
+  ofst_found = 0;
   for ii = 1:ncases
 
     iseg=ii;    
@@ -258,22 +193,6 @@ for jj=10:10% nfiles
     nek_omega = 2*k;
     nek_timeperiod = 2*pi/nek_omega;
 
-    if k<0.02
-      continue
-    end
-%   if jj==22 && iseg==10
-%    disp(['Something is wrong in this case: ' fname '; iseg: ' num2str(iseg)])
-%    continue;
-%  end  
-
-  
-    disp(['File: ', fname, '; No:', num2str(jj)]) 
-    disp(['Reduced Frequency: ', num2str(k), ';  iseg= ', num2str(iseg)])
-    disp(['Mean alpha: ', num2str(mean_alpha)])
-    disp(['Amplitude: ', num2str(amp)])
-    disp(['Time Period (nek): ', num2str(nek_timeperiod)])
-    legs{ii} = ['Re=', num2str(Re) '; k=', num2str(k)]; 
-    
     q_time = segments(iseg).qtime;
     q_alpha = segments(iseg).alpha;
   
@@ -283,14 +202,47 @@ for jj=10:10% nfiles
     
     q_cm = interp1(p_time,p_cm,q_time,'pchip');
     q_cz = interp1(p_time,p_cz,q_time,'pchip');
- 
-    % instantaneous rotational frequency
-%    mean_alpha2 = mean_alpha*pi/180;
-%    amp2 = amp*pi/180;
-%    inst_alpha = mean_alpha2 + amp2*sin(omega*q_time);          % in degreees
-%    inst_OMEGA = amp2*omega*cos(omega*q_time);
-    
-%    disp(['--------------'])
+
+%%  Get offset in alpha
+    if (iseg==1)
+      if (k<0.02)
+        alpha_ofst=0;
+        par0(1)=alpha_ofst;
+        
+        options=optimset('MaxFunEvals',1000,'MaxIter',10000,'TolX',1e-8,'Tolfun',1e-8);
+        [par,fval,exitflag,output] = fminsearch(@(par) alpha_offset(par,q_alpha,q_cz,modelalpha,modelcz), par0,options);
+        alpha_ofst=par(1);
+        disp(['Alpha offset: ' num2str(alpha_ofst*180/pi) ' deg'])
+        modelalpha = modelalpha-alpha_ofst*180/pi;
+        ofst_found = 1;
+      end
+    end  
+
+    if (~ofst_found)
+      found = 0;
+      if case_count>0 && iseg==1
+        legs_f(case_count) = [];
+        case_count=case_count-1
+      end  
+      disp(['Can not find steady shift. Min k=' num2str(k) ])
+      continue
+    end  
+
+    if k<0.005
+      continue
+    end
+%   if jj==22 && iseg==10
+%    disp(['Something is wrong in this case: ' fname '; iseg: ' num2str(iseg)])
+%    continue;
+%  end  
+
+    disp(['File: ', fname, '; No:', num2str(jj)]) 
+    disp(['Reduced Frequency: ', num2str(k), ';  iseg= ', num2str(iseg)])
+    disp(['Mean alpha: ', num2str(mean_alpha)])
+    disp(['Amplitude: ', num2str(amp)])
+    disp(['Time Period (nek): ', num2str(nek_timeperiod)])
+    legs{ii} = ['Re=', num2str(Re) '; k=', num2str(k)]; 
+    disp(['--------------'])
   
     theta=0;
     ini_aoa=1;
@@ -323,6 +275,7 @@ for jj=10:10% nfiles
     par0(1)=phi;
     par0(2)=intg_const;
     par0(3)=toff;
+
 %    par0(4)=0;    % steady curve offset      
     options=optimset('MaxFunEvals',10000,'MaxIter',10000,'TolX',1e-8,'TolFun', 1e-8);
 
@@ -337,8 +290,7 @@ for jj=10:10% nfiles
     phi=par(1);
     intg_const=par(2);
     toff=par(3);
-%    steady_offset=par(4);
-    
+   
     if (isnan(fval))
       fval    
       continue
@@ -480,24 +432,24 @@ for jj=10:10% nfiles
 
 end
 
-% save('all_predictions.mat', 'kall2','phiall2','gammaall2','intgall2','intgbydalpha2','intgnorm2','alpha_all2','theta_all2','ampall2','toffall2')
+save(['delta' num2str(deltacase) '_predictions.mat'], 'kall2','phiall2','gammaall2','intgall2','intgbydalpha2','intgnorm2','alpha_all2','theta_all2','ampall2','toffall2')
 
 
-figure(30)
-filename=['phase_lag_k-phi.eps'];
-%filename = [re_leg '_' filename];
-SaveFig(gcf,filename, destn, ifcols)
-
-
-figure(31)
-filename=['phase_lag_k-intg.eps'];
-%filename = [re_leg '_' filename];
-SaveFig(gcf,filename, destn, ifcols)
-
-figure(34)
-filename=['phase_lag_k-intgnorm.eps'];
-%filename = [re_leg '_' filename];
-SaveFig(gcf,filename, destn, ifcols)
+%figure(30)
+%filename=['phase_lag_k-phi.eps'];
+%%filename = [re_leg '_' filename];
+%SaveFig(gcf,filename, destn, ifcols)
+%
+%
+%figure(31)
+%filename=['phase_lag_k-intg.eps'];
+%%filename = [re_leg '_' filename];
+%SaveFig(gcf,filename, destn, ifcols)
+%
+%figure(34)
+%filename=['phase_lag_k-intgnorm.eps'];
+%%filename = [re_leg '_' filename];
+%SaveFig(gcf,filename, destn, ifcols)
 
 
 

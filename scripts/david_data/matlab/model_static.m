@@ -7,7 +7,7 @@ close all
 addpath '/scratch/negi/git_repos/matlabscripts/scripts/'
 
 base = '/scratch/negi/git_repos/matlabscripts/scripts/david_data/';
-fol = 'delta+14/';
+fol = 'delta+8/';
 folder = [base fol];
 % fname = 'u24_a3_d14_fsteps.h5';
 lfol = length(fol);
@@ -21,8 +21,10 @@ lw = 1;     % linewidth
 c=0.5;
 nu = 1.568E-5;
 
-fname='u30_d14_alphasweep1.h5';
+%fname='u30_d14_alphasweep1.h5';
 %fname='u24_d14_alphasweep.h5';
+fname='u30_d8_alphasweep.h5';
+%fname='u24_d8_alphasweep.h5';
 uoo = 30;
 deltacase=14;
 Re=uoo*c/nu;
@@ -45,7 +47,7 @@ cm_all = [];
 alpha_all = [];
 time_all = [];
 
-alpha_min = -1;         % degrees
+alpha_min = 0;         % degrees
 alpha_max = 10;         % degrees
 
 nsegs = length(segments);
@@ -69,10 +71,10 @@ for iseg=1:nsegs
   q_cz = interp1(p_time,p_cz,qtime2,'pchip');
   q_cm = interp1(p_time,p_cm,qtime2,'pchip');
 
-  cz_all = [cz_all q_cz];
-  cm_all = [cm_all q_cm];
-  alpha_all = [alpha_all alpha2];
-  time_all = [time_all qtime2];
+  cz_all = [cz_all q_cz'];
+  cm_all = [cm_all q_cm'];
+  alpha_all = [alpha_all alpha2'];
+  time_all = [time_all qtime2'];
 
 end
 
@@ -80,7 +82,7 @@ end
 cm3 = cm_all(ind4);
 cz3 = cz_all(ind4);
 
-nsmooths=10; 
+nsmooths=50; 
 movalpha=alpha3;
 movcm=cm3;
 movcz=cz3;
@@ -100,6 +102,13 @@ xlabel('\alpha', 'Interpreter', 'tex', 'FontSize', fs)
 hold on
 xlim([-1 11])
 
+figure(4)
+plot_cq1 = plot(alpha3,cz3, '.', 'Color', 'b'); hold on;
+plot_cq = plot(movalpha,movcz, '--', 'Color', 'm', 'LineWidth',3);
+ylabel('C_{z}', 'Interpreter', 'tex', 'FontSize', fs)
+xlabel('\alpha', 'Interpreter', 'tex', 'FontSize', fs)
+hold on
+xlim([-1 11])
 
 %% Reduce resolution and save
 npts=10000;
@@ -109,9 +118,16 @@ cz = interp1(movalpha,movcz,alpha,'pship');
 
 figure(3)
 plot_cq2=plot(alpha,cm,'-d', 'Color', 'c', 'LineWidth', 3);
-filename=['static_model.eps'];
+filename=['static_model_cm.eps'];
 filename = [re_leg '_' filename];
 SaveFig(gcf,filename, destn, ifcols)
+
+figure(4)
+plot_cq2=plot(alpha,cz,'-d', 'Color', 'c', 'LineWidth', 3);
+filename=['static_model_cz.eps'];
+filename = [re_leg '_' filename];
+SaveFig(gcf,filename, destn, ifcols)
+
 
 save([num2str(deltacase) '_static_models_' num2str(re_leg) '.mat'], 'alpha', 'cm', 'cz', 'deltacase', 'uoo', 'base', 'fol', 'folder', 'fname')
 
