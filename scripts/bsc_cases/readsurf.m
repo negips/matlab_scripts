@@ -93,6 +93,7 @@ if displayhdr
   disp(['Num. of variables: ' num2str(ns)])    
   disp(['Max Time saves: ' num2str(maxtsaves)])    
   disp(['Output time: ' num2str(timeout)])
+  disp('---------------------')
 end 
 
 %dbstop in readsurf at 88

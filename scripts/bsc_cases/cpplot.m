@@ -6,7 +6,7 @@ close all
 
 addpath '/home/prabal/workstation/git_kth/matlabscripts/scripts/'
 
-fol = 'beskow_p6';
+fol = 'beskow_p8';
 ifhdr = 1;
 fs = 16;                % fontsize
 lfs = 16;               % legend fontsize
@@ -16,7 +16,7 @@ destn = 'plots/';
 [sfiles tout] = LoadSurfFiles(fol);
 
 nfiles = length(sfiles);
-tlast = 6.0;
+tlast = 0.0;
 maxframes = nfiles*100;
 
 h1=figure('units','normalized','outerposition',[0 0 0.4 0.6]);
@@ -37,11 +37,11 @@ for i = 1:nfiles
          end   
          dtmpx = sdata(1).data(:,:,it);
          dtmpy = sdata(2).data(:,:,it);
-         dtmp_v = sdata(3).data(:,:,it);    
+%         dtmp_v = sdata(3).data(:,:,it);    
          dtmp_v = sdata(5).data(:,:,it);    
 
          pvar = plot(x(:),dtmp_v(:), 'b.', 'MarkerSize', 6);
-         set(gca,'Ydir', 'reverse')
+%         set(gca,'Ydir', 'reverse')
 %         ylim([-3.5 1.1]);
          hold on
          lgs{1} =  ['T=' num2str(tstamps(it))]; 
