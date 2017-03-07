@@ -40,10 +40,10 @@ nu_nek=nu;
 yplusmin = 0.64;
 yplusmax = 12;
 xplus = 18.0;
-zplus = 9;
+zplus = 12;
 ifxavg = 1;
 ifzavg = 1;
-lz = 0.20;
+lz = 0.15;
 
 % Data from xfoil
 
@@ -485,13 +485,12 @@ display('-----------')
 %rans = importdata('epsilon-rsm-03.dat');
 rans = importdata('saab_750k_aoa54_eps.dat');
 
-maxeta_ratio = 9;
+filsgs_eta = 9;
 ifxavg = 1;
 ifsgs = 1;
 sgs_ramp_start=1.25;
-sgs_full=1.75;
-sgs_eta=80;
-
+sgs_full=2.00;
+sgs_eta=20;
 
 
 %epsilon2 = abs(0.5*(Dxx + Dyy + Dzz));
@@ -558,11 +557,15 @@ plot(linfit, 'k');
 %-------------------- 
 
 if (ifsgs)
-  continue
+  smoothvals = smoothstep(X2(1,:),sgs_ramp_start,sgs_full);
+  maxeta_ratio = filsgs_eta + smoothvals.*(sgs_eta-filsgs_eta);
+  figure(20)
+  plot(X2(1,:),maxeta_ratio)
 else
-  continue
+  maxeta_ratio=filsgs_eta;
 end
-h_x = maxeta_ratio*moveta_s;
+h_x = transpose(maxeta_ratio).*moveta_s;
+
 
 % Using volume criterion
 % deltax = [(h_x.^3)/deltaz_gll*2].^(1/2);           % delta z calculated from the wing surface
@@ -576,6 +579,8 @@ else
   el_s_x = deltax*2/max_gll;
 end
 
+val1 = interp1(X2(1,:),el_s_x,1.25);
+display(['delta x @x=1.25 == ' num2str(val1)])
 
 val1 = interp1(X2(1,:),el_s_x,2.0);
 display(['delta x @x=2.0 == ' num2str(val1)])
@@ -594,53 +599,59 @@ plot(X2(1,:),el_s_x);
 xlabel('$x$', 'Interpreter', 'Latex', 'FontSize', 16);
 ylabel('Element Sizes', 'Interpreter', 'Latex', 'FontSize', 16);
 
+dh_el = el_s_x;
+dh_ratio = dh_el(2:end)./dh_el(1:end-1);
+figure(21)
+plot(X2(1,2:end),dh_ratio)
+grid on
+grid minor
 
 %% Kolmogorov scale above the airfoil
 
-st_pt = -0.2;
-en_pt = 1.2;
-
-intp_pts = 200;
-xvec = linspace(st_pt,en_pt,intp_pts);
-
-st_pt = 0;
-en_pt = 0.5;
-yvec = linspace(st_pt,en_pt,intp_pts);
-
-[X3 Y3] = meshgrid(xvec,yvec);
-eta3 = griddata(X,Y,eta,X3,Y3);
-
-% Bit retarded this way, but it was adapted from the code that used DNS data.
-% You know, whatever works.
-st_pt = 0;
-en_pt = 0.4;
-
-[val ind1] = min(abs(Y3(:,1)-st_pt));
-[val ind2] = min(abs(Y3(:,1)-en_pt));
-X4 = X3(ind1:ind2,:);
-Y4 = Y3(ind1:ind2,:);
-eta4 = eta3(ind1:ind2,:);
-h_xa = maxeta_ratio*eta4;
-
-% Some queries @
-
-[val yind] = min(abs(Y4(:,1)-0.05));
-
-xpts = [0.6 0.7 0.8 0.9 1.0];
-cmap = lines(length(xpts));
-
-figure
-hold on
-legs =[];
-for i=1:length(xpts);
-     [val ind1] = min(abs(X4(1,:)-xpts(i)));
-     yvals = Y4(1:yind,ind1);
-     hvals = h_xa(1:yind,ind1);
-     plot(yvals,hvals,'Color', cmap(i,:));
-     legs{i} = ['x = ' num2str(xpts(i))];
-end
-
-title('"h" above the airfoil')
-legend(legs)
+% st_pt = -0.2;
+% en_pt = 1.2;
+% 
+% intp_pts = 200;
+% xvec = linspace(st_pt,en_pt,intp_pts);
+% 
+% st_pt = 0;
+% en_pt = 0.5;
+% yvec = linspace(st_pt,en_pt,intp_pts);
+% 
+% [X3 Y3] = meshgrid(xvec,yvec);
+% eta3 = griddata(X,Y,eta,X3,Y3);
+% 
+% % Bit retarded this way, but it was adapted from the code that used DNS data.
+% % You know, whatever works.
+% st_pt = 0;
+% en_pt = 0.4;
+% 
+% [val ind1] = min(abs(Y3(:,1)-st_pt));
+% [val ind2] = min(abs(Y3(:,1)-en_pt));
+% X4 = X3(ind1:ind2,:);
+% Y4 = Y3(ind1:ind2,:);
+% eta4 = eta3(ind1:ind2,:);
+% h_xa = maxeta_ratio.*eta4;
+% 
+% % Some queries @
+% 
+% [val yind] = min(abs(Y4(:,1)-0.05));
+% 
+% xpts = [0.6 0.7 0.8 0.9 1.0];
+% cmap = lines(length(xpts));
+% 
+% figure
+% hold on
+% legs =[];
+% for i=1:length(xpts);
+%      [val ind1] = min(abs(X4(1,:)-xpts(i)));
+%      yvals = Y4(1:yind,ind1);
+%      hvals = h_xa(1:yind,ind1);
+%      plot(yvals,hvals,'Color', cmap(i,:));
+%      legs{i} = ['x = ' num2str(xpts(i))];
+% end
+% 
+% title('"h" above the airfoil')
+% legend(legs)
 
 

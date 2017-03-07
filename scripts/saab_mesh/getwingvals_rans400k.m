@@ -35,6 +35,7 @@ uinf = 1.;
 Rec = 400*1000;
 rho = 1.0;
 nu = 1/Rec;
+nu_nek=nu;
 
 yplusmin = 0.64;
 yplusmax = 12;
@@ -46,18 +47,18 @@ lz = 0.20;
 
 % Data from xfoil
 
-xfoil = importdata('integral_vals_re400k_alpha70.out');
+xfoil = importdata('integral_vals_re400k_alpha55.out');
 l1 = length(xfoil.data(:,7));
 x0 = xfoil.data(1,2);
 cnt=0;
 while(x0~=0)
-     cnt=cnt+1;
-     xa(cnt) = xfoil.data(cnt,2);
-     ya(cnt) = xfoil.data(cnt,3);
-     tauw(cnt) = abs(xfoil.data(cnt,7))*0.5;
-     ut(cnt) = sqrt(tauw(cnt)/rho);
+  cnt=cnt+1;
+  xa(cnt) = xfoil.data(cnt,2);
+  ya(cnt) = xfoil.data(cnt,3);
+  tauw(cnt) = abs(xfoil.data(cnt,7))*0.5;
+  ut(cnt) = sqrt(tauw(cnt)/rho);
 
-     x0 = xfoil.data(cnt+1,2);
+  x0 = xfoil.data(cnt+1,2);
 end
 
 cnt=cnt+1;
@@ -117,7 +118,7 @@ display('Top Surface')
 display('-----------')
 
 %% x<0.1
-xref=0.2;
+xref=0.34;
 
 display(['===== For x<=' num2str(xref) ' ====='])
 
@@ -127,7 +128,7 @@ display(['===== For x<=' num2str(xref) ' ====='])
 %min(lstar1)
 %max(lstar1)
 %%plot(x1,lstar1)
-lstar1 = interp1(xa,lstar,0.24);             % Has to be selected manually
+lstar1 = interp1(xa,lstar,0.5484);             % Has to be selected manually
 if ifzavg
      deltaz = zplus*max(lstar1)*2/avg_gll;
 else
@@ -172,7 +173,7 @@ xupf = [xupf xa(1:indfup)];
 yupf = [yupf ya(1:indfup)];
 
 %% 0.1<x<=0.6
-xref1=0.20;
+xref1=0.34;
 xref2=0.70;
 display(['===== For ' num2str(xref1) '<x<=' num2str(xref2) ' ====='])
 [val ind] = min(abs(xa-xref1));
@@ -308,7 +309,7 @@ display('Bottom Surface')
 display('--------------')
 
 %% x<0.1
-xref=0.20;
+xref=0.34;
 display(['===== For x<=' num2str(xref) ' ====='])
 
 lstar1 = interp1(xab,lstarb,xref);
@@ -337,7 +338,7 @@ lst_ind = indfbot;
 xbotf = [xbotf xab(1:indfbot)];
 
 %% 0.1<x<=0.6
-xref1=0.20;
+xref1=0.34;
 xref2=0.7;
 display(['===== For ' num2str(xref1) '<x<=' num2str(xref2) ' ====='])
 [val ind] = min(abs(xab-xref1));
@@ -481,20 +482,27 @@ display('-----------')
 
 % load('../prace_mesh/data_contour.mat');
 
-% rans = importdata('epsilon-rsm-03.dat');
-rans = importdata('saab_750k_aoa54_eps.dat');
+%rans = importdata('epsilon-rsm-03.dat');
+rans = importdata('saab_400k_aoa57_eps.dat');
 
-maxeta_ratio = 9;
+filsgs_eta = 9;
 ifxavg = 1;
+ifsgs = 1;
+sgs_ramp_start=1.25;
+sgs_full=2.00;
+sgs_eta=20;
+
 
 %epsilon2 = abs(0.5*(Dxx + Dyy + Dzz));
 X = rans.data(:,2);
 Y = rans.data(:,3);
 epsilon = rans.data(:,4);
 nu_rans = (1.7894e-5)/1.225;
-epsilon_norm = epsilon*(nu_rans/1.789^4);
+uinf_rans = 5.9667;
+epsilon_norm = epsilon*(nu_rans/(uinf_rans^4));
 epsilon_nek = epsilon_norm/(nu/1^4);
-eta = ((nu^3)./epsilon_nek).^(1/4);
+%eta = (nu_nek^(3/4))/(epsilon_nek.^(1/4));
+eta=((nu_nek^3)./epsilon_nek).^(1/4);
 
 st_pt = 1.0;
 en_pt = 5.2;
@@ -513,7 +521,7 @@ eta2 = griddata(X,Y,eta,X2,Y2);
 
 ylocs_m=zeros(1,length(yind));
 for i=1:length(ylocs_m)
-     ylocs_m(i) = Y2(yind(i),i);
+  ylocs_m(i) = Y2(yind(i),i);
 end
 %scatter(X2(1,:),ylocs_m,mineta_x);
 figure
@@ -548,7 +556,16 @@ plot(linfit, 'k');
 
 %-------------------- 
 
-h_x = maxeta_ratio*moveta_s;
+if (ifsgs)
+  smoothvals = smoothstep(X2(1,:),sgs_ramp_start,sgs_full);
+  maxeta_ratio = filsgs_eta + smoothvals.*(sgs_eta-filsgs_eta);
+  figure(20)
+  plot(X2(1,:),maxeta_ratio)
+else
+  maxeta_ratio=filsgs_eta;
+end
+h_x = transpose(maxeta_ratio).*moveta_s;
+
 
 % Using volume criterion
 % deltax = [(h_x.^3)/deltaz_gll*2].^(1/2);           % delta z calculated from the wing surface
@@ -557,11 +574,13 @@ h_x = maxeta_ratio*moveta_s;
 deltax = h_x;
 
 if ifxavg
-     el_s_x = deltax*2/avg_gll;
+  el_s_x = deltax*2/avg_gll;
 else
-     el_s_x = deltax*2/max_gll;
+  el_s_x = deltax*2/max_gll;
 end
 
+val1 = interp1(X2(1,:),el_s_x,1.25);
+display(['delta x @x=1.25 == ' num2str(val1)])
 
 val1 = interp1(X2(1,:),el_s_x,2.0);
 display(['delta x @x=2.0 == ' num2str(val1)])
@@ -580,53 +599,59 @@ plot(X2(1,:),el_s_x);
 xlabel('$x$', 'Interpreter', 'Latex', 'FontSize', 16);
 ylabel('Element Sizes', 'Interpreter', 'Latex', 'FontSize', 16);
 
+dh_el = el_s_x;
+dh_ratio = dh_el(2:end)./dh_el(1:end-1);
+figure(21)
+plot(X2(1,2:end),dh_ratio)
+grid on
+grid minor
 
 %% Kolmogorov scale above the airfoil
 
-st_pt = -0.2;
-en_pt = 1.2;
-
-intp_pts = 200;
-xvec = linspace(st_pt,en_pt,intp_pts);
-
-st_pt = 0;
-en_pt = 0.5;
-yvec = linspace(st_pt,en_pt,intp_pts);
-
-[X3 Y3] = meshgrid(xvec,yvec);
-eta3 = griddata(X,Y,eta,X3,Y3);
-
-% Bit retarded this way, but it was adapted from the code that used DNS data.
-% You know, whatever works.
-st_pt = 0;
-en_pt = 0.4;
-
-[val ind1] = min(abs(Y3(:,1)-st_pt));
-[val ind2] = min(abs(Y3(:,1)-en_pt));
-X4 = X3(ind1:ind2,:);
-Y4 = Y3(ind1:ind2,:);
-eta4 = eta3(ind1:ind2,:);
-h_xa = maxeta_ratio*eta4;
-
-% Some queries @
-
-[val yind] = min(abs(Y4(:,1)-0.05));
-
-xpts = [0.6 0.7 0.8 0.9 1.0];
-cmap = lines(length(xpts));
-
-figure
-hold on
-legs =[];
-for i=1:length(xpts);
-     [val ind1] = min(abs(X4(1,:)-xpts(i)));
-     yvals = Y4(1:yind,ind1);
-     hvals = h_xa(1:yind,ind1);
-     plot(yvals,hvals,'Color', cmap(i,:));
-     legs{i} = ['x = ' num2str(xpts(i))];
-end
-
-title('"h" above the airfoil')
-legend(legs)
+% st_pt = -0.2;
+% en_pt = 1.2;
+% 
+% intp_pts = 200;
+% xvec = linspace(st_pt,en_pt,intp_pts);
+% 
+% st_pt = 0;
+% en_pt = 0.5;
+% yvec = linspace(st_pt,en_pt,intp_pts);
+% 
+% [X3 Y3] = meshgrid(xvec,yvec);
+% eta3 = griddata(X,Y,eta,X3,Y3);
+% 
+% % Bit retarded this way, but it was adapted from the code that used DNS data.
+% % You know, whatever works.
+% st_pt = 0;
+% en_pt = 0.4;
+% 
+% [val ind1] = min(abs(Y3(:,1)-st_pt));
+% [val ind2] = min(abs(Y3(:,1)-en_pt));
+% X4 = X3(ind1:ind2,:);
+% Y4 = Y3(ind1:ind2,:);
+% eta4 = eta3(ind1:ind2,:);
+% h_xa = maxeta_ratio.*eta4;
+% 
+% % Some queries @
+% 
+% [val yind] = min(abs(Y4(:,1)-0.05));
+% 
+% xpts = [0.6 0.7 0.8 0.9 1.0];
+% cmap = lines(length(xpts));
+% 
+% figure
+% hold on
+% legs =[];
+% for i=1:length(xpts);
+%      [val ind1] = min(abs(X4(1,:)-xpts(i)));
+%      yvals = Y4(1:yind,ind1);
+%      hvals = h_xa(1:yind,ind1);
+%      plot(yvals,hvals,'Color', cmap(i,:));
+%      legs{i} = ['x = ' num2str(xpts(i))];
+% end
+% 
+% title('"h" above the airfoil')
+% legend(legs)
 
 
