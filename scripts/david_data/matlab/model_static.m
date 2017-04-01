@@ -7,7 +7,7 @@ close all
 addpath '/scratch/negi/git_repos/matlabscripts/scripts/'
 
 base = '/scratch/negi/git_repos/matlabscripts/scripts/david_data/';
-fol = 'delta+8/';
+fol = 'delta+14/';
 folder = [base fol];
 % fname = 'u24_a3_d14_fsteps.h5';
 lfol = length(fol);
@@ -21,9 +21,9 @@ lw = 1;     % linewidth
 c=0.5;
 nu = 1.568E-5;
 
-%fname='u30_d14_alphasweep1.h5';
+fname='u30_d14_alphasweep1.h5';
 %fname='u24_d14_alphasweep.h5';
-fname='u30_d8_alphasweep.h5';
+%fname='u30_d8_alphasweep.h5';
 %fname='u24_d8_alphasweep.h5';
 uoo = 30;
 deltacase=14;
@@ -96,7 +96,7 @@ end
 
 figure(3)
 plot_cq1 = plot(alpha3,cm3, '.', 'Color', 'b'); hold on;
-plot_cq = plot(movalpha,movcm, '--', 'Color', 'm', 'LineWidth',3);
+%plot_cq = plot(movalpha,movcm, '--', 'Color', 'm', 'LineWidth',3);
 ylabel('C_{m}', 'Interpreter', 'tex', 'FontSize', fs)
 xlabel('\alpha', 'Interpreter', 'tex', 'FontSize', fs)
 hold on
@@ -104,7 +104,7 @@ xlim([-1 11])
 
 figure(4)
 plot_cq1 = plot(alpha3,cz3, '.', 'Color', 'b'); hold on;
-plot_cq = plot(movalpha,movcz, '--', 'Color', 'm', 'LineWidth',3);
+%plot_cq = plot(movalpha,movcz, '--', 'Color', 'm', 'LineWidth',3);
 ylabel('C_{z}', 'Interpreter', 'tex', 'FontSize', fs)
 xlabel('\alpha', 'Interpreter', 'tex', 'FontSize', fs)
 hold on
@@ -129,7 +129,7 @@ filename = [re_leg '_' filename];
 SaveFig(gcf,filename, destn, ifcols)
 
 
-save([num2str(deltacase) '_static_models_' num2str(re_leg) '.mat'], 'alpha', 'cm', 'cz', 'deltacase', 'uoo', 'base', 'fol', 'folder', 'fname')
+% save([num2str(deltacase) '_static_models_' num2str(re_leg) '.mat'], 'alpha', 'cm', 'cz', 'deltacase', 'uoo', 'base', 'fol', 'folder', 'fname')
 
 
 

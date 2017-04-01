@@ -6,15 +6,17 @@ close all
 
 addpath '/scratch/negi/git_repos/matlabscripts/scripts/'
 
-ifsave = 0;
+ifsave = 1;
+iftsave = 0;
 destn = 'plots/';
 ifcols= 1;
+ifdt = 0;
 
 c=0.5;
 nu = 1.568E-5;
 
 base = '/scratch/negi/git_repos/matlabscripts/scripts/david_data/';
-fol = 'delta+8/';
+fol = 'delta+14/';
 folder = [base fol];
 lfol = length(fol);
 
@@ -33,7 +35,7 @@ steady_shift = [];
 %remove_files = [];                      % steady curve seems shifted
 %nostd_shift  = [1];
 %steady_shift = [0.02];
-%bad_fits = [];                       % 16,53,59,60 - alpha out of range. 
+bad_fits = [22 28];                       % 16,53,59,60 - alpha out of range. 
                                                           % 20 - Some cases seem phase shifted by 90 deg.                                                     
                                                           % 28 - continuous offset in alpha.
                                                           % 43 - does not match
@@ -41,8 +43,13 @@ steady_shift = [];
 
 good_fits = -1*[];   % 55 - data is a bit noisy
                                                   % 22 - has spikes in some data points.
-                                                  % 33 - eller case          
+                                                  % 33 - eller case 
 
+if (ifdt)
+  delays = importdata('d14_delays.txt');
+  ndelays =  length(delays.data);
+end
+                                                  
 nfiles=length(filenames);
 col1=lines(nfiles);
 
@@ -74,11 +81,11 @@ for jj=1:nfiles
 %     found=0;   
 %     continue;
 %  end   
-  if deltacase~=8
+  if deltacase~=14
     found=0;
     continue
   end
-  if uoo~=24 && uoo ~= 30
+  if uoo~=24  && uoo ~= 30
     found=0;
     continue;
   end    
@@ -103,7 +110,24 @@ for jj=1:nfiles
 %    continue;
 %  end
 
-  [segments] = split_segments(hfile, uoo, deltacase);
+  delayfound = 0;
+  if (ifdt)
+    delayind = strfind(delays.textdata(:,1),fname);
+    deltaT = [];
+    for i=1:ndelays
+      if ~isempty(delayind{i})
+        deltaT = delays.data(i)
+        delayfound = 1
+        break
+      end 
+    end
+  end  
+
+  if (delayfound) 
+    [segments] = split_segments(hfile, uoo, deltacase,deltaT);
+  else    
+    [segments] = split_segments(hfile, uoo, deltacase);
+  end  
 
   flds = fieldnames(segments);
   has_freq = max(strcmp(flds,'rfreq'));
@@ -118,16 +142,22 @@ for jj=1:nfiles
   amp        = (rms_alpha*sqrt(2))*180/pi;
   mean_alpha = mean_alpha*180/pi;
 
-  if mean_alpha>8.5
+  if mean_alpha>6.0
+    disp(['Mean alpha out of range: ' num2str(mean_alpha) '; File no:', num2str(jj)])    
+    found=0;
+    continue;
+  end
+
+  if mean_alpha<1.0
     disp(['Mean alpha out of range: ' num2str(mean_alpha) '; File no:', num2str(jj)])    
     found=0;
     continue;
   end
 
   if uoo==30       
-    model=load('8_static_models_950k.mat');
+    model=load('14_static_models_950k.mat');
   elseif uoo==24  
-    model=load('8_static_models_765k.mat');
+    model=load('14_static_models_765k.mat');
   else
     found=0;
     continue    
@@ -168,8 +198,8 @@ for jj=1:nfiles
   toffall=[];
   sofstall=[];
 
-  legs_f{case_count} = [re_leg '; \alpha= ' num2str(mean_alpha), '; No:' num2str(jj)];
-%  legs_f{case_count} = [re_leg '; \alpha= ' num2str(mean_alpha)];
+%  legs_f{case_count} = [re_leg '; \alpha= ' num2str(mean_alpha), '; No:' num2str(jj)];
+  legs_f{case_count} = [re_leg '; \alpha= ' num2str(mean_alpha)];
 
   dum=1;
   col2=lines(ncases+dum); 
@@ -234,7 +264,7 @@ for jj=1:nfiles
 %   if jj==22 && iseg==10
 %    disp(['Something is wrong in this case: ' fname '; iseg: ' num2str(iseg)])
 %    continue;
-%  end  
+%   end  
 
     disp(['File: ', fname, '; No:', num2str(jj)]) 
     disp(['Reduced Frequency: ', num2str(k), ';  iseg= ', num2str(iseg)])
@@ -262,34 +292,68 @@ for jj=1:nfiles
       theta=theta+pi;
     end
 
-    alpha_pred = mean_alpha2 +amp2*sin(omega*q_time + theta);
+    alpha_pred = mean_alpha2 + amp2*sin(omega*q_time + theta);
     
 %    figure(21)
 %    plot(q_time,q_alpha*180/pi); hold on
 %    plot(q_time,alpha_pred*180/pi, ' ok')
     
     % cm/cz model
-    phi=-5*pi/180;
-    intg_const=1;
-    toff=0.;
-    par0(1)=phi;
-    par0(2)=intg_const;
-    par0(3)=toff;
 
 %    par0(4)=0;    % steady curve offset      
     options=optimset('MaxFunEvals',10000,'MaxIter',10000,'TolX',1e-8,'TolFun', 1e-8);
 
 %     [par,fval,exitflag,output] = fminsearch(@(par) unsteady_force_model3(par,q_time,q_cz,modelcz,modelalpha,k,uoo,mean_alpha2,amp2,theta), par0,options);
 
-    [par,fval,exitflag,output] = fminsearch(@(par) unsteady_force_model2(par,q_time,q_cz,modelcz,modelalpha,k,uoo,mean_alpha2,amp2,theta), par0,options);
+%    if (delayfound)
+%      phi=-5*pi/180;
+%      intg_const=1;
+%      toff=0.;
+%      par0(1)=phi;
+%      par0(2)=intg_const;
+%
+%      [par,fval,exitflag,output] = fminsearch(@(par) unsteady_force_model3(par,q_time,q_cz,modelcz,modelalpha,k,uoo,mean_alpha2,amp2,theta), par0,options);
+%
+%      phi=par(1);
+%      intg_const=par(2);
+%
+%    else      
+      phi=-5*pi/180;
+      intg_const=1;
+      toff=0.;
+      par0(1)=phi;
+      par0(2)=intg_const;
+      par0(3)=toff;
+
+      [par,fval,exitflag,output] = fminsearch(@(par) unsteady_force_model2(par,q_time,q_cz,modelcz,modelalpha,k,uoo,mean_alpha2,amp2,theta), par0,options);
+
+%      [par,fval,exitflag,output] = fmincon(@(par) unsteady_force_model2(par,q_time,q_cz,modelcz,modelalpha,k,uoo,mean_alpha2,amp2,theta), par0,[],[],[],[],[-pi 0 -5],[0 10 5],[],options);
+
+      phi=par(1);
+      intg_const=par(2);
+      toff=par(3);
+
+%    end
+
+
+%    if (intg_const<0)
+%      intg_const=abs(intg_const);
+%      phi = phi - pi;
+%      if (phi>0)
+%        phi=phi-2*pi;
+%      end
+%    end  
+        
 
 %   [par,fval,exitflag,output] = fminsearch(@(par) unsteady_force_model(par,q_time,q_cz,modelcz,modelalpha,k,uoo,mean_alpha2,amp2,theta), par0,options);
 
 %    [par,fval,exitflag,output] = fmincon(@(par) unsteady_force_model(par,q_time,q_cz,model.cz,model.alpha,k,uoo,mean_alpha2,amp2,theta),par0,[],[],[],[],[-pi/2 -100],[pi/2 100],[],options);
-  
-    phi=par(1);
-    intg_const=par(2);
-    toff=par(3);
+
+%    if iseg==1
+%      phi=0;
+%      toff=0;
+%    end  
+
    
     if (isnan(fval))
       fval    
@@ -338,11 +402,14 @@ for jj=1:nfiles
     xlabel('\alpha', 'Interpreter', 'tex', 'FontSize', fs)
     legend(phase_plot, legs(ii), 'Interpreter', 'tex', 'fontsize', lfs, 'Location', 'NorthWest')
 %    plot(q_alpha*180/pi,cz_pred, '--', 'Color', col2(ii,:));
-    plot(alpha_pred2*180/pi,cz_pred, '--', 'Color', col2(ncases+dum,:), 'LineWidth', 2);
+%    plot(alpha_pred2*180/pi,cz_pred, '--', 'Color', col2(ncases+dum,:), 'LineWidth', 2);
+    plot(alpha_pred2*180/pi,cz_pred, '--o', 'Color', 'k', 'LineWidth', 1);
+
     if ksegs~=-1
       plot(modelalpha,modelcz,'--k', 'LineWidth', 2)
       xlim([mean_alpha2*180/pi-1.5 mean_alpha2*180/pi+1.5])
     end
+
     if ifsave 
       filename=['phase_plot_' num2str(jj) '_' num2str(iseg)];
       filename = [re_leg '_' filename];
@@ -351,9 +418,22 @@ for jj=1:nfiles
 
     figure(50)
     time_plot = plot(q_time,q_cz, '-', 'Color', col2(ii,:), 'LineWidth', 2); hold on
-    time_pred = plot(q_time,cz_pred, '--', 'Color', col2(ncases+dum,:), 'LineWidth', 2);
+%    time_pred = plot(q_time,cz_pred, '--', 'Color', col2(ncases+dum,:), 'LineWidth', 2);
+    time_pred = plot(q_time,cz_pred, ' o', 'Color', 'k', 'LineWidth', 1);
     ylabel('C_{z}', 'Interpreter', 'tex', 'FontSize', fs)
     xlabel('time', 'Interpreter', 'tex', 'FontSize', fs)
+
+    if iftsave
+      xlim([min(q_time) max(q_time)])
+      ylim([min(q_cz) max(q_cz)])
+      figure(50)
+      filename=['time_plot_' num2str(jj) '_' num2str(iseg)];
+      filename = [re_leg '_' filename];
+      SaveFig(gcf,filename, destn, ifcols)
+      xlim auto
+      ylim auto 
+    end
+
 
   end
 
@@ -403,7 +483,8 @@ for jj=1:nfiles
 
     figure(34)
     plot(kall,intgnorm, mkr, 'Color', col1(jj,:), 'LineWidth', 2)
-    ylabel('Normalized Integration constant', 'Interpreter', 'tex', 'FontSize', fs)
+%    ylabel('Normalized Integration constant', 'Interpreter', 'tex', 'FontSize', fs)
+    ylabel('C_{1}', 'Interpreter', 'tex', 'FontSize', fs)
     xlabel('k', 'Interpreter', 'tex', 'FontSize', fs)
     legend(legs_f, 'Interpreter', 'tex', 'FontSize', lfs, 'Location', 'Best')
     hold on
@@ -432,13 +513,13 @@ for jj=1:nfiles
 
 end
 
-save(['delta' num2str(deltacase) '_predictions.mat'], 'kall2','phiall2','gammaall2','intgall2','intgbydalpha2','intgnorm2','alpha_all2','theta_all2','ampall2','toffall2')
+% save(['delta' num2str(deltacase) '_predictions.mat'], 'kall2','phiall2','gammaall2','intgall2','intgbydalpha2','intgnorm2','alpha_all2','theta_all2','ampall2','toffall2')
 
 
-%figure(30)
-%filename=['phase_lag_k-phi.eps'];
-%%filename = [re_leg '_' filename];
-%SaveFig(gcf,filename, destn, ifcols)
+figure(30)
+filename=['phase_lag_k-phi.eps'];
+%filename = [re_leg '_' filename];
+SaveFig(gcf,filename, destn, ifcols)
 %
 %
 %figure(31)
@@ -446,10 +527,10 @@ save(['delta' num2str(deltacase) '_predictions.mat'], 'kall2','phiall2','gammaal
 %%filename = [re_leg '_' filename];
 %SaveFig(gcf,filename, destn, ifcols)
 %
-%figure(34)
-%filename=['phase_lag_k-intgnorm.eps'];
-%%filename = [re_leg '_' filename];
-%SaveFig(gcf,filename, destn, ifcols)
+figure(34)
+filename=['phase_lag_k-intgnorm.eps'];
+%filename = [re_leg '_' filename];
+SaveFig(gcf,filename, destn, ifcols)
 
 
 

@@ -97,6 +97,7 @@ seg_all = [];           % store segment index as array
 U0_all = [];            % freestream
 delta_all = [];         % flap deflection
 allcount = 0;
+mkr = [];               % markers
 
 red = [1 0 0];          % 573k
 blue = [0 0 1];         % 765k
@@ -272,10 +273,13 @@ for i=1:nfiles
       % Color code specification for Re
       if (Re<600000)
         re_ccode = [re_ccode; red];
+        mkr = [mkr; 'o'];
       elseif (Re>600000 && Re < 900000)
         re_ccode = [re_ccode; blue];
+        mkr = [mkr; 'o'];
       else
-        re_ccode = [re_ccode; cyan];
+        re_ccode = [re_ccode; black];
+        mkr = [mkr; 'o'];
       end        
 
       disp(['--------------'])
@@ -294,7 +298,7 @@ dalpha_rescale = 10 + (pitch_amp - min(pitch_amp))/max(pitch_var)*10;
 
 %%
 h1=figure;
-scatter(aoa0,pitch_amp,[],re_ccode, 'LineWidth', lw);
+scatter(aoa0,pitch_amp,[],re_ccode, mkr, 'LineWidth', lw);
 %ylim([0 2])
 xlim([0 15])
 ylabel('\Delta\alpha (pitch amplitude)', 'Interpreter', 'tex', 'FontSize', fs)
@@ -305,7 +309,7 @@ SaveFig(h1, filename, destn, ifcols)
 
 %%
 h2=figure;
-scatter(aoa0,kred_cases,[],re_ccode, 'LineWidth', lw);
+scatter(aoa0,kred_cases,[],re_ccode,mkr, 'LineWidth', lw);
 xlim([-5 15])
 % errorbar(kred_cases,aoa0,pitch_amp, ' o')
 ylabel('k', 'Interpreter', 'tex', 'FontSize', fs)
@@ -316,7 +320,7 @@ SaveFig(h2, filename, destn, ifcols)
 
 %%
 h3=figure;
-scatter(kred_cases,k2./k1,[],re_ccode, 'LineWidth', lw);
+scatter(kred_cases,k2./k1,[],re_ccode,mkr,'LineWidth', lw);
 ylabel('k2/k1', 'Interpreter', 'tex', 'FontSize', fs)
 xlabel('k', 'Interpreter', 'tex', 'FontSize', fs)
 ylim([0 4])
@@ -327,7 +331,7 @@ SaveFig(h3, filename, destn, ifcols)
 
 %%
 h4=figure;
-scatter(kred_cases,k2_amp./k1_amp,[],re_ccode, 'LineWidth', lw);
+scatter(kred_cases,k2_amp./k1_amp,[],re_ccode,mkr,'LineWidth', lw);
 set(gca,'Yscale', 'log')
 ylabel('k2_{amp}/k1_{amp}', 'Interpreter', 'tex', 'FontSize', fs)
 xlabel('k', 'Interpreter', 'tex', 'FontSize', fs)
@@ -337,7 +341,7 @@ SaveFig(h4, filename, destn, ifcols)
 
 %%
 h5=figure;
-scatter(kred_cases,k2_amp./k1_amp,[], re_ccode, 'LineWidth', lw);
+scatter(kred_cases,k2_amp./k1_amp,[],re_ccode,mkr, 'LineWidth', lw);
 ylabel('k2_{amp}/k1_{amp}', 'Interpreter', 'tex', 'FontSize', fs)
 xlabel('k', 'Interpreter', 'tex', 'FontSize', fs)
 filename='k_k2amp.eps'
@@ -347,10 +351,10 @@ SaveFig(h5, filename, destn, ifcols)
 
 %%
 h6=figure;
-scatter(pitch_amp,k2_amp./k1_amp,[], re_ccode, 'LineWidth', lw);
+scatter(pitch_amp,k2_amp./k1_amp,[],re_ccode,mkr,'LineWidth', lw);
 ylabel('k2_{amp}/k1_{amp}', 'Interpreter', 'tex', 'FontSize', fs)
 xlabel('\Delta\alpha', 'Interpreter', 'tex', 'FontSize', fs)
-filename=['kratio_k2amp.eps']
+filename=['pitchamp_k2amp.eps']
 filename = [num2str(defl(1)) '_' filename];
 SaveFig(h6, filename, destn, ifcols)
 
@@ -364,7 +368,7 @@ SaveFig(h6, filename, destn, ifcols)
 %filename = [num2str(defl(1)) '_' filename];
 %SaveFig(h7, filename, destn, ifcols)
 
-save([num2str(defl(1)) '_collated_stats.mat'])
+% save([num2str(defl(1)) '_collated_stats.mat'])
 
 
 

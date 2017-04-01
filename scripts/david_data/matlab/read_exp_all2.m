@@ -103,7 +103,7 @@ interesting_counter = 0;
 for i=1:nfiles
 
   found=0;  
-  if alpha(i)~=-99   && U0(i)<25
+  if alpha(i)~=-99   && U0(i)==18
     found=1;  
     uoo = U0(i);
     deltacase=defl(1);
@@ -208,7 +208,7 @@ for i=1:nfiles
       shifted_q_cm = norm_q_cm + (iseg-1)*2;
 
       figure(h3)
-      plot(q_alpha*180/pi,shifted_q_cm, '.', 'Color', col1(iseg,:))
+      plot(q_alpha*180/pi,shifted_q_cm, '-', 'Color', col1(iseg,:))
       ylabel('C_{m}', 'Interpreter', 'tex', 'FontSize', fs)
       xlabel('\alpha', 'Interpreter', 'tex', 'FontSize', fs)
       legend(legs)

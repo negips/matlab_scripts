@@ -10,7 +10,7 @@ ifcols= 1;
 fs=16;
 lfs=12;
 
-all = load('all_predictions.mat');;
+all = load('delta14_predictions.mat');;
 
 [k ind] = sort(all.kall2);
 k = [0 k];
@@ -50,7 +50,7 @@ plot(k,gamma*180/pi, '*'); hold on
 plot(movk,movgamma*180/pi, '-k', 'LineWidth', 2)
 plot(movk,1.3*movgamma*180/pi, '--r', 'LineWidth', 1)
 plot(movk,0.7*movgamma*180/pi, '--r', 'LineWidth', 1)
-ylabel('\phi', 'Interpreter', 'tex', 'FontSize', fs)
+ylabel('\gamma', 'Interpreter', 'tex', 'FontSize', fs)
 xlabel('k', 'Interpreter', 'tex', 'FontSize', fs)
 
 figure(12)
@@ -68,7 +68,8 @@ plot(k,intgnorm, 'd'); hold on
 plot(movk,movintgnorm, '-k', 'LineWidth', 2)
 plot(movk,1.1*movintgnorm, '--r', 'LineWidth', 1)
 plot(movk,0.9*movintgnorm, '--r', 'LineWidth', 1)
-ylabel('Normalized Integ const', 'Interpreter', 'tex', 'FontSize', fs)
+%ylabel('Normalized Integ const', 'Interpreter', 'tex', 'FontSize', fs)
+ylabel('C_{1}', 'Interpreter', 'tex', 'FontSize', fs)
 xlabel('k', 'Interpreter', 'tex', 'FontSize', fs)
 filename=['model_k-intgnorm.eps'];
 SaveFig(gcf,filename, destn, ifcols)

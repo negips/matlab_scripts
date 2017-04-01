@@ -87,7 +87,7 @@ for i=2:nfiles
   end    
 
 
-  if defl(i)~=-99 && U0(i) < 34
+  if defl(i)~=-99 && U0(i) == 30
     uoo = U0(i);
     deltacase=defl(1);
     Re=uoo*c/nu;
@@ -148,6 +148,14 @@ for i=2:nfiles
       xlabel('\alpha', 'Interpreter', 'tex', 'FontSize', fs)
       hold on
       xlim([-1 11])
+
+      figure(4)
+      plot_cq2(allcount) = plot(alpha3,q_cm, '.', 'Color', col1(i,:));
+      ylabel('C_{m}', 'Interpreter', 'tex', 'FontSize', fs)
+      xlabel('\alpha', 'Interpreter', 'tex', 'FontSize', fs)
+      hold on
+      xlim([-1 11])
+
     end
   end    
 
@@ -161,9 +169,17 @@ legend(plot_aoa,legs,'Interpreter', 'tex', 'FontSize', lfs)
 figure(3)
 legend(plot_cq, legs,'Interpreter', 'tex', 'FontSize', lfs, 'Location', 'SouthEast')
 grid on
+filename=['cz_alpha_steady.eps'];
+filename = [num2str(deltacase) '_' filename];
+SaveFig(gcf,filename, destn, ifcols)
+
+figure(4)
+legend(plot_cq2, legs,'Interpreter', 'tex', 'FontSize', lfs, 'Location', 'SouthEast')
+grid on
 filename=['cm_alpha_steady.eps'];
 filename = [num2str(deltacase) '_' filename];
 SaveFig(gcf,filename, destn, ifcols)
+
 
 ifunsteady = 1;
 
@@ -193,6 +209,17 @@ if (ifunsteady)
   filename=['cz_alpha_steady_unsteady.eps'];
   filename = [num2str(deltacase) '_' filename];
   SaveFig(gcf,filename, destn, ifcols)
+
+  figure(4)
+  %  zero_mean_q_cm = q_cm - mean(q_cm);
+%  norm_q_cm = zero_mean_q_cm/abs(max(zero_mean_q_cm));
+%  shifted_q_cm = norm_q_cm + (iseg-1)*2;
+  plot(q_alpha*180/pi,q_cm, 'Color', 'k')
+  filename=['cm_alpha_steady_unsteady.eps'];
+  filename = [num2str(deltacase) '_' filename];
+  SaveFig(gcf,filename, destn, ifcols)
+
+
 end
 
 %% David Eller's suggested case
@@ -218,8 +245,15 @@ if (ifdavid)
   q_cz = interp1(p_time,p_cz,q_time,'pchip');
   q_cm = interp1(p_time,p_cm,q_time,'pchip');
   plot(q_alpha*180/pi,q_cz, 'Color', 'k')
-%  plot(q_alpha*180/pi,q_cm, 'Color', 'k')
   filename=['cz_alpha_steady_david.eps'];
+  filename = [num2str(deltacase) '_' filename];
+  SaveFig(gcf,filename, destn, ifcols)
+
+  figure(4)
+  q_cz = interp1(p_time,p_cz,q_time,'pchip');
+  q_cm = interp1(p_time,p_cm,q_time,'pchip');
+  plot(q_alpha*180/pi,q_cm, 'Color', 'k')
+  filename=['cm_alpha_steady_david.eps'];
   filename = [num2str(deltacase) '_' filename];
   SaveFig(gcf,filename, destn, ifcols)
 end
@@ -236,7 +270,11 @@ if ifxfoil
   
   xfoil = importdata(xfile);
   figure(3)
+  plot(xfoil.data(:,1), xfoil.data(:,2), '--k', 'LineWidth', 3)
+
+  figure(4)
   plot(xfoil.data(:,1), xfoil.data(:,5), '--k', 'LineWidth', 3)
+
 end
 
 

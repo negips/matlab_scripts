@@ -13,19 +13,19 @@ steady_shift = 0.;
 uoo=24;
 
 %% ideal numbers
-mean_aoa=3.3;
-dalpha=0.9;
-k=0.3;           % min value is 0.02
+mean_aoa=3.2;
+dalpha=1.0;
+k=0.4;           % min value is 0.02
 %%
 
 %% closest to data
-mean_aoa=3.2;
-dalpha=0.94;
-k=0.32;           % min value is 0.02
+%mean_aoa=3.2;
+%dalpha=0.94;
+%k=0.32;           % min value is 0.02
 
 %% propose
-mean_aoa=3.2;
-dalpha=1.0;
+mean_aoa=3.3;
+dalpha=2.0;
 k=0.4;           % min value is 0.02
 
 
@@ -102,6 +102,8 @@ title('Phase Potrait')
 ylabel('C_{z}', 'Interpreter', 'tex', 'FontSize', fs)
 xlabel('\alpha', 'Interpreter', 'tex', 'FontSize', fs)
 grid on
+filename=['model_cz_alpha.eps'];
+SaveFig(gcf,filename, destn, ifcols)
 
 if (onlymean)
   legs_13 = {'Cz'};
@@ -121,10 +123,12 @@ legend(legs_13, 'Interpreter', 'tex', 'FontSize', lfs)
 title('Cz-time')
 ylabel('C_{z}', 'Interpreter', 'tex', 'FontSize', fs)
 xlabel('t', 'Interpreter', 'tex', 'FontSize', fs)
+filename=['model_cz_time.eps'];
+SaveFig(gcf,filename, destn, ifcols)
 
 
 %% Xfoil
-ifxfoil = 1;
+ifxfoil = 0;
 if ifxfoil
   xfoil = importdata('polar_re765k_ed36f128+14.dat');
   figure(20)

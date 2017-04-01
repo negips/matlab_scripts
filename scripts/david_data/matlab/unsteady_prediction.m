@@ -122,7 +122,7 @@ ampall2=[];
 toffall2=[];
 sofstall2=[];
 
-for jj=10:10% nfiles
+for jj=1:nfiles
 
   fname=filenames{jj};
   uoo=U0(jj);
