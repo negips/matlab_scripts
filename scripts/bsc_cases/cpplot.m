@@ -6,7 +6,7 @@ close all
 
 addpath '/home/prabal/workstation/git_kth/matlabscripts/scripts/'
 
-fol = 'beskow_p8';
+fol = 're750k_aoa44';
 ifhdr = 1;
 fs = 16;                % fontsize
 lfs = 16;               % legend fontsize
@@ -16,7 +16,7 @@ destn = 'plots/';
 [sfiles tout] = LoadSurfFiles(fol);
 
 nfiles = length(sfiles);
-tlast = 0.0;
+tlast = 4.50;
 maxframes = nfiles*100;
 
 h1=figure('units','normalized','outerposition',[0 0 0.4 0.6]);
@@ -38,7 +38,7 @@ for i = 1:nfiles
          dtmpx = sdata(1).data(:,:,it);
          dtmpy = sdata(2).data(:,:,it);
 %         dtmp_v = sdata(3).data(:,:,it);    
-         dtmp_v = sdata(5).data(:,:,it);    
+         dtmp_v = -sdata(5).data(:,:,it);    
 
          pvar = plot(x(:),dtmp_v(:), 'b.', 'MarkerSize', 6);
 %         set(gca,'Ydir', 'reverse')
@@ -47,8 +47,8 @@ for i = 1:nfiles
          lgs{1} =  ['T=' num2str(tstamps(it))]; 
          lg = legend(pvar,lgs, 'FontSize', lfs, 'Location', 'North', 'Fontsize', lfs, 'Box', 'off');
          if nplots == 0 
-           ylabel('$C_{p}$', 'Interpreter', 'Latex', 'Fontsize', fs);
-           xlabel('$x/C$', 'Interpreter', 'Latex', 'Fontsize', fs);
+           ylabel('C_{p}', 'Interpreter', 'tex', 'Fontsize', fs);
+           xlabel('x/C', 'Interpreter', 'tex', 'Fontsize', fs);
          end   
          nplots = nplots+1;   
 %         mov(nplots) = getframe(gcf);

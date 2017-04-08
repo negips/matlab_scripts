@@ -32,7 +32,7 @@ uinf = 1.;
 %cfb(ind) = [];
 %utb(ind) = [];
 
-Rec = 750*1000;
+Rec = 1000*1000;
 rho = 1.0;
 nu = 1/Rec;
 nu_nek=nu;
@@ -43,11 +43,11 @@ xplus = 18.0;
 zplus = 12;
 ifxavg = 1;
 ifzavg = 1;
-lz = 0.15;
+lz = 0.2;
 
 % Data from xfoil
 
-xfoil = importdata('integral_vals_re750k_alpha44.out');
+xfoil = importdata('integral_vals_re1000k_naca_alpha50.out');
 l1 = length(xfoil.data(:,7));
 x0 = xfoil.data(1,2);
 cnt=0;
@@ -118,7 +118,7 @@ display('Top Surface')
 display('-----------')
 
 %% x<0.1
-xref=0.34;
+xref=0.1484;
 
 display(['===== For x<=' num2str(xref) ' ====='])
 
@@ -128,7 +128,7 @@ display(['===== For x<=' num2str(xref) ' ====='])
 %min(lstar1)
 %max(lstar1)
 %%plot(x1,lstar1)
-lstar1 = interp1(xa,lstar,0.34);             % Has to be selected manually
+lstar1 = interp1(xa,lstar,0.1484);             % Has to be selected manually
 if ifzavg
      deltaz = zplus*max(lstar1)*2/avg_gll;
 else
@@ -173,7 +173,7 @@ xupf = [xupf xa(1:indfup)];
 yupf = [yupf ya(1:indfup)];
 
 %% 0.1<x<=0.6
-xref1=0.34;
+xref1=0.1484;
 xref2=0.70;
 display(['===== For ' num2str(xref1) '<x<=' num2str(xref2) ' ====='])
 [val ind] = min(abs(xa-xref1));
@@ -309,7 +309,7 @@ display('Bottom Surface')
 display('--------------')
 
 %% x<0.1
-xref=0.34;
+xref=0.1325;
 display(['===== For x<=' num2str(xref) ' ====='])
 
 lstar1 = interp1(xab,lstarb,xref);
@@ -338,7 +338,7 @@ lst_ind = indfbot;
 xbotf = [xbotf xab(1:indfbot)];
 
 %% 0.1<x<=0.6
-xref1=0.34;
+xref1=0.1325;
 xref2=0.7;
 display(['===== For ' num2str(xref1) '<x<=' num2str(xref2) ' ====='])
 [val ind] = min(abs(xab-xref1));
@@ -483,7 +483,7 @@ display('-----------')
 % load('../prace_mesh/data_contour.mat');
 
 %rans = importdata('epsilon-rsm-03.dat');
-rans = importdata('saab_750k_aoa54_eps.dat');
+rans = importdata('naca_1000k_eps.dat');
 
 filsgs_eta = 9;
 ifxavg = 1;
@@ -498,7 +498,7 @@ X = rans.data(:,2);
 Y = rans.data(:,3);
 epsilon = rans.data(:,4);
 nu_rans = (1.7894e-5)/1.225;
-uinf_rans = 11.1876;
+uinf_rans = 14.9167;
 epsilon_norm = epsilon*(nu_rans/(uinf_rans^4));
 epsilon_nek = epsilon_norm/(nu/1^4);
 %eta = (nu_nek^(3/4))/(epsilon_nek.^(1/4));
