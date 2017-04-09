@@ -10,7 +10,7 @@ ifsave = 1;
 iftsave = 0;
 destn = 'plots/';
 ifcols= 1;
-ifdt = 0;
+ifdt = 1;
 
 c=0.5;
 nu = 1.568E-5;
@@ -111,23 +111,28 @@ for jj=1:nfiles
 %  end
 
   delayfound = 0;
+  deltaT = 0;
   if (ifdt)
     delayind = strfind(delays.textdata(:,1),fname);
-    deltaT = [];
     for i=1:ndelays
       if ~isempty(delayind{i})
-        deltaT = delays.data(i)
-        delayfound = 1
+        deltaT = delays.data(i);
+        delayfound = 1;
         break
       end 
     end
   end  
 
-  if (delayfound) 
-    [segments] = split_segments(hfile, uoo, deltacase,deltaT);
-  else    
+  if ifdt && ~delayfound 
+    found=0;    
+    continue
+  end
+
+%  if (delayfound) 
+%    [segments] = split_segments(hfile, uoo, deltacase,deltaT);
+%  else    
     [segments] = split_segments(hfile, uoo, deltacase);
-  end  
+%  end  
 
   flds = fieldnames(segments);
   has_freq = max(strcmp(flds,'rfreq'));
@@ -197,6 +202,7 @@ for jj=1:nfiles
   ampall=[];
   toffall=[];
   sofstall=[];
+  omgall=[];
 
 %  legs_f{case_count} = [re_leg '; \alpha= ' num2str(mean_alpha), '; No:' num2str(jj)];
   legs_f{case_count} = [re_leg '; \alpha= ' num2str(mean_alpha)];
@@ -335,7 +341,6 @@ for jj=1:nfiles
 
 %    end
 
-
 %    if (intg_const<0)
 %      intg_const=abs(intg_const);
 %      phi = phi - pi;
@@ -363,11 +368,11 @@ for jj=1:nfiles
 
 %    [[mean_alpha2 amp2 theta phi]*180/pi intg_const]
     
-    omega = 2*k*uoo/c;
-    time=q_time-toff;
+    % omega = 2*k*uoo/c;
+    time  = q_time+toff;
  
-    alpha_pred2 = mean_alpha2 +amp2*sin(omega*time + theta);
-    alpha_lagg=mean_alpha2+amp2*sin(omega*time + theta + phi);
+    alpha_pred2 = mean_alpha2 + amp2*sin(omega*time + theta);
+    alpha_lagg  = mean_alpha2+amp2*sin(omega*time + theta + phi);
     
 %    inst_OMEGA=omega*amp2*cos(omega*time+theta);
     inst_OMEGA=cos(omega*time+theta);
@@ -377,18 +382,23 @@ for jj=1:nfiles
     cz_lagg = interp1(modelalpha,modelcz,alpha_lagg*180/pi,'linear');
     
     cz_pred = p_motion + cz_lagg;
+
+    gamma = omega*(toff-deltaT);
+
+%    [toff deltaT (toff-deltaT) omega gamma gamma*180/pi]
   
     kall=[kall k];
     phiall = [phiall phi];
-    gammaall = [gammaall phi - omega*toff];
+    gammaall = [gammaall gamma];
     intgall = [intgall intg_const];
     intgbydalpha=[intgbydalpha intg_const/amp2];
     intgnorm=[intgnorm intg_const/amp2*uoo/30];             % uoo/30 to keep the factor ~ O(1)
     alpha_all=[alpha_all mean_alpha2];
     theta_all=[theta_all theta];
     ampall = [ampall amp2];
-    toffall = [toffall toff];    
-%    sofstall = [sofstall steady_offset];  
+    toffall = [toffall toff-deltaT]; 
+    omgall = [omgall omega];  
+    %    sofstall = [sofstall steady_offset];  
 
     % Phase plot
     % interpolate onto qtime
@@ -460,7 +470,7 @@ for jj=1:nfiles
     hold on    
 
     figure(31)
-    plot(kall,intgbydalpha, mkr, 'Color', col1(jj,:), 'LineWidth', 2)
+    plot(kall,abs(intgbydalpha), mkr, 'Color', col1(jj,:), 'LineWidth', 2)
     ylabel('Integration constant', 'Interpreter', 'tex', 'FontSize', fs)
     xlabel('k', 'Interpreter', 'tex', 'FontSize', fs)
     legend(legs_f, 'Interpreter', 'tex', 'FontSize', lfs, 'Location', 'Best')
@@ -482,7 +492,7 @@ for jj=1:nfiles
     hold on    
 
     figure(34)
-    plot(kall,intgnorm, mkr, 'Color', col1(jj,:), 'LineWidth', 2)
+    plot(kall,abs(intgnorm), mkr, 'Color', col1(jj,:), 'LineWidth', 2)
 %    ylabel('Normalized Integration constant', 'Interpreter', 'tex', 'FontSize', fs)
     ylabel('C_{1}', 'Interpreter', 'tex', 'FontSize', fs)
     xlabel('k', 'Interpreter', 'tex', 'FontSize', fs)
@@ -490,7 +500,13 @@ for jj=1:nfiles
     hold on
     grid on
 
-
+    figure(35)
+    plot(kall,abs((toffall+deltaT)./deltaT ), mkr, 'Color', col1(jj,:), 'LineWidth', 2)
+    ylabel('toff/deltaT', 'Interpreter', 'tex', 'FontSize', fs)
+    xlabel('k', 'Interpreter', 'tex', 'FontSize', fs)
+    legend(legs_f, 'Interpreter', 'tex', 'FontSize', lfs, 'Location', 'Best')
+    hold on
+    grid on
 
 %    figure(33)
 %    plot(kall,sofstall, '-d', 'Color', col1(jj,:))

@@ -4,9 +4,10 @@ clear
 clc
 close all
 
-addpath '/home/prabal/workstation/git_kth/matlabscripts/scripts/'
+% addpath '/home/prabal/workstation/git_kth/matlabscripts/scripts/'
+addpath '/scratch/negi/git_repos/matlabscripts/scripts/'
 
-fol = 'beskow_p6';
+fol = 're750k_aoa44';
 ifhdr = 1;
 fs = 16;                % fontsize
 lfs = 16;               % legend fontsize
@@ -16,7 +17,7 @@ destn = 'plots/';
 [sfiles tout] = LoadSurfFiles(fol);
 
 nfiles = length(sfiles);
-tlast = 6.0;
+tlast = 0.0;
 maxframes = nfiles*100;
 
 h1=figure('units','normalized','outerposition',[0 0 0.4 0.6]);
@@ -30,6 +31,9 @@ for i = 1:nfiles
     fname = sfiles{i};
         
     [sdata sintegrals tstamps sno lx1 selt maxtsaves x y timeout hdr] = readsurf(fname,ifhdr);
+    xmin=min(x(:));
+    xmax=max(x(:));
+    Chord=xmax-xmin;
     for it = 1:length(tstamps)
       if (tstamps(it)>=tlast)
          if nplots>0
@@ -37,18 +41,18 @@ for i = 1:nfiles
          end   
          dtmpx = sdata(1).data(:,:,it);
          dtmpy = sdata(2).data(:,:,it);
-         dtmp_v = sdata(3).data(:,:,it);    
-         dtmp_v = sdata(5).data(:,:,it);    
+%         dtmp_v = sdata(3).data(:,:,it);    
+         dtmp_v = -sdata(5).data(:,:,it);    
 
-         pvar = plot(x(:),dtmp_v(:), 'b.', 'MarkerSize', 6);
-         set(gca,'Ydir', 'reverse')
+         pvar = plot(x(:)/Chord,dtmp_v(:), 'b.', 'MarkerSize', 6);
+%         set(gca,'Ydir', 'reverse')
 %         ylim([-3.5 1.1]);
          hold on
          lgs{1} =  ['T=' num2str(tstamps(it))]; 
          lg = legend(pvar,lgs, 'FontSize', lfs, 'Location', 'North', 'Fontsize', lfs, 'Box', 'off');
          if nplots == 0 
-           ylabel('$C_{p}$', 'Interpreter', 'Latex', 'Fontsize', fs);
-           xlabel('$x/C$', 'Interpreter', 'Latex', 'Fontsize', fs);
+           ylabel('C_{p}', 'Interpreter', 'tex', 'Fontsize', fs);
+           xlabel('x/C', 'Interpreter', 'tex', 'Fontsize', fs);
          end   
          nplots = nplots+1;   
 %         mov(nplots) = getframe(gcf);
