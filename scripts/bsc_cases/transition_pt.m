@@ -49,9 +49,7 @@ for i = 1:nfiles
       t_els=n01;
       b_els=n12;
     end
-
-
-
+  
     xmin=min(x(:));
     xmax=max(x(:));
     Chord=xmax-xmin;
@@ -61,12 +59,12 @@ for i = 1:nfiles
          if nplots>0
            delete(pvar)
          end   
-         dtmpx = sdata(1).data(:,:,it);
-         dtmpy = sdata(2).data(:,:,it);
-%         dtmp_v = sdata(3).data(:,:,it);    
-         dtmp_v = -sdata(5).data(:,:,it);    
+         dtmpx = sdata(1).data(:,t_els,it);
+         dtmpy = sdata(2).data(:,t_els,it);
+%         dtmp_v = sdata(3).data(:,t_els,it);    
+         dtmp_v = -sdata(5).data(:,t_els,it);    
 
-         pvar = plot(x(:)/Chord,dtmp_v(:), 'b.', 'MarkerSize', 6);
+         pvar = plot(dtmpx(:)/Chord,dtmp_v(:), 'b.', 'MarkerSize', 6);
 %         set(gca,'Ydir', 'reverse')
 %         ylim([-3.5 1.1]);
          grid on   
