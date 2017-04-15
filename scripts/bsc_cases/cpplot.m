@@ -2,7 +2,7 @@
 
 clear
 clc
-close all
+%close all
 
 addpath '/home/prabal/workstation/git_kth/matlabscripts/scripts/'
 % addpath '/scratch/negi/git_repos/matlabscripts/scripts/'
@@ -51,7 +51,6 @@ for i = 1:nfiles
     end
 
 
-
     xmin=min(x(:));
     xmax=max(x(:));
     Chord=xmax-xmin;
@@ -63,11 +62,12 @@ for i = 1:nfiles
          end   
          dtmpx = sdata(1).data(:,:,it);
          dtmpy = sdata(2).data(:,:,it);
-%         dtmp_v = sdata(3).data(:,:,it);    
-         dtmp_v = -sdata(5).data(:,:,it);    
-
+         dtmp_v = sdata(3).data(:,:,it);    
+%         dtmp_v = -sdata(5).data(:,:,it);    
+         
+         figure(h1)      
          pvar = plot(x(:)/Chord,dtmp_v(:), 'b.', 'MarkerSize', 6);
-%         set(gca,'Ydir', 'reverse')
+         set(gca,'Ydir', 'reverse')
 %         ylim([-3.5 1.1]);
          grid on   
          hold on

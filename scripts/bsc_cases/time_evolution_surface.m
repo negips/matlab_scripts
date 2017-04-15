@@ -17,7 +17,7 @@ destn = 'plots/';
 [sfiles tout] = LoadSurfFiles(fol);
 
 nfiles = length(sfiles);
-tlast = 19.05;
+tlast = 18.85;
 maxframes = nfiles*100;
 
 h1=figure('units','normalized','outerposition',[0 0 0.4 0.6]);
@@ -56,11 +56,7 @@ for i=1:length(snx_bot)
   sty_bot(i) = snx_bot(i);
 end
 %% 
-% Load transition point calculations
 
-load('tr.mat')
-
-%%
 U0=1.;
 kred=0.5;
 chord=1.0;
@@ -135,9 +131,7 @@ for i = 1:nfiles
     for it = 1:length(tstamps)
       if (tstamps(it)>=tlast)
          if nplots>0
-           delete(pvar)
-           delete(ptruv)
-           delete(ptrww)  
+%           delete(pvar)
          end   
          dtmpx = sdata(1).data(:,t_els,it);
          dtmpy = sdata(2).data(:,t_els,it);
@@ -184,18 +178,12 @@ for i = 1:nfiles
 
          cf = cfx.*(stx_ref') + cfy.*(sty_ref');
 
-         pvar = plot(xsort,cf, 'b.', 'MarkerSize', 6);
+%         pvar = plot(xsort,cf, 'b.', 'MarkerSize', 6);
 %         xlim([0.05 .15])    
 %         set(gca,'Ydir', 'reverse')
 %         ylim([-3.5 1.1]);
 %         grid on   
-         hold on
-         tr_pt_uv = interp1(tr_time,trx_uv,tstamps(it));
-         tr_pt_ww = interp1(tr_time,trx_ww,tstamps(it));
-         gca_ylims = get(gca,'Ylim');   
-         ptruv = plot([tr_pt_uv tr_pt_uv], gca_ylims, '--b'); 
-         ptrww = plot([tr_pt_ww tr_pt_ww], gca_ylims, '--r');   
- 
+%         hold on
 %         lgs{1} =  ['T=' num2str(tstamps(it))]; 
 %         lg = legend(pvar,lgs, 'FontSize', lfs, 'Location', 'North', 'Fontsize', lfs, 'Box', 'off');
 %         if nplots == 0 
