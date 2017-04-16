@@ -7,7 +7,7 @@ clc
 addpath '/home/prabal/workstation/git_kth/matlabscripts/scripts/'
 % addpath '/scratch/negi/git_repos/matlabscripts/scripts/'
 
-fol = 're100k';
+fol = 're750k_aoa44';
 ifhdr = 1;
 fs = 16;                % fontsize
 lfs = 16;               % legend fontsize
@@ -17,7 +17,7 @@ destn = 'plots/';
 [sfiles tout] = LoadSurfFiles(fol);
 
 nfiles = length(sfiles);
-tlast = 19.5;
+tlast = 6.5;
 maxframes = nfiles*100;
 
 h1=figure('units','normalized','outerposition',[0 0 0.4 0.6]);
@@ -25,6 +25,13 @@ h1=figure('units','normalized','outerposition',[0 0 0.4 0.6]);
 %mov(1:maxframes) = struct('cdata', [],'colormap', []);            % Just allocating
 %mov = VideoWriter('cp_movie.avi');
 
+cfavg = [];
+cfavgx = [];
+cfavgy = [];
+ncf_pts = 0;
+cf_start=5.1;
+cf_end = 6.59;
+ifcfplot = 0;
 nplots = 0;
 for i = 1:nfiles
   if (tout(i)>=tlast)
@@ -62,12 +69,45 @@ for i = 1:nfiles
          end   
          dtmpx = sdata(1).data(:,:,it);
          dtmpy = sdata(2).data(:,:,it);
-         dtmp_v = sdata(3).data(:,:,it);    
-%         dtmp_v = -sdata(5).data(:,:,it);    
+%         dtmp_v = sdata(3).data(:,:,it);    
+         dtmp_v = -sdata(5).data(:,:,it);    
+         cf = -sdata(5).data(:,:,it);
+
+         [xsort ind] = sort(dtmpx(:));
+         ysort = dtmpy(:);
+         ysort = ysort(ind);
+         cf = cf(:);
+         cf = cf(ind);           
+                
+
+         if tstamps(it)>cf_start && tstamps(it)<cf_end
+
+           ncf_pts = ncf_pts+1;
+           avgbeta = 1/ncf_pts;
+           avgalpha = 1 - avgbeta;
+
+           if avgalpha==0
+             cfavg = cf;
+             cfavgx = xsort/Chord;
+             cfavgy = ysort/Chord;
+           else               
+             cfavg =  avgalpha*cfavg +  avgbeta*cf;
+             cfavgx =  avgalpha*cfavgx +  avgbeta*xsort/Chord;
+             cfavgy =  avgalpha*cfavgy +  avgbeta*ysort/Chord;
+           end
+
+         end
+
+         if (tstamps(it)>cf_end) && (ifcfplot==0)
+           cfplot = plot(cfavgx,cfavg, ' .r');
+           ifcfplot=1; 
+         end    
+
+
          
          figure(h1)      
          pvar = plot(x(:)/Chord,dtmp_v(:), 'b.', 'MarkerSize', 6);
-         set(gca,'Ydir', 'reverse')
+%         set(gca,'Ydir', 'reverse')
 %         ylim([-3.5 1.1]);
          grid on   
          hold on
