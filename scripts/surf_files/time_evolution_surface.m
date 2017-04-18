@@ -235,6 +235,7 @@ view(2)
 ylabel('Time')
 xlabel('x')
 xlim([0 1])
+ylim([min(surf_t(:)) max(surf_t(:))])
 hold on
 svfname = ['cf_time_surf.eps'];
 destn = 'plots/';   
@@ -254,6 +255,7 @@ colormap(ax2,'gray');
 ylabel('Time')
 xlabel('x')
 xlim([0 1])
+ylim([min(surf_t(:)) max(surf_t(:))])
 
 svfname = ['cf_time_surf_grey.eps'];
 destn = 'plots/';   
