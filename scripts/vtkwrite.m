@@ -72,9 +72,9 @@ fprintf(fid, 'VTK from Matlab\n');
 
 binaryflag = any(strcmpi(varargin, 'BINARY'));
 if any(strcmpi(varargin, 'PRECISION'))
-    precision = num2str(varargin{find(strcmpi(vin, 'PRECISION'))+1});
+    precision = num2str(varargin{find(strcmpi(varargin, 'PRECISION'))+1});
 else
-    precision = '2';
+    precision = '10';
 end
 
 switch upper(dataType)

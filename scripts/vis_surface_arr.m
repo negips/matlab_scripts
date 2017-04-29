@@ -47,10 +47,12 @@ for i=1:30
     
     figure(1)
     scatter3(tmpx,tmpy,tmpz,[],tmput, '.'); 
-    caxis([-0.01 0.02])   
+    caxis([-0.01 0.01])   
     colorbar
-    view([-5 60])
+%    view([-5 60])
+    view([0 0]) 
     title(num2str(time))
+    axis tight  
 
     pause(0.1)  
 

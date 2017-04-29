@@ -56,7 +56,32 @@ for i=1:length(snx_bot)
   sty_bot(i) = snx_bot(i);
 end
 %% 
+% Find nearest point
 
+pt_side=1;        % ==> bottom
+xin_pts = [0.1:0.05:0.9];
+pt_npts = length(xin_pts);
+xin_pt = [];
+yin_pt = [];
+
+if pt_side==0
+  for i = 1:pt_npts    
+    [val ind] = min(abs(xt_imp-xin_pts(i)));
+    xin_pt = [xin_pt xt_imp(ind)];
+    yin_pt = [yin_pt yt_imp(ind)];
+    l1{i} = num2str(xin_pt(end));  
+  end    
+else
+  for i = 1:pt_npts
+    [val ind] = min(abs(xb_imp-xin_pts(i)));
+    xin_pt = [xin_pt xb_imp(ind)];
+    yin_pt = [yin_pt yb_imp(ind)];
+    l1{i} = num2str(xin_pt(end));  
+  end    
+end   
+
+
+%% 
 U0=1.;
 kred=0.5;
 chord=1.0;
@@ -66,6 +91,7 @@ ptch_amp = 1.3;
 ptch_start = 0.;
 axis_x0 = 0.35;
 axis_y0 = 0.034;
+alpha0 = 6.7;
 
 nplots = 0;
 bcnt = 0;
@@ -74,6 +100,15 @@ surf_t = [];
 surf_v = [];
 surf_c = [];
 icalld = 0;
+
+% Point for time history
+ptx = 0.2;
+ptside = 1;       % bottom;
+v_hist = [];
+t_hist = [];
+x_hist = [];
+y_hist = [];
+
 for i = 1:nfiles
   if (tout(i)>=tlast)
     fname = sfiles{i};
@@ -113,18 +148,32 @@ for i = 1:nfiles
         xtels_mean = mean(sdata(1).data(:,t_els,1));
         [val ind] = min(xtels_mean);
         t_els(ind)=[];                  % remove leading edge element
+
+        xbels_mean = mean(sdata(1).data(:,b_els,1));
+        [val ind] = min(xbels_mean);
+        b_els(ind)=[];                  % remove leading edge element
       end 
     
-      total_els = length(t_els);
+      total_top_els = length(t_els);
+      total_bot_els = length(b_els);
       icalld = icalld+1;
     else
       ntop = length(t_els);
-      while ntop>total_els
+      while ntop>total_top_els
         xtels_mean = mean(sdata(1).data(:,t_els,1));
         [val ind] = min(xtels_mean);
         t_els(ind)=[];                  % remove leading edge element 
         ntop = length(t_els);
       end
+
+      nbot = length(b_els);
+      while nbot>total_bot_els
+        xbels_mean = mean(sdata(1).data(:,b_els,1));
+        [val ind] = min(xbels_mean);
+        b_els(ind)=[];                  % remove leading edge element 
+        nbot = length(t_els);
+      end
+
     end    
 
       
@@ -163,8 +212,43 @@ for i = 1:nfiles
          coords = rot*[transpose(xnew)-axis_x0; transpose(ynew)-axis_y0];
          xrnew = coords(1,:) + axis_x0;
          yrnew = coords(2,:) + axis_y0;
-         %% end of rotation   
 
+         coords = rot*[(xin_pt-axis_x0); (yin_pt-axis_y0)];
+         xout_pt = coords(1,:)+axis_x0;
+         yout_pt = coords(2,:)+axis_y0;      
+         if pt_side==0
+            xtmp = sdata(1).data(:,t_els,it);
+            xtmp = xtmp(:);
+            ytmp = sdata(2).data(:,t_els,it);
+            ytmp = xtmp(:);
+            vtmp = sdata(3).data(:,t_els,it);
+            vtmp = vtmp(:);
+            ind2 = [];
+            for ipt = 1:pt_npts
+              [val ind]=min(abs(xtmp-xout_pt(ipt)));
+              ind2 = [ind2 ind]; 
+            end
+            x_hist = [x_hist; xtmp(ind2)'];
+            y_hist = [y_hist; ytmp(ind2)'];
+            v_hist = [v_hist; vtmp(ind2)'];       
+         else
+            xtmp = sdata(1).data(:,b_els,it);
+            xtmp = xtmp(:);
+            ytmp = sdata(2).data(:,b_els,it);
+            ytmp = xtmp(:);
+            vtmp = sdata(3).data(:,b_els,it);
+            vtmp = vtmp(:);
+            ind2 = [];
+            for ipt = 1:pt_npts
+              [val ind]=min(abs(xtmp-xout_pt(ipt)));
+              ind2 = [ind2 ind]; 
+            end
+            x_hist = [x_hist; xtmp(ind2)'];
+            y_hist = [y_hist; ytmp(ind2)'];
+            v_hist = [v_hist; vtmp(ind2)'];       
+         end
+         t_hist = [t_hist tstamps(it)];
+         %% end of rotation   
                          
          x_min = min(xsort);
          x_max = max(xsort);
@@ -179,6 +263,7 @@ for i = 1:nfiles
          cf = cfx.*(stx_ref') + cfy.*(sty_ref');
 
 %         pvar = plot(xsort,cf, 'b.', 'MarkerSize', 6);
+%         grid on   
 %         xlim([0.05 .15])    
 %         set(gca,'Ydir', 'reverse')
 %         ylim([-3.5 1.1]);
@@ -248,7 +333,7 @@ set(ax1, 'FontSize', 14)
 
 svfname = ['cf_time_surf.eps'];
 destn = 'plots/';   
-SaveFig(gcf, svfname, destn, 1)
+%SaveFig(gcf, svfname, destn, 1)
 
 
 
@@ -304,13 +389,19 @@ set(ax4,'Position', get(ax1,'Position'));
 
 svfname = ['cf_time_surf_grey.eps'];
 destn = 'plots/';   
-SaveFig(gcf, svfname, destn, 1)
+%SaveFig(gcf, svfname, destn, 1)
 
 
 figure(4)
-plot(bubble_time,bubble_start,'b'); hold on
-plot(bubble_time,bubble_end, 'r')
+plot(t_hist,v_hist)
 
+figure(5)
+alpha = alpha0 + ptch_amp*sin(omega*(t_hist-ptch_start));
+plot(alpha,v_hist)
+
+figure(6)
+alpha_dot = omega*ptch_amp*cos(omega*(t_hist-ptch_start));
+plot(alpha_dot,v_hist)
 
 % ncontours = 2;
 % cont_vec = linspace(min(surf_v(:)),0,ncontours);

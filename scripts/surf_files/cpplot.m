@@ -2,7 +2,7 @@
 
 clear
 clc
-%close all
+close all
 
 addpath '/home/prabal/workstation/git_kth/matlabscripts/scripts/'
 % addpath '/scratch/negi/git_repos/matlabscripts/scripts/'
@@ -17,7 +17,8 @@ destn = 'plots/';
 [sfiles tout] = LoadSurfFiles(fol);
 
 nfiles = length(sfiles);
-tlast = 6.5;
+tlast = 5.1;
+tmax = 6.6;
 maxframes = nfiles*100;
 
 h1=figure('units','normalized','outerposition',[0 0 0.4 0.6]);
@@ -39,9 +40,14 @@ for i = 1:nfiles
         
     [sdata sintegrals tstamps sno lx1 selt maxtsaves x y timeout hdr] = readsurf(fname,ifhdr);
 
+    if (tstamps(1)>tmax)
+       break
+    end         
+
+
 %   trying to find top and bottom elements        
     [val ind] = max(sdata(1).data(:,:,1));
-    n12=find(ind==12);
+    n12=find(ind==lx1(1));
     n01=find(ind==1);
 
     y12 = sdata(2).data(:,n12,1);
@@ -62,8 +68,14 @@ for i = 1:nfiles
     xmax=max(x(:));
     Chord=xmax-xmin;
     Chord=1;  
+
     for it = 1:length(tstamps)
       if (tstamps(it)>=tlast)
+         
+         if (tstamps(it)>tmax)
+            break
+         end         
+
          if nplots>0
            delete(pvar)
          end   

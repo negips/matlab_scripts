@@ -39,27 +39,33 @@ tmpz=ZT(ind);
 tmput=utT(ind);
 tmpput=p_utT(ind);
 
-figure
-scatter3(tmpx,tmpy,tmpz,[],tmput, '.'); colorbar
-view([-5 60])
-legend(num2str(time))
+%figure
+%scatter3(tmpx,tmpy,tmpz,[],tmput, '.'); colorbar
+%view([-5 60])
+%legend(num2str(time))
 
 %[zsort ind] = sort(ZT);
 [xsort ind] = sort(XT);
 ysort = YT(ind);
 p_sep_sort = p_utT(ind);
 zsort = ZT(ind);
+var = utT(ind);
 
 % unq_z = real_unique(ZT,1e-12);
 [unq_x indicies ind_unq n_unq] = real_unique( XT, 1e-12 );
 
-
 for i=1:length(unq_x)
   z_avg(i) = mean(p_sep_sort(indicies{i}));
 end
-
 figure
 plot(unq_x,z_avg);
+
+ind1 = min(n_unq);
+ind2 = max(n_unq);
+
+
+
+
 
 
 
