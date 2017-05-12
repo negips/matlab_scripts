@@ -7,7 +7,7 @@ close all
 addpath '/home/prabal/workstation/git_kth/matlabscripts/scripts/'
 % addpath '/scratch/negi/git_repos/matlabscripts/scripts/'
 
-fol = 're750k_aoa44';
+fol = 're100k';
 ifhdr = 1;
 fs = 16;                % fontsize
 lfs = 16;               % legend fontsize
@@ -17,8 +17,8 @@ destn = 'plots/';
 [sfiles tout] = LoadSurfFiles(fol);
 
 nfiles = length(sfiles);
-tlast = 5.1;
-tmax = 6.6;
+tlast = 19.0;
+tmax = 25.0;
 maxframes = nfiles*100;
 
 h1=figure('units','normalized','outerposition',[0 0 0.4 0.6]);
@@ -67,7 +67,7 @@ for i = 1:nfiles
     xmin=min(x(:));
     xmax=max(x(:));
     Chord=xmax-xmin;
-    Chord=1;  
+%    Chord=1;  
 
     for it = 1:length(tstamps)
       if (tstamps(it)>=tlast)
@@ -81,8 +81,8 @@ for i = 1:nfiles
          end   
          dtmpx = sdata(1).data(:,:,it);
          dtmpy = sdata(2).data(:,:,it);
-%         dtmp_v = sdata(3).data(:,:,it);    
-         dtmp_v = -sdata(5).data(:,:,it);    
+         dtmp_v = sdata(3).data(:,:,it);    
+%         dtmp_v = -sdata(5).data(:,:,it);    
          cf = -sdata(5).data(:,:,it);
 
          [xsort ind] = sort(dtmpx(:));
@@ -92,6 +92,7 @@ for i = 1:nfiles
          cf = cf(ind);           
                 
 
+%%        Average cf   
          if tstamps(it)>cf_start && tstamps(it)<cf_end
 
            ncf_pts = ncf_pts+1;
@@ -114,26 +115,27 @@ for i = 1:nfiles
            cfplot = plot(cfavgx,cfavg, ' .r');
            ifcfplot=1; 
          end    
-
-
+%%
          
          figure(h1)      
-         pvar = plot(x(:)/Chord,dtmp_v(:), 'b.', 'MarkerSize', 6);
+%         pvar = plot(x(:)/Chord,dtmp_v(:), 'b.', 'MarkerSize', 10);
+         pvar = plot(xsort/Chord,cf, 'b.', 'MarkerSize', 10);
 %         set(gca,'Ydir', 'reverse')
 %         ylim([-3.5 1.1]);
+         xlim([-0.1 1.1])   
          grid on   
          hold on
          lgs{1} =  ['T=' num2str(tstamps(it))]; 
          lg = legend(pvar,lgs, 'FontSize', lfs, 'Location', 'North', 'Fontsize', lfs, 'Box', 'off');
          if nplots == 0 
-           ylabel('C_{p}', 'Interpreter', 'tex', 'Fontsize', fs);
+           ylabel('\tau_{w}', 'Interpreter', 'tex', 'Fontsize', fs);
            xlabel('x/C', 'Interpreter', 'tex', 'Fontsize', fs);
          end   
          nplots = nplots+1;   
 %         mov(nplots) = getframe(gcf);
 
          svfname = sprintf('%0.4d', nplots);   
-         svfname = ['cp_fig' svfname '.png'];
+         svfname = ['cf_fig' svfname '.eps'];
          destn = 'plots/';   
 %         SaveFig(gcf, svfname, destn, 1)
       end

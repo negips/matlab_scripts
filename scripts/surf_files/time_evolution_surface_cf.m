@@ -105,7 +105,7 @@ for i = 1:nfiles
          surf_c = [surf_c; sign(vsort)'];      
 
 %         figure(h1)  
-%         pvar = plot(dtmpx(:)/Chord,dtmp_v(:), 'b.', 'MarkerSize', 6);
+%         pvar = plot(xsort/Chord, vsort, 'b.', 'MarkerSize', 8);
 %         set(gca,'Ydir', 'reverse')
 %         ylim([-3.5 1.1]);
 %         grid on   
@@ -143,7 +143,7 @@ xlim([0 1])
 % cplot=contour(surf_x,surf_t,surf_v,cont_vec);
 svfname = ['cf_time_surf.eps'];
 destn = 'plots/';   
-SaveFig(gcf, svfname, destn, 1)
+%SaveFig(gcf, svfname, destn, 1)
 
 figure(3)
 splot=surf(surf_x,surf_t,surf_v,'EdgeColor', 'none', 'LineStyle', 'none', 'FaceColor', 'interp', 'FaceAlpha', 0.25); hold on
@@ -156,7 +156,7 @@ xlim([0 1])
 colormap('gray')
 svfname = ['cf_time_surf_grey.eps'];
 destn = 'plots/';   
-SaveFig(gcf, svfname, destn, 1)
+%SaveFig(gcf, svfname, destn, 1)
 
 
 %mov2 = mov(1:nplots); 

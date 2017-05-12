@@ -10,7 +10,7 @@ rho=1.0;
 norm = 0.5*rho*U0^2*area;
 
 ax1=axes;
-cl=importdata('cd.out');
+cl=importdata('cl.out');
 
 ind = find(cl.data(:,1)==0);
 cl.data(ind,:) = [];
