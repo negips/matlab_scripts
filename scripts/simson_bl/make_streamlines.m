@@ -57,6 +57,13 @@ dstar = sum(cheb_u_deficit)*Ly;
 cheb_theta_deficit = chebfun((1.0 - stat.u).*stat.u);
 theta = sum(cheb_theta_deficit)*Ly;
 
+cheby = 2*y/Ly -1;
+for i=1:length(cheby)
+  clc
+  i
+  dstar_prof(i,:)=sum(cheb_u_deficit,-1,cheby(i));
+end
+
 figure(1)
 plot(x,delta99)
 hold on
@@ -70,12 +77,11 @@ plot(x,dstar./theta)
 xlim([1000 12000])
 
 %x_seed = 1000; 
-%nseed = 1;
+%nseed = 5;
 %dr = 1e-2;
 %maxverts=828000;
 %blh_xin = interp1(x,delta99,x_seed);
-%%y_seed = linspace(1e-4,1.0*blh_xin,nseed);
-%y_seed = 1.25*blh_xin;
+%y_seed = linspace(1e-4,1.0*blh_xin,nseed);
 %
 %x_sl = [];
 %y_sl = [];
@@ -108,7 +114,6 @@ xlim([1000 12000])
 %  slines(iseed).xw = x;
 %  slines(iseed).delta99 = delta99;        
 %end     
-%
 %
 %save('slines.mat', 'slines')
 
