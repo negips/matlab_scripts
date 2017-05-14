@@ -52,6 +52,13 @@ dstar = sum(cheb_u_deficit)*Ly;
 cheb_theta_deficit = chebfun((1.0 - stat.u).*stat.u);
 theta = sum(cheb_theta_deficit)*Ly;
 
+cheby = 2*y/Ly -1;
+for i=1:length(cheby)
+  clc
+  i
+  dstar_prof(i,:)=sum(cheb_u_deficit,-1,cheby(i));
+end
+
 figure(1)
 plot(x,delta99)
 hold on
@@ -64,51 +71,47 @@ figure(2)
 plot(x,dstar./theta)
 xlim([1000 12000])
 
-x_seed = 1000; 
-nseed = 5;
-dr = 1e-2;
-maxverts=828000;
-blh_xin = interp1(x,delta99,x_seed);
-y_seed = linspace(1e-4,1.0*blh_xin,nseed);
-
-x_sl = [];
-y_sl = [];
-y_sl2 = [];
-xsl_max = 12000;
-ysl_max = 400;
-
-for iseed = nseed:-1:1
-  xsl=x_seed;
-  ysl=y_seed(iseed);
-  xsl_arr = [xsl];
-  ysl_arr = [ysl];
-  npts=0;    
-  while ((xsl<xsl_max) && (ysl<ysl_max))
-    clc  
-    npts=npts+1
-    iseed  
-    [xsl ysl] = sl_rk4(X,Y,stat.u,stat.v,dr,xsl,ysl);
-    xsl_arr = [xsl_arr; xsl];
-    ysl_arr = [ysl_arr; ysl];
-%    if (mod(npts,1000)==0)
-%      figure(20)
-%      plot(xsl_arr,ysl_arr)
-%      pause(0.1)
-%    end    
-  end
-  slines(iseed).x=xsl_arr;
-  slines(iseed).y=ysl_arr;
-  slines(iseed).xw = x;
-  slines(iseed).delta99 = delta99;        
-end     
- 
-
-
-
-ind1=x_sl>=x_start;
-ind2=x_sl<=x_end;
-
-save('slines.mat', 'slines')
+%x_seed = 1000; 
+%nseed = 5;
+%dr = 1e-2;
+%maxverts=828000;
+%blh_xin = interp1(x,delta99,x_seed);
+%y_seed = linspace(1e-4,1.0*blh_xin,nseed);
+%
+%x_sl = [];
+%y_sl = [];
+%y_sl2 = [];
+%xsl_max = 12000;
+%ysl_max = 400;
+%
+%for iseed = nseed:-1:1
+%  xsl=x_seed;
+%  ysl=y_seed(iseed);
+%  xsl_arr = [xsl];
+%  ysl_arr = [ysl];
+%  npts=0;    
+%  while ((xsl<xsl_max) && (ysl<ysl_max))
+%    clc  
+%    npts=npts+1
+%    iseed  
+%    [xsl ysl] = sl_rk4(X,Y,stat.u,stat.v,dr,xsl,ysl);
+%    xsl_arr = [xsl_arr; xsl];
+%    ysl_arr = [ysl_arr; ysl];
+%%    if (mod(npts,1000)==0)
+%%      figure(20)
+%%      plot(xsl_arr,ysl_arr)
+%%      pause(0.1)
+%%    end    
+%  end
+%  slines(iseed).x=xsl_arr;
+%  slines(iseed).y=ysl_arr;
+%  slines(iseed).xw = x;
+%  slines(iseed).delta99 = delta99;        
+%end     
+% 
+%
+%
+%save('slines.mat', 'slines')
 
 % figure(100)
 % for i=1:nseed
