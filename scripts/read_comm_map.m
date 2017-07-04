@@ -3,7 +3,7 @@
 clear
 clc
 
-filename = ['comm_map_02048.out.stuck'];
+filename = ['surf_map_01024.out'];
 fid = fopen(filename);
 s = str2double(filename(10:14));
 
@@ -107,19 +107,21 @@ sndpos_list = [transpose(0:(s-1)) sndmap_trim];
 
 
 %% Build a check
-
+%% Display Communication steps
 err = 0;
 for nid=0:s-1
-  for j=1:rec_max
+  for j=1:rec_max  
     recfrom = recmap_trim(nid+1,j);
     if recfrom<0
       ind = find(recmap_trim(nid+1,j:end)>=0);
       if ~isempty(ind)
-        disp(['Rcieve order screwed up in communication map'])
+        disp(['Recieve order screwed up in communication map'])
         err=err+1;    
       end 
       continue
-    end    
+    end
+      
+    disp([num2str(nid) ' <---- ' num2str(recfrom) ' Pos: ' num2str(j)])  
     % check sending processor
     ind = find(sndmap_trim(recfrom+1,:)==nid);
     if ~isempty(ind)
@@ -130,13 +132,16 @@ for nid=0:s-1
          disp(['Sending: ' num2str(recfrom), ' Pos: ' num2str(pos)])
          err=err+1;   
        end
+      disp([num2str(recfrom) ' ----> ' num2str(nid) ' Pos: ' num2str(pos)])  
+
     else
        disp(['Error in communication map'])
        disp(['Receiving: ' num2str(nid), ' Pos: ' num2str(j)])
        disp(['Sending process does not have nid'])
        err=err+1;
     end
-%    [nid recfrom j ;recfrom nid pos] 
+%    [nid recfrom j ;recfrom nid pos]
+    disp(' ')     
   end
 end 
 

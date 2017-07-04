@@ -24,7 +24,7 @@ s = [0; s];
 st=s(1:ind);
 sb=s(ind:end);
 
-sphase=pi*linspace(0,1,1000);
+sphase=pi*linspace(0,1,100000);
 sfine1=max(st)/2*(1 + cos(sphase));
 sfine2=max(sfine1)+(max(sb)-min(sb))/2*(1+cos(sphase));
 
@@ -54,40 +54,59 @@ yintp_cs = yintp_cs/(max(xintp_cs) - min(xintp_cs));
 
 
 figure(1)
-plot(xintp_c,yintp_c);hold on
-plot(xintp_s,yintp_s, 'r')
-plot(xintp_cs,yintp_cs, 'k')
+%plot(xintp_c,yintp_c);hold on
+%plot(xintp_s,yintp_s, 'r')
+plot(xintp_cs,yintp_cs, 'k', 'LineWidth', 2)
 %plot(barryx,barryy, 'k')
-
-plot(x,y, '-om', 'LineWidth', 1.5)
+hold on
+plot(x,y, '-b', 'LineWidth', 2, 'MarkerSize', 4)
+ylim([-0.1 0.15])
+xlim([-0.05 1.05])
+%axis equal
 
 kc=CalcCurvature(xintp_c,yintp_c);
 ks=CalcCurvature(xintp_s,yintp_s);
 kcs=CalcCurvature(xintp_cs,yintp_cs);
 
 figure(2)
-plot(xintp_c,kc, '-'); hold on
-plot(xintp_s,ks, '-r')
-plot(xintp_cs,kcs, '-k')
+plot(xintp_c,kc, '-', 'LineWidth', 2); hold on
+%plot(xintp_s,ks, '-r')
+plot(xintp_cs,kcs, '-k', 'LineWidth', 2)
 ylim([0 100])
+ylabel('Curvature - k')
+xlabel('x/c')
+%SaveFig(gcf,'curvature_1.eps', 'plots/', 1)
 
 
 %% Find residual @ collocated points.
+x_new = [];
+y_new = [];
+fid = fopen('saab_new.dat','w');
+fprintf(fid,'%1d\t 2\n', length(x));
 for i=1:length(x)
-   x0=x(i);
-   y0=y(i);
-   dmin=100;
-   for k=1:length(xintp_cs);
-     dl=sqrt((xintp_cs(k)-x0)^2 + (yintp_cs(k)-y0)^2);
-     if dl<dmin
-       dmin=dl;
-     end
-   end    
-   resid(i)=dmin;
+  clc
+  i
+  x0=x(i);
+  y0=y(i);
+  dmin=100;
+  for k=1:length(xintp_cs);
+    dl=sqrt((xintp_cs(k)-x0)^2 + (yintp_cs(k)-y0)^2);
+    if dl<dmin
+      dmin=dl;
+      x_new = xintp_cs(k);
+      y_new = yintp_cs(k);
+    end
+  end    
+  resid(i)=dmin;
+  fprintf(fid,'%10.7f\t %10.7f\t 0.00\n',x_new,y_new);
 end
+fclose(fid)
 
 figure(3)
-plot(x,resid, '.')   
+plot(x,resid, '.', 'MarkerSize', 12)
+ylabel('\Delta')
+xlabel('x/c')
+SaveFig(gcf,'displacement.eps','plots/',1) 
       
 %% Write out data
 l1=length(xintp_cs);

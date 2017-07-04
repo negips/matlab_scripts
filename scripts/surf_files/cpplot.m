@@ -7,7 +7,7 @@ close all
 addpath '/home/prabal/workstation/git_kth/matlabscripts/scripts/'
 % addpath '/scratch/negi/git_repos/matlabscripts/scripts/'
 
-fol = 're100k';
+fol = 'pitch_new';
 ifhdr = 1;
 fs = 16;                % fontsize
 lfs = 16;               % legend fontsize
@@ -17,8 +17,8 @@ destn = 'plots/';
 [sfiles tout] = LoadSurfFiles(fol);
 
 nfiles = length(sfiles);
-tlast = 19.0;
-tmax = 25.0;
+tlast = 9.25;
+tmax = 41.40001;
 maxframes = nfiles*100;
 
 h1=figure('units','normalized','outerposition',[0 0 0.4 0.6]);
@@ -30,8 +30,8 @@ cfavg = [];
 cfavgx = [];
 cfavgy = [];
 ncf_pts = 0;
-cf_start=5.1;
-cf_end = 6.59;
+cf_start=16.5;
+cf_end = 17.1;
 ifcfplot = 0;
 nplots = 0;
 for i = 1:nfiles
@@ -43,7 +43,6 @@ for i = 1:nfiles
     if (tstamps(1)>tmax)
        break
     end         
-
 
 %   trying to find top and bottom elements        
     [val ind] = max(sdata(1).data(:,:,1));
@@ -90,7 +89,6 @@ for i = 1:nfiles
          ysort = ysort(ind);
          cf = cf(:);
          cf = cf(ind);           
-                
 
 %%        Average cf   
          if tstamps(it)>cf_start && tstamps(it)<cf_end
@@ -119,10 +117,11 @@ for i = 1:nfiles
          
          figure(h1)      
 %         pvar = plot(x(:)/Chord,dtmp_v(:), 'b.', 'MarkerSize', 10);
-         pvar = plot(xsort/Chord,cf, 'b.', 'MarkerSize', 10);
+         pvar = plot(xsort/Chord,cf, 'b.', 'MarkerSize', 15);
 %         set(gca,'Ydir', 'reverse')
 %         ylim([-3.5 1.1]);
-         xlim([-0.1 1.1])   
+         xlim([-0.01 1.000])
+         ylim([-0.003 0.0040])    
          grid on   
          hold on
          lgs{1} =  ['T=' num2str(tstamps(it))]; 
@@ -141,7 +140,7 @@ for i = 1:nfiles
       end
       tlast = tstamps(it);
       pause(0.01)
-    end
+    end           % it
   end
 end           
 

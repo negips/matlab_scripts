@@ -20,7 +20,6 @@ nfiles = length(sfiles);
 tlast = 19.05;
 maxframes = nfiles*100;
 
-h1=figure('units','normalized','outerposition',[0 0 0.4 0.6]);
 
 %mov(1:maxframes) = struct('cdata', [],'colormap', []);            % Just allocating
 %mov = VideoWriter('cp_movie.avi');
@@ -77,7 +76,14 @@ surf_x = [];
 surf_t = [];
 surf_v = [];
 surf_c = [];
+xsep = [];
+tsep = [];
 icalld = 0;
+
+
+h1=figure('units','normalized','outerposition',[0 0 0.4 0.6]);
+h2=figure('units','normalized','outerposition',[0 0 0.4 0.6]);
+
 for i = 1:nfiles
   if (tout(i)>=tlast)
     fname = sfiles{i};
@@ -135,6 +141,7 @@ for i = 1:nfiles
     for it = 1:length(tstamps)
       if (tstamps(it)>=tlast)
          if nplots>0
+           figure(h1) 
            delete(pvar)
            delete(ptruv)
            delete(ptrww)  
@@ -184,7 +191,10 @@ for i = 1:nfiles
 
          cf = cfx.*(stx_ref') + cfy.*(sty_ref');
 
-         pvar = plot(xsort,cf, 'b.', 'MarkerSize', 6);
+%         figure(h1)   
+%         pvar = plot(xsort,cf, 'b.', 'MarkerSize', 6);
+         nplots = nplots+0;   
+
 %         xlim([0.05 .15])    
 %         set(gca,'Ydir', 'reverse')
 %         ylim([-3.5 1.1]);
@@ -192,9 +202,23 @@ for i = 1:nfiles
          hold on
          tr_pt_uv = interp1(tr_time,trx_uv,tstamps(it));
          tr_pt_ww = interp1(tr_time,trx_ww,tstamps(it));
-         gca_ylims = get(gca,'Ylim');   
-         ptruv = plot([tr_pt_uv tr_pt_uv], gca_ylims, '--b'); 
-         ptrww = plot([tr_pt_ww tr_pt_ww], gca_ylims, '--r');   
+%         gca_ylims = get(gca,'Ylim');   
+%         ptruv = plot([tr_pt_uv tr_pt_uv], gca_ylims, '--b'); 
+%         ptrww = plot([tr_pt_ww tr_pt_ww], gca_ylims, '--r');
+
+%        Separation point estimate
+%        Finding separation for x/C>0.65
+         sep_min = 0.70;   
+         ind2 = find(xsort>sep_min);
+         xsort2=xsort(ind2);
+         cf2=cf(ind2);
+
+         ind3 = find(cf2<0,1);
+            
+         xsep = [xsep xsort2(ind3)];
+         tsep = [tsep tstamps(it)];
+%         figure(h2)
+%         plot(tsep,xsep, 'b.', 'MarkerSize', 6)       
  
 %         lgs{1} =  ['T=' num2str(tstamps(it))]; 
 %         lg = legend(pvar,lgs, 'FontSize', lfs, 'Location', 'North', 'Fontsize', lfs, 'Box', 'off');
@@ -206,6 +230,8 @@ for i = 1:nfiles
 %         surf_x = [surf_x; dtmpx(:)'/Chord];
 %         surf_t = [surf_t; tstamps(it)*ones(1,length(dtmpx(:)))];
 %         surf_v = [surf_v; dtmp_v(:)'];
+
+%         mov(nplots) = getframe(gcf);
 
          surf_x = [surf_x; xsort'/Chord];
          surf_t = [surf_t; tstamps(it)*ones(1,length(xsort))];
@@ -226,8 +252,6 @@ for i = 1:nfiles
            bubble_time(bcnt) = tstamps(it);
          end    
 
-         nplots = nplots+1;   
-%         mov(nplots) = getframe(gcf);
 
          svfname = sprintf('%0.4d', nplots);   
          svfname = ['cp_fig' svfname '.png'];
@@ -240,7 +264,11 @@ for i = 1:nfiles
   end
 end           
 
-figure(2)
+figure(h2)
+plot(tsep,xsep, 'b.', 'MarkerSize', 6)       
+
+
+figure(10)
 splot=surf(surf_x,surf_t,surf_v,'EdgeColor', 'none', 'LineStyle', 'none', 'FaceColor', 'interp');
 colorbar;
 view(2)
@@ -257,7 +285,7 @@ svfname = ['cf_time_surf_contour.eps'];
 destn = 'plots/';   
 %SaveFig(gcf, svfname, destn, 1)
 
-figure(3)
+figure(11)
 ax2=axes;
 set(ax2,'Color', 'none')
 gplot=surf(ax2,surf_x,surf_t,surf_c,surf_c,'EdgeColor', 'none', 'LineStyle', 'none', 'FaceColor', 'interp');
@@ -272,7 +300,7 @@ destn = 'plots/';
 %SaveFig(gcf, svfname, destn, 1)
 
 
-figure(4)
+figure(20)
 plot(bubble_time,bubble_start,'b'); hold on
 plot(bubble_time,bubble_end, 'r')
 
