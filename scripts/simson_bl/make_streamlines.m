@@ -9,7 +9,6 @@ filename='xy.stat';
 
 [X,Y]=meshgrid(x,y);
 
-
 x_start = 1000;
 x_end   = 11000;
 y_start = 0;
@@ -25,8 +24,12 @@ y2 = y(indy);
 
 [X2,Y2]=meshgrid(x2,y2);
 
+total_p = 0.5*(stat.u2 + stat.v2 + stat.w2) + stat.p;
+
 figure(100)
-surf(X2,Y2,stat.u(indy,indx),'EdgeColor', 'none', 'FaceColor', 'interp');
+%surf(X2,Y2,stat.u(indy,indx),'EdgeColor', 'none', 'FaceColor', 'interp');
+%surf(X2,Y2,atan(stat.v(indy,indx)./stat.u(indy,indx))*180/pi,'EdgeColor', 'none', 'FaceColor', 'interp');
+surf(X2,Y2,total_p(indy,indx),'EdgeColor', 'none', 'FaceColor', 'interp');
 view(2)
 colorbar
 hold on
@@ -36,6 +39,8 @@ delta99 = [];
 for i=1:length(x)
   delta99(i)=interp1(stat.u(:,i),y,bl_criteria);
   delta995(i)=interp1(stat.u(:,i),y,0.995);
+  Ue(i)=interp1(y,stat.u(:,i),delta99(i));
+  Ve(i)=interp1(y,stat.v(:,i),delta99(i));
 end
 
 figure(100)
@@ -84,7 +89,7 @@ xlim([1000 12000])
 %xsl_max = 12000;
 %ysl_max = 400;
 %
-%for iseed = nseed:-1:1
+%for iseed = 1:nseed
 %  xsl=x_seed;
 %  ysl=y_seed(iseed);
 %  xsl_arr = [xsl];
@@ -92,24 +97,23 @@ xlim([1000 12000])
 %  npts=0;    
 %  while ((xsl<xsl_max) && (ysl<ysl_max))
 %    clc  
-%    npts=npts+1
+%    npts=npts+1;
 %    iseed  
+%    [npts xsl]
 %    [xsl ysl] = sl_rk4(X,Y,stat.u,stat.v,dr,xsl,ysl);
 %    xsl_arr = [xsl_arr; xsl];
 %    ysl_arr = [ysl_arr; ysl];
-%%    if (mod(npts,1000)==0)
-%%      figure(20)
-%%      plot(xsl_arr,ysl_arr)
-%%      pause(0.1)
-%%    end    
+%    if (mod(npts,1000)==0)
+%      figure(20)
+%      plot(xsl_arr,ysl_arr)
+%      pause(0.1)
+%    end    
 %  end
 %  slines(iseed).x=xsl_arr;
 %  slines(iseed).y=ysl_arr;
 %  slines(iseed).xw = x;
 %  slines(iseed).delta99 = delta99;        
 %end     
-% 
-%
 %
 %save('slines.mat', 'slines')
 

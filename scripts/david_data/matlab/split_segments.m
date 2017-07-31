@@ -103,6 +103,7 @@ function [segments] = split_segments(hfile, uoo, deltacase, dt)
       segments(1).xtaps = xtaps;
       segments(1).ytaps = ytaps;
       segments(1).itaps = itaps;
+      segments(1).xytaps = xytaps;
 
     else      
       for ki = 1:nseg
@@ -116,6 +117,7 @@ function [segments] = split_segments(hfile, uoo, deltacase, dt)
           segments(ki).xtaps = xtaps;
           segments(ki).ytaps = ytaps;
           segments(ki).itaps = itaps;
+          segments(ki).xytaps = xytaps;
       end
     end
     
