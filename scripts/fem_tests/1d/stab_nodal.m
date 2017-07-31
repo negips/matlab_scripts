@@ -7,12 +7,12 @@
 % Taking a periodic domain
 % ==> U0 = Un;
 
-addpath '../';
+%addpath '../';
 
-%N = 5;
+N = 5;
 
 [x wts p]= lglnodes(N);
-x =x(end:-1:1)
+x =x(end:-1:1);
 wts =wts(end:-1:1);
 
 % build A
@@ -43,8 +43,8 @@ for i = 0:N
      D= [D; t1];
 end
 
-abcde
-D
+abcde;
+D;
 
 %% testing
 xtemp = transpose(linspace(-1,1,200));
@@ -108,7 +108,7 @@ dt(j+1,j+1) = integral;
 
 end
 
-dt
+dt;
 
 %% Analytically compute integral
 dt2 = zeros(N+1);
@@ -181,7 +181,7 @@ end
 
 end
 
-dc = -conv*dc
+dc = -conv*dc;
 
 %% Boundary term
 bc = zeros(N+1);
@@ -222,7 +222,7 @@ end
 
 end
 
-bc = conv*bc
+bc = conv*bc;
 
 dc2 = dc + bc;
 

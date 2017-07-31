@@ -4,10 +4,10 @@ close all
 clear
 clc
 
-N = 2;
+N = 8;
 
 [x wts p]= lglnodes(N);
-x =x(end:-1:1)
+x =x(end:-1:1);
 wts =wts(end:-1:1);
 
 % build A
@@ -40,8 +40,8 @@ for i = 0:N
      D= [D; t1];
 end
 
-abcde
-D
+abcde;
+D;
 
 %% testing
 xtemp = transpose(linspace(-1,1,200));
@@ -105,7 +105,7 @@ dt(j+1,j+1) = integral;
 
 end
 
-dt
+dt;
 % matrix for cvdu/dx
 conv = 1.0;
 dc = zeros(N+1);
@@ -141,7 +141,7 @@ end
 
 end
 
-dc = conv*dc
+dc = conv*dc;
 
 %% Build forcing
 
@@ -190,7 +190,7 @@ G(N+1,N+1) =1;
 
 G = eye(N+1);
 
-fil_mat = boydstonodal*G*inv(boydstonodal)
+fil_mat = boydstonodal*G*inv(boydstonodal);
 %fil2 = transpose(fil_mat);
 % x matrix
 %x_mat=A1;      % calculated earlier
@@ -233,7 +233,7 @@ alphas = -linspace(0,alpha_final,steps);
 
 cmap = prism(steps);
 
-for k = 1:0 
+for k = 1:length(alphas) 
 
 if k==1
 h3=figure

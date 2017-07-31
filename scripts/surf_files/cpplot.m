@@ -7,7 +7,7 @@ close all
 addpath '/home/prabal/workstation/git_kth/matlabscripts/scripts/'
 % addpath '/scratch/negi/git_repos/matlabscripts/scripts/'
 
-fol = 'pitch_new';
+fol = 're750k_pitch';
 ifhdr = 1;
 fs = 16;                % fontsize
 lfs = 16;               % legend fontsize
@@ -17,7 +17,7 @@ destn = 'plots/';
 [sfiles tout] = LoadSurfFiles(fol);
 
 nfiles = length(sfiles);
-tlast = 9.25;
+tlast = 0.0;
 tmax = 41.40001;
 maxframes = nfiles*100;
 

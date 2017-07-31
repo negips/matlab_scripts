@@ -90,9 +90,9 @@ el_min=2*y_el_n/y_ref_n;
 y1plus = el_min/2*dz_min*Re_tau;
 
 if y1plus>firstpt           % we want first point at y+<0.95
-     dr_min    = min(diff(dr));
-     dr_min_el = firstpt/Re_tau;
-     el_min    = 2*dr_min_el/dr_min;         % max element size at the wall
+  dr_min    = min(diff(dr));
+  dr_min_el = firstpt/Re_tau;
+  el_min    = 2*dr_min_el/dr_min;         % max element size at the wall
 end
 
 dy_ref=abs(diff(x));
@@ -153,32 +153,30 @@ dx_cheb_el = dx_cheb_ref*el2/2;
 nelmin = 7;
 
 if Nel<nelmin
-     Nel = nelmin;
-    
-     [xel, DM] = chebdif(Nel, 1);
+  Nel = nelmin;
+ 
+  [xel, DM] = chebdif(Nel, 1);
 
-     %Distance between Chebychev nodes in element [-1,1]
-     dx_cheb_ref=abs(diff(xel)); 
-     dx_cheb_ratio = dx_cheb_ref(2:end)./dx_cheb_ref(1:end-1);
-     dx_cheb_min=min(dx_cheb_ref);
-     [dx_cheb_max maxind]=max(dx_cheb_ref);
-     rtio = dx_cheb_max/dx_cheb_min;
+  %Distance between Chebychev nodes in element [-1,1]
+  dx_cheb_ref=abs(diff(xel)); 
+  dx_cheb_ratio = dx_cheb_ref(2:end)./dx_cheb_ref(1:end-1);
+  dx_cheb_min=min(dx_cheb_ref);
+  [dx_cheb_max maxind]=max(dx_cheb_ref);
+  rtio = dx_cheb_max/dx_cheb_min;
 
-     dx_cheb_min_el = el_max/rtio;
+  dx_cheb_min_el = el_max/rtio;
 
-     el2 = 2*el_max/dx_cheb_max;
-     dx_cheb_el = dx_cheb_ref*el2/2;
+  el2 = 2*el_max/dx_cheb_max;
+  dx_cheb_el = dx_cheb_ref*el2/2;
 
-     tlength = el2/2*sum(dx_cheb_ref(1:maxind));
-
+  tlength = el2/2*sum(dx_cheb_ref(1:maxind));
 end 
-
 
 
 %Combine Chebyshev and uniform distribution
 nodes(1) = 1;
 for i = 2:maxind+1
-     nodes(i) = nodes(i-1)-dx_cheb_el(i-1);
+  nodes(i) = nodes(i-1)-dx_cheb_el(i-1);
 end
 
 %break
@@ -193,7 +191,7 @@ new_delta = twice_len/needed_equi;
 allnodes = nodes;
 l1=length(allnodes);
 for i = 1:needed_equi
-     allnodes(l1+i) = allnodes(l1+i-1)-new_delta;
+  allnodes(l1+i) = allnodes(l1+i-1)-new_delta;
 end
 
 %break
@@ -277,12 +275,12 @@ plot([0 dy_final],'o-r'); hold on;
 
 y_last=0;
 for i=1:number_of_elements/2
-    for j=1:N+1
-        mesh_final((i-1)*(N+1)+j,1)=gll_nodes(end-j+1)*dy_final(i)*Re_tau+y_last;
-        if j==N+1 
-            y_last=gll_nodes(end-j+1)*dy_final(i)*Re_tau+y_last;
-        end
+  for j=1:N+1
+    mesh_final((i-1)*(N+1)+j,1)=gll_nodes(end-j+1)*dy_final(i)*Re_tau+y_last;
+    if j==N+1 
+      y_last=gll_nodes(end-j+1)*dy_final(i)*Re_tau+y_last;
     end
+  end
 end
 
 figure(2);
