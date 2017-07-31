@@ -50,9 +50,9 @@ Re=500*dstar;                 % Redstar
 alpha=1.5;
 beta=0.000;
 
-alpha_min=0;
-alpha_max=1.0;
-nalpha=100;
+alpha_min=1e-5;
+alpha_max=1.2;
+nalpha=200;
 alpha_range = linspace(alpha_min,alpha_max,nalpha);
 
 cols = lines(nalpha);
@@ -65,7 +65,8 @@ uns_ar = [];
 uns_ind = [];
 nuns = 0;
 
-for ios= 1:nalpha
+neigs = 0;
+for ios=1:nalpha
   alpha=alpha_range(ios);
   [A,B] = OS_temp(U, D, alpha, beta, Re);
   
@@ -90,16 +91,41 @@ for ios= 1:nalpha
   xlabel('real(\omega)')
 
   [val ind] = max(imag(eigval));
-  if (val>0)
-    nuns = nuns + 1;  
-    uns_wr = [uns_wr real(eigval(ind))];
-    uns_wi = [uns_wi imag(eigval(ind))];
-    uns_ar = [uns_ar alpha];
-    uns_ind = [uns_ind ind];  
-  
-    figure(2)
-    plot(alpha,real(eigval(ind)), '.', 'Color', cols(ios,:), 'MarkerSize', 9); hold on
-  end        
+%  if (val>0)
+%    nuns = nuns + 1;  
+%    uns_wr = [uns_wr real(eigval(ind))];
+%    uns_wi = [uns_wi imag(eigval(ind))];
+%    uns_ar = [uns_ar alpha];
+%    uns_ind = [uns_ind ind];  
+%  
+%    figure(2)
+%    plot(alpha,real(eigval(ind)), '.', 'Color', cols(ios,:), 'MarkerSize', 9); hold on
+%  end
+
+   if neigs==0
+%     [val ind] = max(imag(eigval)); 
+     [xp,yp,button] = ginput(1);
+     a=xp+sqrt(-1)*yp;
+     [c,ind]=min(abs(eigval-a));
+     uns_wr = [uns_wr real(eigval(ind))];
+     uns_wi = [uns_wi imag(eigval(ind))];
+     uns_ar = [uns_ar alpha];
+     uns_ind = [uns_ind ind];
+     eigold = eigval(ind);
+     neigs=neigs+1; 
+   else
+     [c,ind]=min(abs(eigval-eigold));
+     uns_wr = [uns_wr real(eigval(ind))];
+     uns_wi = [uns_wi imag(eigval(ind))];
+     uns_ar = [uns_ar alpha];
+     uns_ind = [uns_ind ind];
+     eigold = eigval(ind);
+     neigs=neigs+1; 
+   end
+
+   nuns=nuns+1;
+   figure(2)
+   plot(alpha,real(eigval(ind)), '.', 'Color', cols(ios,:), 'MarkerSize', 9); hold on
 
 end
 

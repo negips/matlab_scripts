@@ -50,31 +50,38 @@ Re=500;                 % Redstar
 alpha=1.5;
 beta=0.000;
 
-alpha_min=0;
-alpha_max=2.0;
-nalpha=100;
+alpha_min=-0.151;
+alpha_max=0.152;
+nalpha=150;
 alpha_range = linspace(alpha_min,alpha_max,nalpha);
 
-beta_min=0;
-beta_max=1.5;
-nbeta=25;
+beta_min=-0.1;
+beta_max=0.1;
+nbeta=100;
 beta_range = linspace(beta_min,beta_max,nbeta);
-
 
 cols = lines(nalpha*nbeta);
 
 %% Set up the eigenvalue problem
 
-uns_wr = [];
-uns_wi = [];
-uns_ar = [];
-uns_br = [];
-uns_ind = [];
+uns_wr = zeros(nbeta,nalpha);
+uns_wi = zeros(nbeta,nalpha);
+uns_ar = zeros(nbeta,nalpha);
+uns_br = zeros(nbeta,nalpha);
 
 nuns = 0;
+neigs = 0;
+nplots = 0;
+ifplot = 1;
 
 for ios=1:nalpha
   for jos=1:nbeta
+
+    if (nplots>0)
+%      pause(0.001)
+%      delete(eigplot)
+    end    
+
     alpha=alpha_range(ios);
     beta=beta_range(jos);  
     [A,B] = OS_temp(U, D, alpha, beta, Re);
@@ -89,38 +96,77 @@ for ios=1:nalpha
 %    header=strcat({'Re= '},{num2str(Re)},{', beta= '},{num2str(beta)});
 
     %plot_OS(eigval,eigvec,y1,header)
-    
-    figure(1)
-    plot(real(eigval),imag(eigval),'.', 'Color', cols(ios,:)); hold on
-    xlims=get(gca,'XLim');
-%    plot(xlims,[0 0], '--')
-    ylim([-1,0.2]);
+
+    if nplots==0
+      
+      figure(1)
+      eigplot = plot(real(eigval),imag(eigval),'.', 'Color', cols(ios,:)); hold on
+      xlims=get(gca,'XLim');
+%      plot(xlims,[0 0], '--')
+      ylim([-1,0.2]);
+      title(header);
+      ylabel('imag(\omega)')
+      xlabel('real(\omega)')
+      nplots=nplots+1;
+    end    
+
+    if neigs==0
+%      [val ind] = max(imag(eigval)); 
+      [xp,yp,button] = ginput(1);
+      a=xp+sqrt(-1)*yp;
+      [c,ind]=min(abs(eigval-a));
+      uns_wr(jos,ios) = real(eigval(ind));
+      uns_wi(jos,ios) = imag(eigval(ind));
+      uns_ar(jos,ios) = alpha;
+      uns_br(jos,ios) = beta;
+
+      eigold = eigval(ind);
+
+      neigs=neigs+1; 
+    else
+      [c,ind]=min(abs(eigval-eigold));
+      uns_wr(jos,ios) = real(eigval(ind));
+      uns_wi(jos,ios) = imag(eigval(ind));
+      uns_ar(jos,ios) = alpha;
+      uns_br(jos,ios) = beta;
+
+      if (jos==nbeta) && (nbeta>1)
+        eigold = uns_wr(1,ios) + sqrt(-1)*uns_wi(1,ios);
+      else
+        eigold = eigval(ind);
+      end
+
+      neigs=neigs+1; 
+    end
+
+  end     
+
+  if ifplot
+    figure(2)
+    branchplot = plot(uns_wr(:,ios),uns_wi(:,ios),'.', 'Color', cols(ios,:)); hold on
+    header=strcat({'Re= '},{num2str(Re)},{', alpha= '},{num2str(alpha)}); 
     title(header);
     ylabel('imag(\omega)')
     xlabel('real(\omega)')
+  end  
 
-    [val ind] = max(imag(eigval));
-    if (val>0)
-      nuns = nuns + 1;  
-      uns_wr = [uns_wr real(eigval(ind))];
-      uns_wi = [uns_wi imag(eigval(ind))];
-      uns_ar = [uns_ar alpha];
-      uns_br = [uns_br beta];
-      uns_ind = [uns_ind ind];
-   
-      figure(2)
-      plot(alpha,real(eigval(ind)), '.', 'Color', cols(ios,:), 'MarkerSize', 9); hold on
-    end
-  end     
 end
 
-if (nuns>1)
-  figure(2)
-  plot(uns_ar,uns_wr)
-  grid on
-
-  cg = gradient(uns_wr,uns_ar);
+if (neigs>1)
   figure(3)
-  plot(uns_ar,cg)
-  grid on     
+  surf(uns_ar,uns_br,uns_wr, 'EdgeColor', 'None', 'FaceColor', 'interp')
+  xlabel('\alpha')
+  ylabel('\beta')
+  zlabel('\omega_{r}')             
+
+  [Cgx Cgy] = gradient(uns_wr,alpha_range,beta_range);
+  Cg2 = Cgx.*Cgy;   
+  figure(4)
+  surf(uns_ar,uns_br,Cg2, 'EdgeColor', 'None', 'FaceColor', 'interp')
+  xlabel('\alpha')
+  ylabel('\beta')
+  zlabel('d\omega/d\alpha')             
+
 end
+
+
