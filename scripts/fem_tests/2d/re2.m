@@ -17,7 +17,7 @@ yperiodic = 1;
 %    Bottom left is element 1.
 %    Right neighbor is element 2 and so on till end of row (nelx)
 
-custom_domain=1;
+custom_domain=0;
 if custom_domain
      sem_dd
 else
@@ -31,8 +31,8 @@ else
      gy(3) = 4;
      gy(4) = 4;
 
-     nelx=2;
-     nely=2;
+     nelx=8;
+     nely=8;
      nelv=nelx*nely;
 
 %     xvec = [0 2.5 4];

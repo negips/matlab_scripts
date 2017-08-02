@@ -9,8 +9,8 @@ close all
 SIZE           %    Polynomial order
 re2            %    domain/decomposition/mapping/boundary conditions.
 
-ifplot = 0;
-gltot = 0;
+ifplot = 1;
+gltot = 0;     %    Global number of elements   
 
 display(['Time started: ' datestr(clock)])
 
@@ -93,7 +93,7 @@ end
 plotgll=0;
 %nekchecks(El,Nx,Ny,nelx,nely,nelv,plotgll)
 
-plotspy=0;
+plotspy=1;
 [bigmass bigconv bigconvd bigconvxd velvec gno nreps nn] = AssembleBig(El,Nx,Ny,nelx,nely,nelv,plotspy);
 
 clearvars mass nek_mass DXM1 DYM1 DXM1D DYM1D RXM1 RYM1 SXM1 SYM1 convx convy convall convxd convyd convalld gradm1xd gradm1yd intpm1d wtsvecd nek_conv lpx lpy lpall nek_lp lpbc forc x_coeff y_coeff Dx Dy w2m1 xm1 ym1 JACM1 JACM1D xm1d ym1d

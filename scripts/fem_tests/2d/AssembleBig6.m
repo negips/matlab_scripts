@@ -1,4 +1,4 @@
-function [bigmass bigconv bigconvd bigconvxd velvec gno nreps nn] = AssembleBig(El,Nx,Ny,nelx,nely,nelv,ifplots)
+function [bigmass bigconv bigconvd bigconvxd bigforc bigconvd_new velvec gno nreps nn] = AssembleBig6(El,Nx,Ny,nelx,nely,nelv,ifplots)
 
 %%   Build combined matricies
 
@@ -56,6 +56,8 @@ function [bigmass bigconv bigconvd bigconvxd velvec gno nreps nn] = AssembleBig(
      bigconv = zeros(nn,nn);
      bigconvd = zeros(nn,nn);
      bigconvxd = zeros(nn,nn);
+     bigforc = zeros(nn,nn);
+     bigconvd_new = zeros(nn,nn);
 
      for elno=1:nelv
           for ii=1:nbasis
@@ -73,39 +75,47 @@ function [bigmass bigconv bigconvd bigconvxd velvec gno nreps nn] = AssembleBig(
 
                     entry = El(elno).mass(ii,jj);
                     bigmass(ix,iy) = bigmass(ix,iy)+entry;
+
+                    entry = El(elno).forc(ii,jj);
+                    bigforc(ix,iy) = bigforc(ix,iy)+entry;
+
+                    entry = El(elno).convalld_new(ii,jj);
+                    bigconvd_new(ix,iy) = bigconvd_new(ix,iy)+entry;
+
+
                end
           end
      end
 
-     if ifplots     
-          figure
-          spytol(El(1).convalld,6,'r')
-
-          h=figure;
-          spytol(bigconvd,6)
-
-          filename = 'spy_dealiased_N4_nelv4_uniform';
-          destn = './plots';
-%         SaveFig(h, filename, destn, 1)
-     end
-%%   Eigenvalues:
-     deltat = 0.001;
-     e1 = eig(inv(bigmass)*bigconvd);
-     lambda_deltat = e1;
-     clines = load('bdfk-neutral-curve.mat');
-
-     lambdar = real(e1)*deltat;
-     lambdai = imag(e1)*deltat;
-
-     if ifplots
-          hstab= figure;
-          plot(lambdar,lambdai,'*', 'MarkerSize', 12)
-          hold on
-%          plot(clines.cline3(1,2:end),clines.cline3(2,2:end), 'r')
-
-          %xlim([min(lambdar) max(lambdar)]);
-          %ylim([min(lambdai) max(lambdai)]);
-     end
+%     if ifplots     
+%          figure
+%          spytol(El(1).convalld_new,6,'r')
+%
+%          h=figure;
+%          spytol(bigconvd_new,6)
+%
+%          filename = 'spy_dealiased_N4_nelv4_uniform';
+%          destn = './plots';
+%%         SaveFig(h, filename, destn, 1)
+%     end
+%%%   Eigenvalues:
+%     deltat = 0.001;
+%     e1 = eig(inv(bigmass)*bigconvd_new);
+%     lambda_deltat = e1;
+%     clines = load('bdfk-neutral-curve.mat');
+%
+%     lambdar = real(e1)*deltat;
+%     lambdai = imag(e1)*deltat;
+%
+%     if ifplots
+%          hstab= figure;
+%          plot(lambdar,lambdai,'*', 'MarkerSize', 12)
+%          hold on
+%%          plot(clines.cline3(1,2:end),clines.cline3(2,2:end), 'r')
+%
+%          %xlim([min(lambdar) max(lambdar)]);
+%          %ylim([min(lambdai) max(lambdai)]);
+%     end
 %%
 
      return

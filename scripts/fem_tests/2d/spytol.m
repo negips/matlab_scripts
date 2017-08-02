@@ -56,7 +56,7 @@ if markersize == 0
    set(gca,'units',units);
 end
 
-tol=1e-8;
+tol=1e-10;
 [i,j] = find(abs(S)>tol);
 if isempty(i), i = NaN; j = NaN; end
 if isempty(S), marker = 'none'; end

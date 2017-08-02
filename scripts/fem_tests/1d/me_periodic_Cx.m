@@ -5,17 +5,18 @@ clc
 close all
 
 addpath 'templates/'
-ifplot = 0;
+ifplot = 1;
 
 N=4;
 npts = N+1;
-nels = 2;
+Nxd=4;
+nels = 1;
 
 dof = N*nels+1;
 nnodes = nels+1;
 
-d_start = -1;
-d_end = 1;
+d_start = -2;
+d_end = 2;
 d_len = abs(d_end-d_start);
 
 periodic = 1;
@@ -25,13 +26,13 @@ interp_pts = 200;
 uniform = 1;
 
 if uniform
-     el_nodes = linspace(d_start,d_end,nnodes);
-     el_size = diff(el_nodes);
+  el_nodes = linspace(d_start,d_end,nnodes);
+  el_size = diff(el_nodes);
 else
-%     el_nodes = lglnodes(nels);
-%     el_nodes = el_nodes(end:-1:1);
-     el_nodes = [-1 0.1 1];
-     el_size = diff(el_nodes);
+%  el_nodes = lglnodes(nels);
+%  el_nodes = el_nodes(end:-1:1);
+  el_nodes = [-1 0.1 1];
+  el_size = diff(el_nodes);
 end
 
 xgll = zeros(npts,nels);
@@ -39,6 +40,7 @@ gl_mass = zeros(dof,dof);
 gl_amass = zeros(dof,dof);
 gl_stiff = zeros(dof,dof);
 gl_conv = zeros(dof,dof);
+gl_dconv = zeros(dof,dof);
 gl_forc = zeros(dof,dof);
 gl_lapl = zeros(dof,dof);
 gl_cbc = zeros(dof,dof);
@@ -60,13 +62,14 @@ for i=1:nels
 
      xst = el_nodes(i);
      xen = el_nodes(i+1);
-     [MASS AMASS CONV_W CONV1 LAPL CBC LPBC FORC x_p_coeff dx_p_coeff xorg wts] = MEFem(N,xst,xen,ifplot);
+     [MASS AMASS CONV_W CONV1 VCdx LAPL CBC LPBC FORC x_p_coeff dx_p_coeff xorg wts NODAL2SPEC SPEC2NODAL] = MEFem_Cx(N,Nxd,xst,xen,ifplot);
      xgll(:,i) = el_nodes(i) + (xorg+1)/2*el_size(i);
 
      nek_mass(:,:,i) = MASS;
      nek_amass(:,:,i) = AMASS;
      nek_conv(:,:,i) = CONV1;
      nek_conv_w(:,:,i) = CONV_W;
+     nek_conv_d(:,:,i) = VCdx;
      nek_forc(:,:,i) = FORC;
      nek_lapl(:,:,i) = LAPL;
      nek_cbc(:,:,i) = CBC;
@@ -81,12 +84,16 @@ for i=1:nels
      gl_mass(gl_pos_j1:gl_pos_j2,gl_pos_i1:gl_pos_i2) = MASS + gl_mass(gl_pos_j1:gl_pos_j2,gl_pos_i1:gl_pos_i2);
      gl_amass(gl_pos_j1:gl_pos_j2,gl_pos_i1:gl_pos_i2) = AMASS + gl_amass(gl_pos_j1:gl_pos_j2,gl_pos_i1:gl_pos_i2);
      gl_conv(gl_pos_j1:gl_pos_j2,gl_pos_i1:gl_pos_i2) = CONV1 + gl_conv(gl_pos_j1:gl_pos_j2,gl_pos_i1:gl_pos_i2) ;
+     gl_dconv(gl_pos_j1:gl_pos_j2,gl_pos_i1:gl_pos_i2) = VCdx + gl_dconv(gl_pos_j1:gl_pos_j2,gl_pos_i1:gl_pos_i2) ;
+
      gl_forc(gl_pos_j1:gl_pos_j2,gl_pos_i1:gl_pos_i2) = FORC + gl_forc(gl_pos_j1:gl_pos_j2,gl_pos_i1:gl_pos_i2);
      gl_lapl(gl_pos_j1:gl_pos_j2,gl_pos_i1:gl_pos_i2) = LAPL + gl_lapl(gl_pos_j1:gl_pos_j2,gl_pos_i1:gl_pos_i2);
 
 end
 
 xall = unique(xgll(:));
+
+break
 
 %clearvars -except N dt dt2 dc dc2 bc df_mat conv forc x abcde D
 
