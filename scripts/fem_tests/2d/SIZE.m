@@ -4,14 +4,15 @@
 
 % Polynomial orders
 
-Nx = 11;
+Nx = 10;
 lx1=Nx+1;
-Nxd = 18;
+Nxd = 15;
 %Nxd = ceil(3/2*(Nx+1));
 
 Ny = Nx;            % For now. Maybe will test a more general case later.
 ly1=Ny+1;
 Nyd = Nxd;
 
-
+display(['Nx=' num2str(Nx) '; Nxd=' num2str(Nxd)])
+display(['Ny=' num2str(Ny) '; Nyd=' num2str(Nyd)])
 

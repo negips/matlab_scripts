@@ -26,7 +26,7 @@ function [mass nek_mass DXM1 DYM1 DXM1D DYM1D RXM1 RYM1 SXM1 SYM1 convx convy co
 
 tic
 
-epstol=1e-20;
+epstol=1e-30;
 
 if Nx>0
      [x wx p]= lglnodes(Nx);
@@ -501,6 +501,15 @@ else
      yd=[0];
      wyd=[1];
 end
+
+massd = zeros((Nxd+1)*(Nyd+1),(Nxd+1)*(Nyd+1));
+for n=0:Nyd
+  for m=0:Nxd
+    ii=n*(Nxd+1) + m+1;
+    massd(ii,ii) = wyd(n+1)*wxd(m+1);
+  end    
+end    
+
 
 
 % Build polynomial coefficients for xd 
@@ -1029,7 +1038,7 @@ spec2nodalx = transpose(pht);
 nodal2specx = inv(spec2nodalx);
 
 % Filter function. Modes and amplitudes
-alpha_x=0.25;
+alpha_x=0.1;
 Gx = eye(Nx+1);
 Gx(Nx+1,Nx+1)=1-alpha_x;
 %Gx(Nx,Nx)=1-alpha_x.^2;
@@ -1088,7 +1097,7 @@ nodaltoboyds_y = inv(boydstonodal_y);
 
 
 % Filter function. Modes and amplitudes
-alpha_y=0.25;
+alpha_y=0.1;
 Gy = eye(Ny+1);
 Gy(Ny+1,Ny+1)=1-alpha_y;
 %Gy(Ny,Ny)=1-alpha_y.^2;
@@ -1119,7 +1128,7 @@ for j = 1:lx
   z=x(j);
   Lj = legendrePoly(n,z);
   pht(j,:) = transpose(Lj);
-  if (Nxd>Nx)    
+  if (Nxd>Nx) 
     pht(j,lx+1:nx) = 0;               % Truncate space to order N
   end 
 end
@@ -1157,7 +1166,7 @@ for j = 1:lx
   pht(j,:) = transpose(Lj);
 end
 
-dealiased_nodal2specx = inv(pht);
+dealiased_nodal2specx = inv(pht);         % Legendre transform of order Nxd
 
 %% In the y-direction
 pht = zeros(Nyd+1,Nyd+1);
@@ -1182,10 +1191,16 @@ dealias2gll = dealias_spec2gll*dealiased_nodal2spec;
 %convyd_new = mass*dealias2gll*diag(Cyd_fld(:))*gradm1yd;
 %convalld_new = convxd_new + convyd_new;
 
-convxd_new = mass*dealias2gll*diag(intpm1d*Cx_fld(:))*gradm1xd;
-convyd_new = mass*dealias2gll*diag(intpm1d*Cy_fld(:))*gradm1yd;
-convalld_new = convxd_new + convyd_new;
+%convxd_new = mass*dealias2gll*diag(intpm1d*Cx_fld(:))*gradm1xd;
+%convyd_new = mass*dealias2gll*diag(intpm1d*Cy_fld(:))*gradm1yd;
+%convalld_new = convxd_new + convyd_new;
 
+%% Another method for convection operator
+%dbstop in MESem2D6 at 1201
+intpm1d_trial = transpose(intpm1d);
+convxd_new = intpm1d_trial*massd*diag(intpm1d*Cx_fld(:))*gradm1xd;
+convyd_new = intpm1d_trial*massd*diag(intpm1d*Cy_fld(:))*gradm1yd;
+convalld_new = convxd_new + convyd_new;
 
 
 %dbstop in MESem2D6 at 1168

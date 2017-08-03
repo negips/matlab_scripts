@@ -6,6 +6,10 @@ close all
 
 %addpath '../../'
 
+tic
+
+display(['Time started: ' datestr(clock)])
+
 SIZE           %    Polynomial order
 re2            %    domain/decomposition/mapping/boundary conditions.
 
@@ -14,7 +18,6 @@ ifplot = 0;
 ifdiv  = 1;
 gltot = 0;     %    Global number of elements 
 
-display(['Time started: ' datestr(clock)])
 
 for ii=1:nelv
 
@@ -118,40 +121,48 @@ if ifdiv
 %  El = DSSM2D_var(El,nelv,varname);
 
   for ii=1:nelv
+
+%   Check Divergence
     figure(100) 
-    surf(El(ii).xm1,El(ii).ym1,log10(abs(El(ii).div)+1e-11), 'EdgeColor', 'none', 'FaceColor', 'interp'); hold on
+    surf(El(ii).xm1,El(ii).ym1,log10(abs(El(ii).div)+1e-17), 'EdgeColor', 'none', 'FaceColor', 'interp'); hold on
     title('Divergence field (logscale)')
     view(2)
     colorbar  
 
-    figure(101)
-    spectra2d = log10(abs(El(ii).nodal2spec2d*El(ii).Cfx(:))+1e-10);
-    spectra2d = reshape(spectra2d,Nx+1,Ny+1);
-    surf(El(ii).xm1,El(ii).ym1,spectra2d, 'EdgeColor', 'none', 'FaceColor', 'interp'); hold on
-    title('Convecting field Cfx Spectra')
-    colorbar
-    view(2)
+%%   2D spectra of the convecting field. 
+%    figure(101)
+%    spectra2d = log10(abs(El(ii).nodal2spec2d*El(ii).Cfx(:))+1e-10);
+%    spectra2d = reshape(spectra2d,Nx+1,Ny+1);
+%    surf(El(ii).xm1,El(ii).ym1,spectra2d, 'EdgeColor', 'none', 'FaceColor', 'interp'); hold on
+%    title('Convecting field Cfx Spectra')
+%    colorbar
+%    view(2)
+%
+%%   2D spectra for the filtered Convecting field.
+%    Just a check to see forcing matrix is correct.  
+%    figure(102)
+%    filtered_fld =  inv(El(ii).mass)*El(ii).forc*El(ii).Cfx(:);
+%    spectra2d = log10(abs(El(ii).nodal2spec2d*filtered_fld)+1e-20);
+%    spectra2d = reshape(spectra2d,Nx+1,Ny+1);
+%    surf(El(ii).xm1,El(ii).ym1,spectra2d, 'EdgeColor', 'none', 'FaceColor', 'interp'); hold on
+%    title('Spectra filtered convective field')
+%    colorbar
+%    view(2)
 
-    figure(102)
-    filtered_fld =  inv(El(ii).mass)*El(ii).forc*El(ii).Cfx(:);
-    spectra2d = log10(abs(El(ii).nodal2spec2d*filtered_fld)+1e-20);
-    spectra2d = reshape(spectra2d,Nx+1,Ny+1);
-    surf(El(ii).xm1,El(ii).ym1,spectra2d, 'EdgeColor', 'none', 'FaceColor', 'interp'); hold on
-    title('Spectra filtered convective field')
-    colorbar
-    view(2)
-
+%   Visualize Convecting field in x. 
     figure(103)  
-    convection = El(ii).Cfx;
-    surf(El(ii).xm1,El(ii).ym1,convection, 'EdgeColor', 'none', 'FaceColor', 'interp'); hold on
-    title('Cfx')
+    dCdy = El(ii).gradm1yd*El(ii).Cfy(:);
+    dCdy = reshape(dCdy, size(El(ii).xm1d));  
+    surf(El(ii).xm1d,El(ii).ym1d,dCdy, 'EdgeColor', 'none', 'FaceColor', 'interp'); hold on
+    title('dCdy')
     colorbar
-
-    figure(104)  
-    convection = El(ii).Cfy;
-    surf(El(ii).xm1,El(ii).ym1,convection, 'EdgeColor', 'none', 'FaceColor', 'interp'); hold on
-    title('Cfy')
-    colorbar
+%
+%%   Visualize Convecting field in y 
+%    figure(104)  
+%    convection = El(ii).Cfy;
+%    surf(El(ii).xm1,El(ii).ym1,convection, 'EdgeColor', 'none', 'FaceColor', 'interp'); hold on
+%    title('Cfy')
+%    colorbar
 
   end 
 
@@ -165,28 +176,44 @@ plotspy=1;
 [bigmass bigconv bigconvd bigconvxd bigforc bigconvd_new velvec gno nreps nn] = AssembleBig6(El,Nx,Ny,nelx,nely,nelv,plotspy);
 
 %% Check eigenvalues of the system
+eigfigure=[];
+ifplot=1;
+if (ifplot)
   eigfigure=figure;
   hold on
-  ifplot=1;
-  
+end
+
+
+sparsehandle=[];
+ifsparse=0;
+if (ifsparse)
   sparsehandle=figure;
   hold on
-  ifsparse=1;
-  
-  bdfkstability = 0;
-  
-  sysmat = inv(bigmass)*bigconvd_new;
-  col='b';
-  [evec lambda] = SystemEig(sysmat,ifplot,eigfigure,ifsparse,sparsehandle,bdfkstability,col);
+end
+
+bdfkstability = 0;
+
+% Convective matrix eigen values  
+sysmat = inv(bigmass)*bigconvd_new;
+col='b';
+[evec lambda] = SystemEig(sysmat,ifplot,eigfigure,ifsparse,sparsehandle,bdfkstability,col);
+pause(2)    
+
+if (ifplot)
   filename=['spectra_conv_N' num2str(Nx), '_Nxd' num2str(Nxd) '_nelv' num2str(nelv) '.eps'];
   SaveFig(eigfigure,filename,destn,1);
-  
-  sysmat = inv(bigmass)*(bigconvd_new - bigforc);
-  col='r';
-  ifsparse=0;
-  [evec lambda] = SystemEig(sysmat,ifplot,eigfigure,ifsparse,sparsehandle,bdfkstability, col);
+end
+
+% (Convective - Forcing) matrix eigenvalues
+sysmat = inv(bigmass)*(bigconvd_new - bigforc);
+col='r';
+[evec lambda] = SystemEig(sysmat,ifplot,eigfigure,ifsparse,sparsehandle,bdfkstability, col);
+pause(2)    
+
+if (ifsparse)
   filename=['spectra_rhs_N' num2str(Nx), '_Nxd' num2str(Nxd) '_nelv' num2str(nelv) '.eps'];
   SaveFig(eigfigure,filename,destn,1);
+end
 
 %%
 
@@ -194,6 +221,8 @@ clearvars mass nek_mass DXM1 DYM1 DXM1D DYM1D RXM1 RYM1 SXM1 SYM1 convx convy co
 
 clearvars xpt ypt ee ii jj ifplot plotspy plotgll
 
+display(['Initialization completed: ' datestr(clock)])
+toc
+
 save(['matrices_N' num2str(Nx) '_NELV' num2str(nelv) '_CART5_1.mat']);
 %% SOLVE
-

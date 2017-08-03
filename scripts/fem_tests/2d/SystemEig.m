@@ -1,4 +1,4 @@
-function [evec lambda] = SystemEig(sysmat,ifplot,plothandle,ifsparsity,sparsityhandle,ifstability,col)
+function [evec lambda] = SystemEig(sysmat,ifplot,plothandle,ifsparsity,sparsityhandle,ifbdfk,col)
 
 
   destn = './plots';
@@ -22,9 +22,11 @@ function [evec lambda] = SystemEig(sysmat,ifplot,plothandle,ifsparsity,sparsityh
     figure(plothandle);
     plot(lambdar,lambdai,'.', 'Color',col, 'MarkerSize', 8)
     hold on
-    if (ifstability)  
+    xlabel('\lambda_{r}')  
+    ylabel('\lambda_{i}')  
+    if (ifbdfk)  
       clines = load('bdfk-neutral-curve.mat');
-      plot(clines.cline3(1,2:end),clines.cline3(2,2:end), 'r')
+      plot(clines.cline3(1,2:end),clines.cline3(2,2:end), 'k', 'LineWidth', 2)
     end  
 
     %xlim([min(lambdar) max(lambdar)]);

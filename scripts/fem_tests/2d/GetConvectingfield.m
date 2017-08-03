@@ -7,8 +7,8 @@ Cy=zeros(size(ym1));
 U0=1.0;
 du=0.1*U0;
 
-alpha=2*pi;
-beta=2*pi;
+alpha=pi/2;
+beta=pi/2;
 
 V0=1.0;
 dv=-du*alpha/beta;

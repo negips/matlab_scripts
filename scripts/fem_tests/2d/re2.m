@@ -31,9 +31,10 @@ else
      gy(3) = 4;
      gy(4) = 4;
 
-     nelx=8;
-     nely=8;
+     nelx=4;
+     nely=4;
      nelv=nelx*nely;
+     disp(['Nelx=' num2str(nelx) '; Nely=' num2str(nely) '; Nelv=' num2str(nelv)]) 
 
 %     xvec = [0 2.5 4];
      xvec = linspace(gx(1),gx(2),nelx+1);
