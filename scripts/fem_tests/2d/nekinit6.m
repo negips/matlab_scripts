@@ -6,7 +6,7 @@ close all
 
 %addpath '../../'
 
-tic
+tstart = tic;
 
 display(['Time started: ' datestr(clock)])
 
@@ -151,10 +151,11 @@ if ifdiv
 
 %   Visualize Convecting field in x. 
     figure(103)  
-    dCdy = El(ii).gradm1yd*El(ii).Cfy(:);
-    dCdy = reshape(dCdy, size(El(ii).xm1d));  
-    surf(El(ii).xm1d,El(ii).ym1d,dCdy, 'EdgeColor', 'none', 'FaceColor', 'interp'); hold on
-    title('dCdy')
+%    dCdy = El(ii).gradm1yd*El(ii).Cfy(:);
+%    dCdy = reshape(dCdy, size(El(ii).xm1d));
+    convect = El(ii).Cfy;  
+    surf(El(ii).xm1,El(ii).ym1,convect, 'EdgeColor', 'none', 'FaceColor', 'interp'); hold on
+    title('Cy')
     colorbar
 %
 %%   Visualize Convecting field in y 
@@ -185,7 +186,7 @@ end
 
 
 sparsehandle=[];
-ifsparse=0;
+ifsparse=1;
 if (ifsparse)
   sparsehandle=figure;
   hold on
@@ -207,10 +208,12 @@ end
 % (Convective - Forcing) matrix eigenvalues
 sysmat = inv(bigmass)*(bigconvd_new - bigforc);
 col='r';
+ifsparse=0;
+ifplot=0;
 [evec lambda] = SystemEig(sysmat,ifplot,eigfigure,ifsparse,sparsehandle,bdfkstability, col);
 pause(2)    
 
-if (ifsparse)
+if (ifplot)
   filename=['spectra_rhs_N' num2str(Nx), '_Nxd' num2str(Nxd) '_nelv' num2str(nelv) '.eps'];
   SaveFig(eigfigure,filename,destn,1);
 end
@@ -222,7 +225,7 @@ clearvars mass nek_mass DXM1 DYM1 DXM1D DYM1D RXM1 RYM1 SXM1 SYM1 convx convy co
 clearvars xpt ypt ee ii jj ifplot plotspy plotgll
 
 display(['Initialization completed: ' datestr(clock)])
-toc
+toc(tstart)
 
 save(['matrices_N' num2str(Nx) '_NELV' num2str(nelv) '_CART5_1.mat']);
 %% SOLVE
