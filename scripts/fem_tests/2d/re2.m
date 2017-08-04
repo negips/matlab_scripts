@@ -22,17 +22,17 @@ if custom_domain
      sem_dd
 else
      gx(1) = 0;
-     gx(2) = 4;
-     gx(3) = 4;
+     gx(2) = 1;
+     gx(3) = 1;
      gx(4) = 0;
 
      gy(1) = 0;
      gy(2) = 0;
-     gy(3) = 4;
-     gy(4) = 4;
+     gy(3) = 1;
+     gy(4) = 1;
 
-     nelx=4;
-     nely=4;
+     nelx=2;
+     nely=2;
      nelv=nelx*nely;
      disp(['Nelx=' num2str(nelx) '; Nely=' num2str(nely) '; Nelv=' num2str(nelv)]) 
 
@@ -42,7 +42,7 @@ else
 
 
      for jj=1:nely  
-               for ii=1:nelx
+          for ii=1:nelx
                elno = (jj-1)*nelx + ii;
                El(elno).xc(1) = xvec((ii-1)+1);
                El(elno).xc(2) = xvec((ii-1)+2);

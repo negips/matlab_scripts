@@ -7,14 +7,23 @@ Cy=zeros(size(ym1));
 U0=1.0;
 du=0.1*U0;
 
-alpha=pi;
-beta=pi;
+
+n = 1;
+
+alpha=n*2*pi;
+beta=n*2*pi;
+
+
+m=5;
+alpha2=m*n*2*pi;
+beta2=m*n*2*pi;
+
 
 V0=1.0;
 dv=-du*alpha/beta;
 
-Cx = U0 + du*sin(alpha*xm1 + beta*ym1) + du*sin(3*beta*ym1);
-Cy = V0 + dv*sin(alpha*xm1 + beta*ym1) + dv*sin(3*alpha*xm1);
+Cx = U0 + du*sin(alpha*xm1 + beta*ym1) + 0.5*du*sin(beta2*ym1);
+Cy = V0 + dv*sin(alpha*xm1 + beta*ym1) + 0*5*dv*sin(alpha2*xm1);
 
 % Might need to project lower polynomial order.
 % Does it still remain divergence free?

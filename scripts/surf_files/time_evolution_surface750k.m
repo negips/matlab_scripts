@@ -12,10 +12,10 @@ ifhdr = 1;
 fs = 16;                % fontsize
 lfs = 16;               % legend fontsize
 ifcols = 1;
-ifplot = 1;
+ifplot = 0;
 tlast = 6.0;
 destn = 'plots/';
-ifsave = 1;
+ifsave = 0;
 
 [sfiles tout] = LoadSurfFiles(fol);
 

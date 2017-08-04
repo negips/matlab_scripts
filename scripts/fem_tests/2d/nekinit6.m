@@ -115,10 +115,10 @@ for elno=1:nelv
      end
 end
 
-if ifdiv
+volume = GetVolume(El,nelv);
+disp(['Domain Volume: ' num2str(volume)])
 
-%  varname='div';
-%  El = DSSM2D_var(El,nelv,varname);
+if ifdiv
 
   for ii=1:nelv
 
@@ -202,21 +202,21 @@ pause(2)
 
 if (ifplot)
   filename=['spectra_conv_N' num2str(Nx), '_Nxd' num2str(Nxd) '_nelv' num2str(nelv) '.eps'];
-  SaveFig(eigfigure,filename,destn,1);
+%  SaveFig(eigfigure,filename,destn,1);
 end
 
 % (Convective - Forcing) matrix eigenvalues
-sysmat = inv(bigmass)*(bigconvd_new - bigforc);
-col='r';
-ifsparse=0;
-ifplot=0;
-[evec lambda] = SystemEig(sysmat,ifplot,eigfigure,ifsparse,sparsehandle,bdfkstability, col);
-pause(2)    
-
-if (ifplot)
-  filename=['spectra_rhs_N' num2str(Nx), '_Nxd' num2str(Nxd) '_nelv' num2str(nelv) '.eps'];
-  SaveFig(eigfigure,filename,destn,1);
-end
+% sysmat = inv(bigmass)*(bigconvd_new - bigforc);
+% col='r';
+% ifsparse=0;
+% ifplot=1;
+% [evec lambda] = SystemEig(sysmat,ifplot,eigfigure,ifsparse,sparsehandle,bdfkstability, col);
+% pause(2)    
+% 
+% if (ifplot)
+%   filename=['spectra_rhs_N' num2str(Nx), '_Nxd' num2str(Nxd) '_nelv' num2str(nelv) '.eps'];
+%   SaveFig(eigfigure,filename,destn,1);
+% end
 
 %%
 

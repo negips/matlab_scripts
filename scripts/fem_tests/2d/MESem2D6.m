@@ -240,7 +240,7 @@ mass = zeros((Nx+1)*(Ny+1),(Nx+1)*(Ny+1));
 for n=0:Ny
   for m=0:Nx
     ii=n*(Nx+1) + m+1;
-    mass(ii,ii) = w2m1(m+1,n+1);
+    mass(ii,ii) = JACM1(m+1,n+1)*w2m1(m+1,n+1);
   end    
 end    
 
@@ -502,16 +502,6 @@ else
      wyd=[1];
 end
 
-massd = zeros((Nxd+1)*(Nyd+1),(Nxd+1)*(Nyd+1));
-for n=0:Nyd
-  for m=0:Nxd
-    ii=n*(Nxd+1) + m+1;
-    massd(ii,ii) = wyd(n+1)*wxd(m+1);
-  end    
-end    
-
-
-
 % Build polynomial coefficients for xd 
 A1 = [];
 for i = 0:Nxd
@@ -626,7 +616,15 @@ for ii=0:Nxd
 end
 
 JACM1D = XRM1D.*YSM1D - XSM1D.*YRM1D;
-
+%---------------------------------------- 
+% Mass matrix for dealiased operator
+massd = zeros((Nxd+1)*(Nyd+1),(Nxd+1)*(Nyd+1));
+for n=0:Nyd
+  for m=0:Nxd
+    ii=n*(Nxd+1) + m+1;
+    massd(ii,ii) = JACM1D(n+1,m+1)*wyd(n+1)*wxd(m+1);
+  end    
+end    
 %---------------------------------------- 
 % All these factors need to be divided by the jacobian (point wise multiplication).
 % It get multiplied by the jacobian during integral.
