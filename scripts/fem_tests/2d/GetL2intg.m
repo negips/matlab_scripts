@@ -1,4 +1,4 @@
-function [l2sum] = GetL2sum(El,varname,nelv)
+function [l2intg] = GetL2intg(El,varname,nelv)
 
   for elno=1:nelv
     evalstr = ['El(' num2str(elno) ').scrtch1 = El(' num2str(elno) ').' varname ';'];
@@ -7,11 +7,12 @@ function [l2sum] = GetL2sum(El,varname,nelv)
   %  eval(evalstr)
   end
   
-  l2sum=zeros(nelv,1);
+  l2intg=zeros(nelv,1);
   
   % Weighted by mass matrix gives an inner product
   for elno=1:nelv
-    l2sum(elno) = sum(El(elno).scrtch1(:).*El(elno).scrtch1(:).*El(elno).mass(:));
+    mass=diag(El(elno).mass);  
+    l2intg(elno) = sum(El(elno).scrtch1(:).*El(elno).scrtch1(:).*mass(:));
   end
 
 return

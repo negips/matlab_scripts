@@ -118,6 +118,10 @@ end
 volume = GetVolume(El,nelv);
 disp(['Domain Volume: ' num2str(volume)])
 
+divergence = GetDivNorm(El,nelv);
+dnorm = divergence/volume;
+disp(['Divergence Norm: ' num2str(dnorm)])
+
 if ifdiv
 
   for ii=1:nelv
