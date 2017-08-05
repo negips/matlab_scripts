@@ -31,15 +31,14 @@ else
      gy(3) = 1;
      gy(4) = 1;
 
-     nelx=16;
-     nely=16;
+     nelx=2;
+     nely=2;
      nelv=nelx*nely;
      disp(['Nelx=' num2str(nelx) '; Nely=' num2str(nely) '; Nelv=' num2str(nelv)]) 
 
 %     xvec = [0 2.5 4];
      xvec = linspace(gx(1),gx(2),nelx+1);
      yvec = linspace(gy(1),gy(4),nely+1);
-
 
      for jj=1:nely  
           for ii=1:nelx

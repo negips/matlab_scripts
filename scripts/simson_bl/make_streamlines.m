@@ -41,6 +41,11 @@ for i=1:length(x)
   delta995(i)=interp1(stat.u(:,i),y,0.995);
   Ue(i)=interp1(y,stat.u(:,i),delta99(i));
   Ve(i)=interp1(y,stat.v(:,i),delta99(i));
+  
+  ttp = total_p(:,i);
+  ttp_max = max(ttp);
+  ttp = ttp + (1-ttp_max);
+  delta99_p(i)=interp1(ttp,y,0.99);
 end
 
 figure(100)
@@ -57,20 +62,21 @@ dstar = sum(cheb_u_deficit)*Ly;
 cheb_theta_deficit = chebfun((1.0 - stat.u).*stat.u);
 theta = sum(cheb_theta_deficit)*Ly;
 
-cheby = 2*y/Ly -1;
-for i=1:length(cheby)
-  clc
-  i
-  dstar_prof(i,:)=sum(cheb_u_deficit,-1,cheby(i));
-end
+%cheby = 2*y/Ly -1;
+%for i=1:length(cheby)
+%  clc
+%  i
+%  dstar_prof(i,:)=sum(cheb_u_deficit,-1,cheby(i));
+%end
 
 figure(1)
 plot(x,delta99)
 hold on
 plot(x,delta995, '--b')
+plot(x,delta99_p, ':b')
 plot(x,dstar, 'r')
 plot(x,theta, 'k')
-legend({'\delta_{99}', '\delta_{995}', '\delta_{*}', '\theta' }, 'FontSize', 14, 'Location', 'NorthWest')
+legend({'\delta_{99}', '\delta_{995}', '\delta_{99}^{p}','\delta_{*}', '\theta' }, 'FontSize', 14, 'Location', 'NorthWest')
 
 figure(2)
 plot(x,dstar./theta)

@@ -1,4 +1,5 @@
-function [stat,x,y,Re,fltype,dstar,rlam,spanv,wAstat,sumw]=readxystats(filename)
+%function [stat,x,y,Re,fltype,dstar,rlam,spanv,wAstat,sumw]=readxystats(filename)
+function [stat,x,y,flow]=readxystats(filename)
 %
 % Read x-statistics file as defined in Simson.
 % See wxys.f and boxxys.f for details.
@@ -31,33 +32,33 @@ else
   disp(' ')
   disp(['Reading ' filename ' on little endian format'])
 end
-Re=fread(fid,1,'float64');
-bau=fread(fid,1,'int');
-xl=fread(fid,1,'float64');
-zl=fread(fid,1,'float64');
-t=fread(fid,1,'float64');
-shift=fread(fid,1,'float64');eol=fread(fid,2,'int');
-A=fread(fid,1,'uint8=>char');
-mhd_n=fread(fid,1,'float64');
-b0=fread(fid,3,'float64');eol=fread(fid,2,'int');
-nx=fread(fid,1,'int');
-nyp=fread(fid,1,'int');
-nzc=fread(fid,1,'int');
-nfzsym=fread(fid,1,'int'); eol=fread(fid,2,'int');
-fltype=fread(fid,1,'int');
-dstar=fread(fid,1,'float64'); eol=fread(fid,2,'int');
-if fltype<0
-     rlam=fread(fid,1,'float64'); eol=fread(fid,2,'int');
-elseif fltype >=6
-    bstart=fread(fid,1,'float64');
-    blenght=fread(fid,1,'float64');
-    rlam=fread(fid,1,'float64');
-    spanv=fread(fid,1,'float64'); eol=fread(fid,2,'int');
+flow.Re=fread(fid,1,'float64');
+flow.bau=fread(fid,1,'int');
+flow.xl=fread(fid,1,'float64');
+flow.zl=fread(fid,1,'float64');
+flow.t=fread(fid,1,'float64');
+flow.shift=fread(fid,1,'float64');eol=fread(fid,2,'int');
+flow.A=fread(fid,1,'uint8=>char');
+flow.mhd_n=fread(fid,1,'float64');
+flow.b0=fread(fid,3,'float64');eol=fread(fid,2,'int');
+flow.nx=fread(fid,1,'int');
+flow.nyp=fread(fid,1,'int');
+flow.nzc=fread(fid,1,'int');
+flow.nfzsym=fread(fid,1,'int'); eol=fread(fid,2,'int');
+flow.fltype=fread(fid,1,'int');
+flow.dstar=fread(fid,1,'float64'); eol=fread(fid,2,'int');
+if flow.fltype<0
+     flow.rlam=fread(fid,1,'float64'); eol=fread(fid,2,'int');
+elseif flow.fltype >=6
+    flow.bstart=fread(fid,1,'float64');
+    flow.blenght=fread(fid,1,'float64');
+    flow.rlam=fread(fid,1,'float64');
+    flow.spanv=fread(fid,1,'float64'); eol=fread(fid,2,'int');
 end
-sumw=fread(fid,1,'float64');
-nxys=fread(fid,1,'int');
-nxysth=fread(fid,1,'int');
-scalar=fread(fid,1,'int');
+flow.sumw=fread(fid,1,'float64');
+flow.nxys=fread(fid,1,'int');
+flow.nxysth=fread(fid,1,'int');
+flow.scalar=fread(fid,1,'int');
 %wAstat=logical(fread(fid,1,'int'));
 wAstat = 0;
 eol=fread(fid,1,'int'); %CHECKED
@@ -88,11 +89,14 @@ Lvs={'u','v','w','u2','v2','w2',...
     'umax','vmax','wmax','umin','vmin','wmin'};
 % 
 %last = 44; %nxys = last;
-last=nxys;
+last=flow.nxys;
  if wAstat
-     nxys=nxys+0;
+     flow.nxys=flow.nxys+0;
  end
 %rl=zeros(nyp*nx/2,1);iml=zeros(nyp*nx/2,1);
+nxys=flow.nxys;
+nx=flow.nx;
+nyp=flow.nyp;
 for i=1:1:nxys
     if i>last
         name = Lvs{end-6+mod(i,last)};
@@ -107,16 +111,17 @@ for i=1:1:nxys
     eol=fread(fid,1,'int');
 end
 fclose(fid);
-Re=Re*dstar;
-x=(0:nx-1)/nx * xl/dstar;
-y=(1-cos(linspace(0,pi,nyp))) * 1/2 * 2/dstar;
+flow.Re=flow.Re*flow.dstar;
+x=(0:nx-1)/nx * flow.xl/flow.dstar;
+y=(1-cos(linspace(0,pi,nyp))) * 1/2 * 2/flow.dstar;
 
 % Correct value of umax, umin
+flow.sumw
 if nxys >= 43
-    stat.umin = stat.umin*sumw;
+    stat.umin = stat.umin*flow.sumw;
 end
 if nxys >= 44
-    stat.umax = stat.umax*sumw;
+    stat.umax = stat.umax*flow.sumw;
 end
 
 % Add root-mean-square velocity

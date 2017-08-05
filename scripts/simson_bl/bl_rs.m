@@ -5,7 +5,8 @@ clc
 close all
 
 filename='xy.stat';
-[stat,x,y,Re,fltype,dstar,rlam,spanv,wAstat,sumw]=readxystats(filename);
+%[stat,x,y,Re,fltype,dstar,rlam,spanv,wAstat,sumw]=readxystats(filename);
+[stat,x,y,flow]=readxystats(filename);
 
 [X,Y]=meshgrid(x,y);
 
@@ -60,6 +61,9 @@ cheb_u_deficit = chebfun(1.0 - stat.u);
 dstar = sum(cheb_u_deficit)*Ly;
 cheb_theta_deficit = chebfun((1.0 - stat.u).*stat.u);
 theta = sum(cheb_theta_deficit)*Ly;
+cheb_u = chebfun(stat.u);
+cheb_dudy = diff(cheb_u);
+
 
 figure(1)
 plot(x,delta99)
@@ -85,8 +89,21 @@ xlim([1000 11000])
 
 % generate wall normal profiles
 
-xin = [1000 2000 5000 8000]
+xin = [2000 5000 8000 10000];
 ifynorm = 1;
+cols = lines(length(xin));
+figure(3)
+for i=1:length(xin)
+  [val ind] = min(abs(x-xin(i)));
+
+  ynorm=dstar(ind);
+  plot(stat.vrms(:,ind), y/ynorm, 'Color', cols(i,:)); hold on
+  legs{i} = ['x=' num2str(x(ind))];
+end
+ylim([0 8])
+legend(legs, 'Location', 'best')
+
+
 
 
 

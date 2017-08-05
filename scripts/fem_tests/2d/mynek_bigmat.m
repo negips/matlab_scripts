@@ -6,9 +6,19 @@ close all
 %
 %addpath '../../'
 
-%nekinit4
-load 'matrices_N8_NELV4_CART3'
+nekinit6
+close all
+%load 'matrices_N8_NELV4_CART3'
 %load 'matrices_N11_NELV4_CART3'
+%load 'matrices_N4_NELV64_CART5_1'
+
+% Reset Initial Conditions
+El = SetICs(El,nelv);
+varname='un';
+[velvec] = GatherBig(El,varname,nelv);
+
+% need to reset big matrix
+
 nbasis = length(velvec);
 
 un    = velvec;
@@ -84,7 +94,7 @@ for i = 0:nsteps
      b1 = bigmass*(b11+b12+b13);
 %     b1 = b11+b12+b13;
 
-     c_op = bigconvd*un;
+     c_op = bigconvd_new*un;
      b21 = extk(2)*c_op;
      b22 = extk(3)*blag1;
      b23 = extk(4)*blag2;
@@ -113,10 +123,10 @@ for i = 0:nsteps
           if istep==0
                pause(1)
           else
-               pause(0.001)
+               pause(0.01)
           end
           iocount=iocount+1;
-          hmov(iocount) = getframe(hsoln);
+%          hmov(iocount) = getframe(hsoln);
      end
 
 %    Update lag veclocities
@@ -131,7 +141,7 @@ for i = 0:nsteps
 end
 tt = toc;
 disp(['Total Solve Time: ' num2str(tt)]);
-movie2avi(hmov,'WaveMovie_DEF3.avi');
+%movie2avi(hmov,'WaveMovie_DEF3.avi');
 
 %-------------------------------------------------- 
 %function SetVel(El,soln,gno)
