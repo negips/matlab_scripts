@@ -446,7 +446,7 @@ convalld = convxd + convyd;
 disp('Calculating derivative operators')
 gradm1x = zeros((Nx+1)*(Ny+1),(Nx+1)*(Ny+1));
 
-%%        De-aliasing points 
+%% GLL points
 for l =0:Ny                        % points along s
      wts = wy(l+1);
      sl = y(l+1);
@@ -497,7 +497,7 @@ grad2m1x = gradm1x*gradm1x;
 
 gradm1y = zeros((Nx+1)*(Ny+1),(Nx+1)*(Ny+1));
 
-%%        De-aliasing points 
+%% GLL points 
 for l =0:Ny                        % points along s
      wts = wy(l+1);
      sl = y(l+1);
@@ -547,7 +547,7 @@ grad2m1y = gradm1y*gradm1y;
 % du/dx (on the dealiased grid).
 gradm1xd = zeros((Nxd+1)*(Nyd+1),(Nx+1)*(Ny+1));
 
-%%        De-aliasing points 
+%% over-integration points 
 for l =0:Nyd                        % points along s
      wts = wyd(l+1);
      sl = yd(l+1);
@@ -597,7 +597,7 @@ end
 
 gradm1yd = zeros((Nxd+1)*(Nyd+1),(Nx+1)*(Ny+1));
 
-%%        De-aliasing points 
+%% over-integration points 
 for l =0:Nyd                        % points along s
      wts = wyd(l+1);
      sl = yd(l+1);
@@ -640,10 +640,10 @@ end
 end
 
 
-%% Interpolation to dealiasing grid
+%% Interpolation to over-integration grid
 intpm1d = zeros((Nxd+1)*(Nyd+1),(Nx+1)*(Ny+1));
 wtsvecd = zeros((Nxd+1)*(Nyd+1),1);       % Weight vector for dealiased grid.
-%%        De-aliasing points 
+%% over-integration points 
 for l =0:Nyd                        % points along y
      wts = wyd(l+1);
      sl = yd(l+1);
@@ -733,7 +733,7 @@ lpbc = zeros(N+1);             % Boundary terms for laplacian operator. vdudx(1)
 
 
 %% Build forcing
-
+%---------------------------------------------------------------------- 
 %% Build basis change matrix
 %% Taken directly from nek
 %% In the x-direction
@@ -829,7 +829,6 @@ NxNy_nodal2spec = kron(Nx_nodal2spec,Ny_nodal2spec);
 
 forc = mass*(eye((Nx+1)*(Ny+1))-fil_mat2d);
 
-
 %% Build reverse interpolation
 % Dealiasing grid to GLL grid
 
@@ -845,7 +844,7 @@ for j = 1:lx
   Lj = legendrePoly(n,z);
   pht(j,:) = transpose(Lj);
   if (Nxd>Nx) 
-    pht(j,lx+1:nx) = 0;               % Truncate space to order N
+    pht(j,Nx+2:Nxd+1) = 0;               % Truncate space to order N
   end 
 end
 dealiased_intpx = pht;
@@ -861,7 +860,7 @@ for j = 1:ly
   Lj = legendrePoly(n,z);
   pht(j,:) = transpose(Lj);
   if (Nyd>Ny)
-    pht(j,ly+1:ny) = 0;               % Truncate space to order N
+    pht(j,Ny+2:Nyd+1) = 0;               % Truncate space to order N
   end    
 end
 
@@ -882,7 +881,7 @@ for j = 1:lx
 end
 
 Nxd_spec2nodal = pht;              % Legendre transform of order Nxd
-dealiased_nodal2specx = inv(pht);         % Inverse legendre transform of order Nxd
+Nxd_nodal2spec = inv(pht);         % Inverse legendre transform of order Nxd
 
 %% In the y-direction
 pht = zeros(Nyd+1,Nyd+1);
@@ -897,21 +896,21 @@ for j = 1:ly
 end
 
 Nyd_spec2nodal = pht;              % Legendre transform of order Nyd
-dealiased_nodal2specy = inv(pht);         % Inverse legendre transform of order Nyd
+Nyd_nodal2spec = inv(pht);        % Inverse legendre transform of order Nyd
 
 NxdNyd_spec2nodal = kron(Nxd_spec2nodal,Nyd_spec2nodal);
-dealiased_nodal2spec = kron(dealiased_nodal2specx,dealiased_nodal2specy);
+NxdNyd_nodal2spec = kron(Nxd_nodal2spec,Nyd_nodal2spec);
 
-dealias2gll = dealias_truncatedspec2gll*dealiased_nodal2spec;
+dealias2gll = dealias_truncatedspec2gll*NxdNyd_nodal2spec;
 
 %% Build fast dealiased-convection operator
-convxd = mass*dealias2gll*diag(Cxd_fld(:))*gradm1xd;
-convyd = mass*dealias2gll*diag(Cyd_fld(:))*gradm1yd;
-convalld = convxd + convyd;
-
-%convxd = mass*dealias2gll*diag(intpm1d*Cx_fld(:))*gradm1xd;
-%convyd = mass*dealias2gll*diag(intpm1d*Cy_fld(:))*gradm1yd;
+%convxd = mass*dealias2gll*diag(Cxd_fld(:))*gradm1xd;
+%convyd = mass*dealias2gll*diag(Cyd_fld(:))*gradm1yd;
 %convalld = convxd + convyd;
+
+convxd = mass*dealias2gll*diag(intpm1d*Cx_fld(:))*gradm1xd;
+convyd = mass*dealias2gll*diag(intpm1d*Cy_fld(:))*gradm1yd;
+convalld = convxd + convyd;
 
 %% Another method for convection operator. This procedure does complete integration.
 % While former is the equivalent of the 3/2 rule of dealiasing in fourier methods.
@@ -922,6 +921,38 @@ convalld_new = convxd_new + convyd_new;
 
 
 %dbstop in MESem2D6 at 1168
+%% Testing
+%% Build nodal to spectral transform in dealiasing grid
+%pht = zeros(Nxd+1,Nx+1);
+%nx = Nx+1;
+%lx = Nxd+1;
+%kj = 0;
+%n = nx-1;
+%for j = 1:lx
+%  z=xd(j);
+%  Lj = legendrePoly(n,z);
+%  pht(j,:) = transpose(Lj);
+%end
+%
+%NxNxd_spec2nodal = pht;              % Legendre transform of order Nxd
+%
+%%% In the y-direction
+%pht = zeros(Nyd+1,Ny+1);
+%ny = Ny+1;
+%ly = Nyd+1;
+%kj = 0;
+%n = ny-1;
+%for j = 1:ly
+%  z=yd(j);
+%  Lj = legendrePoly(n,z);
+%  pht(j,:) = transpose(Lj);
+%end
+%
+%NyNyd_spec2nodal = pht;              % Legendre transform of order Nyd
+%
+%dbstop in MESem2D7 at 955
+
+
 
 toc
 

@@ -13,7 +13,7 @@ display(['Time started: ' datestr(clock)])
 SIZE           %    Polynomial order
 re2            %    domain/decomposition/mapping/boundary conditions.
 
-Re=1e+5;
+Re=1e+3;
 nu=1/Re;
 ifboyd = 0;
 destn  = 'plots/';
@@ -197,10 +197,10 @@ end
 bdfkstability = 0;
 
 %% Convective matrix with overintegration. eigen values  
-sysmat = inv(bigmass +nu*biglapl)*bigconvd_new;
-col='b';
-[evec lambda] = SystemEig(sysmat,ifplot,eigfigure,ifsparse,sparsehandle,bdfkstability,col);
-pause(2)    
+%sysmat = inv(bigmass +nu*biglapl)*bigconvd_new;
+%col='b';
+%[evec lambda] = SystemEig(sysmat,ifplot,eigfigure,ifsparse,sparsehandle,bdfkstability,col);
+%pause(2)    
 %
 %if (ifplot)
 %  filename=['spectra_conv_N' num2str(Nx), '_Nxd' num2str(Nxd) '_nelv' num2str(nelv) '.eps'];
