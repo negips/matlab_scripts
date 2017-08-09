@@ -6,16 +6,16 @@ close all
 %
 %addpath '../../'
 
-nekinit6
+nekinit7
 close all
 %load 'matrices_N8_NELV4_CART3'
 %load 'matrices_N11_NELV4_CART3'
 %load 'matrices_N4_NELV64_CART5_1'
 
 % Reset Initial Conditions
-El = SetICs(El,nelv);
-varname='un';
-[velvec] = GatherBig(El,varname,nelv);
+%El = SetICs(El,nelv);
+%varname='un';
+%[velvec] = GatherBig(El,varname,nelv);
 
 % need to reset big matrix
 
@@ -47,8 +47,8 @@ ex2   = [0 3 -3 1];
 %% Rea file parameters.
 deltat = 0.002;
 istep = 0;
-nsteps = 20000;
-iostep = 50;
+nsteps = 50000;
+iostep = 100;
 
 chi = -0.0;
 re=1e5;
@@ -86,7 +86,7 @@ for i = 0:nsteps
      end
 
 %         Build right hand side
-     A = bdfk(1)*bigmass;
+     A = bdfk(1)*(bigmass + nu*biglapl);
 
      b11 = bdfk(2)*un; 
      b12 = bdfk(3)*ulag1; 
@@ -94,7 +94,7 @@ for i = 0:nsteps
      b1 = bigmass*(b11+b12+b13);
 %     b1 = b11+b12+b13;
 
-     c_op = bigconvd_new*un;
+     c_op = (bigconvd_new - 0*bigforc)*un;
      b21 = extk(2)*c_op;
      b22 = extk(3)*blag1;
      b23 = extk(4)*blag2;
@@ -117,9 +117,9 @@ for i = 0:nsteps
           ifsolnplot=1;
           Elout = UpdSoln(El,soln,gno,nelv,lx1,ly1,hsoln,ifsolnplot);
           zlim([-1.2 1.2]);
-          azim=-20;
-          elev=60;
-          view([azim elev]);
+%          azim=-20;
+%          elev=60;
+%          view([azim elev]);
           if istep==0
                pause(1)
           else

@@ -31,8 +31,8 @@ else
      gy(3) = 1;
      gy(4) = 1;
 
-     nelx=2;
-     nely=2;
+     nelx=3;
+     nely=3;
      nelv=nelx*nely;
      disp(['Nelx=' num2str(nelx) '; Nely=' num2str(nely) '; Nelv=' num2str(nelv)]) 
 

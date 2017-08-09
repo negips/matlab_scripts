@@ -1,4 +1,4 @@
-function [mass nek_mass DXM1 DYM1 DXM1D DYM1D RXM1 RYM1 SXM1 SYM1 convx convy convall convxd convyd convalld convxd_new convyd_new convalld_new Cx_fld Cy_fld gradm1x gradm1y gradm1xd gradm1yd intpm1d wtsvecd nek_conv lpx lpy lpall nek_lp lpbc forc NxNy_nodal2spec NxdNyd_spec2nodal x_coeff y_coeff Dx Dy w2m1 xm1 ym1 JACM1 JACM1D xm1d ym1d] = MESem2D6(Nx,Ny,Nxd,Nyd,xc,yc,ifboyd,ifplot)
+function [mass nek_mass DXM1 DYM1 DXM1D DYM1D RXM1 RYM1 SXM1 SYM1 convx convy convall convxd convyd convalld convxd_new convyd_new convalld_new Cx_fld Cy_fld gradm1x gradm1y gradm1xd gradm1yd intpm1d wtsvecd nek_conv lpx lpy lpall nek_lp lpbc forc NxNy_nodal2spec NxdNyd_spec2nodal x_coeff y_coeff Dx Dy w2m1 xm1 ym1 JACM1 JACM1D xm1d ym1d] = MESem2D7(Nx,Ny,Nxd,Nyd,xc,yc,ifboyd,ifplot)
 
 %addpath '../../';
 
@@ -48,9 +48,9 @@ end
 
 w2m1 = zeros(Nx+1,Ny+1);
 for i=0:Nx
-for j=0:Ny
-     w2m1(i+1,j+1) = wx(i+1)*wy(j+1);
-end
+  for j=0:Ny
+    w2m1(i+1,j+1) = wx(i+1)*wy(j+1);
+  end
 end
 
 N = Nx;                  % temporary
@@ -272,166 +272,6 @@ nek_conv = zeros(Nx+1,Nx+1,Ny+1);
 
 %--------------------------------------------------
  
-%% Laplacian term                  % Integration by parts:  dudx.dvdx
-disp('Calculating laplacian')
-lpx = zeros((Nx+1)*(Ny+1),(Nx+1)*(Ny+1));
-
-%for n = 0:Ny
-%     Ln = y_coeff(:,n+1);               % Test function (vx)
-%     dLn = Dy(:,n+1);
-%for m = 0:Nx      
-%     dLm = Dx(:,m+1);                        
-%     Lm = x_coeff(:,m+1);                    % Test function (vx)
-%     for j = 0:Ny
-%          Lj = y_coeff(:,j+1);               % Trial function (uy)
-%          dLj = Dy(:,j+1);
-%     for i = 0:Nx
-%          Li = x_coeff(:,i+1);               % Trial Function (ux)
-%          dLi = Dx(:,i+1);
-%
-%%%        Integration
-%          integral = 0;
-%          for l =0:Ny                        % Weight along y
-%               wty = wy(l+1);
-%               yl = y(l+1);
-%          for k =0:Nx                        % Weight along x
-%               wtx = wx(k+1);
-%               xk = x(k+1);
-%
-%          %    Trial function/derivative values.
-%               ifderiv =0;
-%               Lm_rk = FuncEval(Lm,xk,ifderiv);
-%               ifderiv =0;
-%               Ln_sl = FuncEval(Ln,yl,ifderiv);
-%
-%               ifderiv =1;
-%               dLm_rk = FuncEval(dLm,xk,ifderiv);
-%               ifderiv =1;
-%               dLn_sl = FuncEval(dLn,yl,ifderiv);
-%
-%
-%          %    Test function/derivative values.
-%               ifderiv =0;
-%               Li_rk = FuncEval(Li,xk,ifderiv);
-%               ifderiv =0;
-%               Lj_sl = FuncEval(Lj,yl,ifderiv);
-%
-%               ifderiv =1;
-%               dLi_rk = FuncEval(dLi,xk,ifderiv);
-%               ifderiv =1;
-%               dLj_sl = FuncEval(dLj,yl,ifderiv);
-%
-%               integral1 = w2m1(k+1,l+1)*(dLm_rk*RXM1(k+1,l+1)*Ln_sl + ...
-%                         dLn_sl*SXM1(k+1,l+1)*Lm_rk)* ...
-%                         (dLi_rk*RXM1(k+1,l+1)*Lj_sl + dLj_sl*SXM1(k+1,l+1)*Li_rk);
-%               integral = integral + integral1; 
-%          end
-%          end
-%%%        End of integration
-%
-%          posx = n*(Nx+1) + m + 1;
-%          posy = j*(Nx+1) + i + 1;
-%%         Since we build this very generally...
-%%         Numerical errors occur
-%          if abs(integral)<1e-12
-%               integral==0;
-%          end
-%          lpx(posx,posy) = integral;
-%     end
-%     end
-%
-%end
-%end
-%lpx = -lpx;
-%
-%
-%% Laplacian term                  % Integration by parts:  dudx.dvdx
-lpy = zeros((Nx+1)*(Ny+1),(Nx+1)*(Ny+1));
-%
-%for n = 0:Ny
-%     Ln = y_coeff(:,n+1);                         % Test function (vx)
-%     dLn = Dy(:,n+1);
-%for m = 0:Nx      
-%     Lm = x_coeff(:,m+1);                         % Test function (vx)
-%     dLm = Dx(:,m+1);
-%     for j = 0:Ny
-%          Lj = y_coeff(:,j+1);                         % Trial function (uy)
-%          dLj = Dy(:,j+1);
-%     for i = 0:Nx
-%          Li = x_coeff(:,i+1);                    % Trial Function (ux)
-%          dLi = Dx(:,i+1);
-%
-%%%        Integration
-%          integral = 0;
-%          for l =0:Ny                             % Weight along y
-%               wty = wy(l+1);
-%               yl = y(l+1);
-%          for k =0:Nx                             % Weight along x
-%               wtx = wx(k+1);
-%               xk = x(k+1);
-%
-%          %    Trial function/derivative values.
-%               ifderiv =0;
-%               Lm_rk = FuncEval(Lm,xk,ifderiv);
-%               ifderiv =0;
-%               Ln_sl = FuncEval(Ln,yl,ifderiv);
-%
-%               ifderiv =1;
-%               dLm_rk = FuncEval(dLm,xk,ifderiv);
-%               ifderiv =1;
-%               dLn_sl = FuncEval(dLn,yl,ifderiv);
-%
-%
-%          %    Test function/derivative values.
-%               ifderiv =0;
-%               Li_rk = FuncEval(Li,xk,ifderiv);
-%               ifderiv =0;
-%               Lj_sl = FuncEval(Lj,yl,ifderiv);
-%
-%               ifderiv =1;
-%               dLi_rk = FuncEval(dLi,xk,ifderiv);
-%               ifderiv =1;
-%               dLj_sl = FuncEval(dLj,yl,ifderiv);
-%
-%               integral1 = w2m1(k+1,l+1)*(dLm_rk*RYM1(k+1,l+1)*Ln_sl + ...
-%                         dLn_sl*SYM1(k+1,l+1)*Lm_rk)* ...
-%                         (dLi_rk*RYM1(k+1,l+1)*Lj_sl + dLj_sl*SYM1(k+1,l+1)*Li_rk);
-%               integral = integral + integral1;
-%          end
-%          end
-%%%        End of integration
-%
-%          posx = n*(Nx+1) + m + 1;
-%          posy = j*(Nx+1) + i + 1;
-%%         Since we build this very generally...
-%%         Numerical errors occur
-%          if abs(integral)<1e-10
-%               integral==0;
-%          end
-%          lpy(posx,posy) = integral;
-%     end
-%     end
-%
-%end
-%end
-%lpy = -lpy;
-%
-lpall = lpx + lpy;
-
-%--------------------------------------------------
-%    Laplacian operator as Nek builds it. 
-nek_lp = zeros(Nx+1,Nx+1,Ny+1);
-for kk=0:Ny
-     ii_st = kk*(Nx+1)+1;
-     ii_en = (kk+1)*(Nx+1);
-
-     jj_st = kk*(Nx+1)+1;
-     jj_en = (kk+1)*(Nx+1);
-     nek_lp(:,:,kk+1) = lpall(ii_st:ii_en,jj_st:jj_en);
-end
-%-------------------------------------------------- 
-lpbc = zeros(N+1);             % Boundary terms for laplacian operator. vdudx(1) - vdudx(-1)
-
 %% Dealiasing
 %-------------------------------------------------- 
 disp('Calculating dealiased linear convective matrix')
@@ -594,135 +434,16 @@ SYM1D = XRM1D;
 [Cx_fld Cy_fld] = GetConvectingfield(xm1,ym1);       % On the GLL grid
 [Cxd_fld Cyd_fld] = GetConvectingfield(xm1d,ym1d);       % On the dealiased grid
 
-
+%% Convection
 convxd = zeros((Nx+1)*(Ny+1),(Nx+1)*(Ny+1));
-%
-%for n = 0:Ny
-%     Ln = y_coeff(:,n+1);               % Test function (vx)
-%for m = 0:Nx      
-%     Lm = x_coeff(:,m+1);               % Test function (vx)
-%     for j = 0:Ny
-%          Lj = y_coeff(:,j+1);          % Trial function (uy)
-%          dLj = Dy(:,j+1);
-%     for i = 0:Nx
-%          Li = x_coeff(:,i+1);               % Trial Function (ux)
-%          dLi = Dx(:,i+1);
-%
-%%%        Integration
-%          integral = 0;
-%          for k =0:Nxd                        % Weight along x
-%               wtx = wxd(k+1);
-%               xk = xd(k+1);
-%          for l =0:Nyd                        % Weight along y
-%               wty = wyd(l+1);
-%               yl = yd(l+1);
-%
-%          %    Trial function/derivative values.
-%               ifderiv =0;
-%               Lm_xk = FuncEval(Lm,xk,ifderiv);
-%               ifderiv =0;
-%               Ln_yl = FuncEval(Ln,yl,ifderiv);
-%
-%          %    Test function/derivative values.
-%               ifderiv =0;
-%               Li_xk = FuncEval(Li,xk,ifderiv);
-%               ifderiv =0;
-%               Lj_yl = FuncEval(Lj,yl,ifderiv);
-%
-%               ifderiv =1;
-%               dLi_xk = FuncEval(dLi,xk,ifderiv);
-%               ifderiv =1;
-%               dLj_yl = FuncEval(dLj,yl,ifderiv);
-%
-%%              We don't multiply with jacobian here since RXM1 etc have (JACM1)^(-1) factor.
-%%              Which is omitted in those terms
-%               integral1 = wtx*wty*Lm_xk*Ln_yl*(dLi_xk*RXM1D(k+1,l+1)*Lj_yl*Cxd_fld(k+1,l+1) + Li_xk*SXM1D(k+1,l+1)*dLj_yl*Cyd_fld(k+1,l+1));
-%               integral = integral + integral1; 
-%          end
-%          end
-%%%        End of integration
-%
-%          posx = n*(Nx+1) + m + 1;
-%          posy = j*(Nx+1) + i + 1;
-%%         Since we build this very generally...
-%%         Numerical errors occur
-%          if abs(integral)<1e-12
-%               integral==0;
-%          end
-%          convxd(posx,posy) = integral;
-%     end
-%     end
-%
-%end
-%end
-%
 convyd = zeros((Nx+1)*(Ny+1),(Nx+1)*(Ny+1));
-%
-%for n = 0:Ny
-%     Ln = y_coeff(:,n+1);               % Test function (vx)
-%for m = 0:Nx      
-%     Lm = x_coeff(:,m+1);               % Test function (vx)
-%     for j = 0:Ny
-%          Lj = y_coeff(:,j+1);          % Trial function (uy)
-%          dLj = Dy(:,j+1);
-%     for i = 0:Nx
-%          Li = x_coeff(:,i+1);               % Trial Function (ux)
-%          dLi = Dx(:,i+1);
-%
-%%%        Integration
-%          integral = 0;
-%          for k =0:Nxd                        % Weight along x
-%               wtx = wxd(k+1);
-%               xk = xd(k+1);
-%          for l =0:Nyd                        % Weight along y
-%               wty = wyd(l+1);
-%               yl = yd(l+1);
-%
-%          %    Trial function/derivative values.
-%               ifderiv =0;
-%               Lm_xk = FuncEval(Lm,xk,ifderiv);
-%               ifderiv =0;
-%               Ln_yl = FuncEval(Ln,yl,ifderiv);
-%
-%          %    Test function/derivative values.
-%               ifderiv =0;
-%               Li_xk = FuncEval(Li,xk,ifderiv);
-%               ifderiv =0;
-%               Lj_yl = FuncEval(Lj,yl,ifderiv);
-%
-%               ifderiv =1;
-%               dLi_xk = FuncEval(dLi,xk,ifderiv);
-%               ifderiv =1;
-%               dLj_yl = FuncEval(dLj,yl,ifderiv);
-%
-%%              We don't multiply with jacobian here since RXM1 etc have (JACM1)^(-1) factor.
-%%              Which is omitted in those terms
-%               integral1 = wtx*wty*Lm_xk*Ln_yl*(dLi_xk*RYM1D(k+1,l+1)*Lj_yl + Li_xk*SYM1D(k+1,l+1)*dLj_yl);
-%               integral = integral + integral1; 
-%
-%          end
-%          end
-%%%        End of integration
-%
-%          posx = n*(Nx+1) + m + 1;
-%          posy = j*(Nx+1) + i + 1;
-%%         Since we build this very generally...
-%%         Numerical errors occur
-%          if abs(integral)<1e-12
-%               integral==0;
-%          end
-%          convyd(posx,posy) = integral;
-%     end
-%     end
-%
-%end
-%end
-%
 convalld = convxd + convyd;
 
 % Just derivative operator.
 % No integration
 % du/dx (on the dealiased grid).
+
+disp('Calculating derivative operators')
 gradm1x = zeros((Nx+1)*(Ny+1),(Nx+1)*(Ny+1));
 
 %%        De-aliasing points 
@@ -767,6 +488,8 @@ for k =0:Nx                        % points along r
 
 end
 end
+
+grad2m1x = gradm1x*gradm1x;
 
 % Just derivative operator.
 % No integration
@@ -817,12 +540,11 @@ for k =0:Nx                        % points along r
 end
 end
 
+grad2m1y = gradm1y*gradm1y;
 
 % Just derivative operator.
 % No integration
 % du/dx (on the dealiased grid).
-
-disp('Calculating derivative operators')
 gradm1xd = zeros((Nxd+1)*(Nyd+1),(Nx+1)*(Ny+1));
 
 %%        De-aliasing points 
@@ -918,6 +640,7 @@ end
 end
 
 
+%% Interpolation to dealiasing grid
 intpm1d = zeros((Nxd+1)*(Nyd+1),(Nx+1)*(Ny+1));
 wtsvecd = zeros((Nxd+1)*(Nyd+1),1);       % Weight vector for dealiased grid.
 %%        De-aliasing points 
@@ -960,6 +683,53 @@ for k =0:Nxd                        % points along x
 
 end
 end
+
+%% Laplacian term                  % Integration by parts:  dudx.dvdx
+%---------------------------------------------------------------------- 
+disp('Calculating laplacian')
+lpx = zeros((Nx+1)*(Ny+1),(Nx+1)*(Ny+1));
+trial_fcn = zeros((Nx+1)*(Ny+1),1);
+deriv_trial = zeros((Nx+1)*(Ny+1),1);
+trial_mat = zeros((Nx+1)*(Ny+1),(Nx+1)*(Ny+1));
+geom_fac = diag(JACM1(:))*diag(w2m1(:));
+for l=1:(Nx+1)*(Ny+1)         % trial function
+  trial = trial_fcn;
+  trial(l) = 1;
+  deriv_trial = gradm1x*trial;
+  trial_mat(l,:) = transpose(deriv_trial);
+end
+lpx = trial_mat*geom_fac*gradm1x;
+
+
+%% Laplacian term                  % Integration by parts:  dudx.dvdx
+lpy = zeros((Nx+1)*(Ny+1),(Nx+1)*(Ny+1));
+trial_fcn = zeros((Nx+1)*(Ny+1),1);
+trial_mat = zeros((Nx+1)*(Ny+1),(Nx+1)*(Ny+1));
+for l=1:(Nx+1)*(Ny+1)         % trial function
+  trial = trial_fcn;
+  trial(l) = 1;
+  deriv_trial = geom_fac*gradm1y*trial;
+  trial_mat(l,:) = transpose(deriv_trial);
+end
+lpy = trial_mat*gradm1y;
+
+lpall = lpx + lpy;
+
+%--------------------------------------------------
+%    Laplacian operator as Nek builds it. 
+nek_lp = zeros(Nx+1,Nx+1,Ny+1);
+%for kk=0:Ny
+%     ii_st = kk*(Nx+1)+1;
+%     ii_en = (kk+1)*(Nx+1);
+%
+%     jj_st = kk*(Nx+1)+1;
+%     jj_en = (kk+1)*(Nx+1);
+%     nek_lp(:,:,kk+1) = lpall(ii_st:ii_en,jj_st:jj_en);
+%end
+%-------------------------------------------------- 
+lpbc = zeros(N+1);             % Boundary terms for laplacian operator. vdudx(1) - vdudx(-1)
+
+
 
 
 %% Build forcing
@@ -1135,13 +905,13 @@ dealiased_nodal2spec = kron(dealiased_nodal2specx,dealiased_nodal2specy);
 dealias2gll = dealias_truncatedspec2gll*dealiased_nodal2spec;
 
 %% Build fast dealiased-convection operator
-%convxd = mass*dealias2gll*diag(Cxd_fld(:))*gradm1xd;
-%convyd = mass*dealias2gll*diag(Cyd_fld(:))*gradm1yd;
-%convalld = convxd + convyd;
-
-convxd = mass*dealias2gll*diag(intpm1d*Cx_fld(:))*gradm1xd;
-convyd = mass*dealias2gll*diag(intpm1d*Cy_fld(:))*gradm1yd;
+convxd = mass*dealias2gll*diag(Cxd_fld(:))*gradm1xd;
+convyd = mass*dealias2gll*diag(Cyd_fld(:))*gradm1yd;
 convalld = convxd + convyd;
+
+%convxd = mass*dealias2gll*diag(intpm1d*Cx_fld(:))*gradm1xd;
+%convyd = mass*dealias2gll*diag(intpm1d*Cy_fld(:))*gradm1yd;
+%convalld = convxd + convyd;
 
 %% Another method for convection operator. This procedure does complete integration.
 % While former is the equivalent of the 3/2 rule of dealiasing in fourier methods.

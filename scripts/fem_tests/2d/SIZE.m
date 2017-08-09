@@ -4,9 +4,9 @@
 
 % Polynomial orders
 
-Nx = 12;
+Nx = 9;
 lx1=Nx+1;
-%Nxd = 9;
+%Nxd = Nx;
 Nxd = ceil(3/2*(Nx+1));
 
 Ny = Nx;            % For now. Maybe will test a more general case later.

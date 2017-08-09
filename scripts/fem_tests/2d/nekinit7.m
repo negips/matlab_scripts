@@ -13,6 +13,8 @@ display(['Time started: ' datestr(clock)])
 SIZE           %    Polynomial order
 re2            %    domain/decomposition/mapping/boundary conditions.
 
+Re=1e+5;
+nu=1/Re;
 ifboyd = 0;
 destn  = 'plots/';
 ifplot = 0;
@@ -24,7 +26,7 @@ for ii=1:nelv
      % clc 
      display(['Building Matrices for Element ', num2str(ii)])
 
-     [mass nek_mass DXM1 DYM1 DXM1D DYM1D RXM1 RYM1 SXM1 SYM1 convx convy convall convxd convyd convalld convxd_new convyd_new convalld_new Cfx Cfy gradm1x gradm1y gradm1xd gradm1yd intpm1d wtsvecd nek_conv lpx lpy lpall nek_lp lpbc forc NxNy_nodal2spec NxdNyd_spec2nodal x_coeff y_coeff Dx Dy w2m1 xm1 ym1 JACM1 JACM1D xm1d ym1d] = MESem2D6(Nx,Ny,Nxd,Nyd,El(ii).xc,El(ii).yc,ifboyd,ifplot);
+     [mass nek_mass DXM1 DYM1 DXM1D DYM1D RXM1 RYM1 SXM1 SYM1 convx convy convall convxd convyd convalld convxd_new convyd_new convalld_new Cfx Cfy gradm1x gradm1y gradm1xd gradm1yd intpm1d wtsvecd nek_conv lpx lpy lpall nek_lp lpbc forc NxNy_nodal2spec NxdNyd_spec2nodal x_coeff y_coeff Dx Dy w2m1 xm1 ym1 JACM1 JACM1D xm1d ym1d] = MESem2D7(Nx,Ny,Nxd,Nyd,El(ii).xc,El(ii).yc,ifboyd,ifplot);
 
      El(ii).mass = mass;      
      El(ii).nek_mass = nek_mass;
@@ -69,6 +71,8 @@ for ii=1:nelv
      El(ii).JACM1D = JACM1D;
 
      El(ii).nek_conv = nek_conv;
+     El(ii).laplx = lpx;
+     El(ii).laply = lpy;
      El(ii).lapl = lpall;
      El(ii).nek_lp = nek_lp;
      El(ii).xm1 = xm1;
@@ -172,7 +176,7 @@ plotgll=0;
 %nekchecks(El,Nx,Ny,nelx,nely,nelv,plotgll)
 
 plotspy=1;
-[bigmass bigconv bigconvd bigconvxd bigforc bigconvd_new velvec gno nreps El] = AssembleBig6(El,Nx,Ny,nelx,nely,nelv,plotspy);
+[bigmass bigconv bigconvd bigconvxd bigforc bigconvd_new biglapl velvec gno nreps El] = AssembleBig7(El,Nx,Ny,nelx,nely,nelv,plotspy);
 
 %% Check eigenvalues of the system
 eigfigure=[];
@@ -193,10 +197,10 @@ end
 bdfkstability = 0;
 
 %% Convective matrix with overintegration. eigen values  
-%sysmat = inv(bigmass)*bigconvd_new;
-%col='b';
-%[evec lambda] = SystemEig(sysmat,ifplot,eigfigure,ifsparse,sparsehandle,bdfkstability,col);
-%pause(2)    
+sysmat = inv(bigmass +nu*biglapl)*bigconvd_new;
+col='b';
+[evec lambda] = SystemEig(sysmat,ifplot,eigfigure,ifsparse,sparsehandle,bdfkstability,col);
+pause(2)    
 %
 %if (ifplot)
 %  filename=['spectra_conv_N' num2str(Nx), '_Nxd' num2str(Nxd) '_nelv' num2str(nelv) '.eps'];
@@ -225,12 +229,12 @@ ifsparse=0;
 pause(2)    
 %
 %%% (Convective - Forcing) matrix eigenvalues
-%sysmat = inv(bigmass)*(bigconvd - bigforc);
-%col='r';
-%ifsparse=0;
-%ifplot=1;
-%[evec lambda] = SystemEig(sysmat,ifplot,eigfigure,ifsparse,sparsehandle,bdfkstability, col);
-%pause(2)    
+sysmat = inv(bigmass + nu*biglapl)*(bigconvd - 0*bigforc);
+col='r';
+ifsparse=0;
+ifplot=1;
+[evec lambda] = SystemEig(sysmat,ifplot,eigfigure,ifsparse,sparsehandle,bdfkstability, col);
+pause(2)    
 
 %%
 
