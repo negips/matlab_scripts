@@ -10,7 +10,9 @@ nekinit7
 close all
 %load 'matrices_N8_NELV4_CART3'
 %load 'matrices_N11_NELV4_CART3'
-%load 'matrices_N4_NELV64_CART5_1'
+%load 'matrices_N9_NELV9_CART5_1'
+Re=1e+5;
+nu=1/Re;
 
 % Reset Initial Conditions
 %El = SetICs(El,nelv);
@@ -30,6 +32,13 @@ blag2 = zeros(size(velvec));
 soln = zeros(size(velvec));
 minv = zeros(size(velvec));
 
+umean = zeros(size(velvec));
+u2mean = zeros(size(velvec));
+stat_alpha = 0.;
+stat_beta  = 0.;
+stat_atime = 0.;
+
+
 hini=figure;
 ifsolnplot=1;
 Elout = UpdSoln(El,velvec,gno,nelv,lx1,ly1,hini,ifsolnplot);
@@ -47,7 +56,7 @@ ex2   = [0 3 -3 1];
 %% Rea file parameters.
 deltat = 0.002;
 istep = 0;
-nsteps = 50000;
+nsteps = 100000;
 iostep = 100;
 
 chi = -0.0;
@@ -85,7 +94,7 @@ for i = 0:nsteps
           extk = ex2;
      end
 
-%         Build right hand side
+%    Build right hand side
      A = bdfk(1)*(bigmass + nu*biglapl);
 
      b11 = bdfk(2)*un; 
@@ -94,7 +103,7 @@ for i = 0:nsteps
      b1 = bigmass*(b11+b12+b13);
 %     b1 = b11+b12+b13;
 
-     c_op = (bigconvd_new - 0*bigforc)*un;
+     c_op = (bigconvd - 0*bigforc)*un;
      b21 = extk(2)*c_op;
      b22 = extk(3)*blag1;
      b23 = extk(4)*blag2;
@@ -138,7 +147,26 @@ for i = 0:nsteps
      blag2 = blag1;
      blag1 = c_op;
 
+%    Statistics
+     stat_atime = stat_atime+deltat;
+     stat_beta = deltat/stat_atime;
+     stat_alpha = 1. - stat_beta;
+      
+     umean = stat_alpha*umean +  stat_beta*soln;
+     u2mean = stat_alpha*u2mean + stat_beta*(soln.^2);
+
 end
+El = ScatterBig(El,'umean', umean,nelv);
+PlotVar(El,'umean',nelv)
+
+El = ScatterBig(El,'u2mean', u2mean,nelv);
+PlotVar(El,'u2mean',nelv)
+
+uvariance = u2mean - umean.^2;
+El = ScatterBig(El,'uvar', uvariance,nelv);
+PlotVar(El,'uvar',nelv)
+
+
 tt = toc;
 disp(['Total Solve Time: ' num2str(tt)]);
 %movie2avi(hmov,'WaveMovie_DEF3.avi');

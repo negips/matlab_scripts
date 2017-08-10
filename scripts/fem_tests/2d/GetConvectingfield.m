@@ -14,7 +14,7 @@ alpha2=m*2*pi;
 beta2=m*2*pi;
 
 
-V0=1.0;
+V0=0.37;
 U0=1.0;
 
 du=0.1*U0;
@@ -28,7 +28,7 @@ Cy = V0 + dv*sin(alpha*xm1 + beta*ym1) + 0.0*dv*sin(alpha2*xm1);
 
 % Add a disturbance to the divergence free convection field
 
-d0 = 0e-2;         % disturbance amplitude
+d0 = 0e-4;         % disturbance amplitude
 alpha3 = 2*pi;
 beta3  = 2*pi;
 

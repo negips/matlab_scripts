@@ -14,7 +14,7 @@ SIZE           %    Polynomial order
 re2            %    domain/decomposition/mapping/boundary conditions.
 
 Re=1e+3;
-nu=1/Re;
+nu=0; %1/Re;
 ifboyd = 0;
 destn  = 'plots/';
 ifplot = 0;
@@ -26,7 +26,7 @@ for ii=1:nelv
      % clc 
      display(['Building Matrices for Element ', num2str(ii)])
 
-     [mass nek_mass DXM1 DYM1 DXM1D DYM1D RXM1 RYM1 SXM1 SYM1 convx convy convall convxd convyd convalld convxd_new convyd_new convalld_new Cfx Cfy gradm1x gradm1y gradm1xd gradm1yd intpm1d intpd2m1 wtsvecd massd nek_conv lpx lpy lpall nek_lp lpbc forc NxNy_nodal2spec NxdNyd_spec2nodal x_coeff y_coeff Dx Dy w2m1 xm1 ym1 JACM1 JACM1D xm1d ym1d] = MESem2D7(Nx,Ny,Nxd,Nyd,El(ii).xc,El(ii).yc,ifboyd,ifplot);
+     [mass nek_mass DXM1 DYM1 DXM1D DYM1D RXM1 RYM1 SXM1 SYM1 convx convy convall convxd convyd convalld convxd_new convyd_new convalld_new Cfx Cfy gradm1x gradm1y gradm1xd gradm1yd intpm1d intpd2m1 wtsvecd massd nek_conv lpx lpy lpall nek_lp lpbc forc NxNy_nodal2spec NxdNyd_spec2nodal x_coeff y_coeff Dx Dy w2m1 xm1 ym1 JACM1 JACM1D xm1d ym1d] = MESem2D8(Nx,Ny,Nxd,Nyd,El(ii).xc,El(ii).yc,ifboyd,ifplot);
 
      El(ii).mass = mass;      
      El(ii).nek_mass = nek_mass;
@@ -198,17 +198,13 @@ plotspy=1;
 %% Check eigenvalues of the system
 eigfigure=[];
 ifplot=1;
-if (ifplot)
-  eigfigure=figure;
-  hold on
-end
+eigfigure=figure;
+hold on
 
 sparsehandle=[];
 ifsparse=1;
-if (ifsparse)
-  sparsehandle=figure;
-  hold on
-end
+sparsehandle=figure;
+hold on
 
 bdfkstability = 0;
 
@@ -240,17 +236,17 @@ pause(2)
 % Convective matrix eigen values 
 sysmat = inv(bigmass)*bigconvd;
 col='k';
-ifsparse=0;
+ifsparse=1;
 [evec lambda] = SystemEig(sysmat,ifplot,eigfigure,ifsparse,sparsehandle,bdfkstability,col);
 pause(2)    
 %%
 %%%% (Convective - Forcing) matrix eigenvalues
-sysmat = inv(bigmass + 0.1*nu*biglapl)*(bigconvd - bigforc);
-col='r';
-ifsparse=0;
-ifplot=1;
-[evec lambda] = SystemEig(sysmat,ifplot,eigfigure,ifsparse,sparsehandle,bdfkstability, col);
-pause(2)    
+%sysmat = inv(bigmass + nu*biglapl)*(bigconvd - 0*bigforc);
+%col='r';
+%ifsparse=0;
+%ifplot=1;
+%[evec lambda] = SystemEig(sysmat,ifplot,eigfigure,ifsparse,sparsehandle,bdfkstability, col);
+%pause(2)    
 
 %%
 

@@ -1,4 +1,4 @@
-function [mass nek_mass DXM1 DYM1 DXM1D DYM1D RXM1 RYM1 SXM1 SYM1 convx convy convall convxd convyd convalld convxd_new convyd_new convalld_new Cx_fld Cy_fld gradm1x gradm1y gradm1xd gradm1yd intpm1d intpd2m1 wtsvecd massd nek_conv lpx lpy lpall nek_lp lpbc forc NxNy_nodal2spec NxdNyd_spec2nodal x_coeff y_coeff Dx Dy w2m1 xm1 ym1 JACM1 JACM1D xm1d ym1d] = MESem2D7(Nx,Ny,Nxd,Nyd,xc,yc,ifboyd,ifplot)
+function [mass nek_mass DXM1 DYM1 DXM1D DYM1D RXM1 RYM1 SXM1 SYM1 convx convy convall convxd convyd convalld convxd_new convyd_new convalld_new Cx_fld Cy_fld gradm1x gradm1y gradm1xd gradm1yd intpm1d intpd2m1 wtsvecd massd nek_conv lpx lpy lpall nek_lp lpbc forc NxNy_nodal2spec NxdNyd_spec2nodal x_coeff y_coeff Dx Dy w2m1 xm1 ym1 JACM1 JACM1D xm1d ym1d] = MESem2D8(Nx,Ny,Nxd,Nyd,xc,yc,ifboyd,ifplot)
 
 %addpath '../../';
 
@@ -254,7 +254,8 @@ for jj = 0:Ny
   end
 end
 
-%% Over-integration matrices
+%% Over-integration matrices using higher order GLL points
+%-------------------------------------------------- 
 if Nxd>1
   [xd wxd p]= lglnodes(Nxd);
   xd =xd(end:-1:1);
@@ -395,7 +396,105 @@ RYM1D = -XSM1D;
 SXM1D = -YRM1D;
 SYM1D = XRM1D;
 
+%--------------------------------------------------
 
+%% Over-integration matrices using higher order GL points (Gauss-Legendre)
+%-------------------------------------------------- 
+if Nxd>1
+  [xGL wxGL]= lgwt(Nxd+1,-1,1);
+else
+  xGL=[0];
+  wxGL=[1];
+end
+
+if Nyd>1
+  [yGL wyGL]= lgwt(Nyd+1,-1,1);
+else
+  yGL=[0];
+  wyGL=[1];
+end
+
+%% Interpolate to Gauss Legendre points.
+%% Work in progress
+
+%% GLL spectral to Gauss Legendre nodal
+%% In the x-direction
+pht = zeros(Nxd+1,Nx+1);
+for j = 1:Nxd+1
+  z=xGL(j);
+  Lj = legendrePoly(Nx,z);
+  pht(j,:) = transpose(Lj);
+end
+Nx_spec2Gauss = pht;
+
+%% In the y-direction
+pht = zeros(Nyd+1,Ny+1);
+for j = 1:Nyd+1
+  z=yGL(j);
+  Lj = legendrePoly(Ny,z);
+  pht(j,:) = transpose(Lj);
+end
+Ny_spec2Gauss = pht;
+%-------------------------------------------------- 
+pht = zeros(Nxd+1,Nxd+1);
+for j = 1:Nxd+1
+  z=xGL(j);
+  Lj = legendrePoly(Nxd,z);
+  pht(j,:) = transpose(Lj);
+end
+Nxd_spec2Gauss = pht;
+Nxd_Gauss2spec = inv(pht);
+
+%% In the y-direction
+pht = zeros(Nyd+1,Nyd+1);
+for j = 1:Nyd+1
+  z=yGL(j);
+  Lj = legendrePoly(Nyd,z);
+  pht(j,:) = transpose(Lj);
+end
+Nyd_spec2Gauss = pht;
+Nyd_Gauss2spec = inv(pht);
+%-------------------------------------------------- 
+% filter
+filterx=eye(Nxd+1);
+if (Nxd>Nx)
+  for ii=Nx+2:Nxd+1
+    filterx(ii,ii)=0;
+  end
+end  
+filtery=eye(Nyd+1);
+if (Nyd>Ny)
+  for ii=Ny+2:Nyd+1
+    filtery(ii,ii)=0;
+  end
+end 
+%--------------------------------------------------
+% Gauss spectral to GLL
+pht = zeros(Nx+1,Nxd+1);
+for j = 1:Nx+1
+  z=x(j);
+  Lj = legendrePoly(Nxd,z);
+  pht(j,:) = transpose(Lj);
+end
+Nxd_spec2GLL = pht;
+
+%% In the y-direction
+pht = zeros(Ny+1,Nyd+1);
+for j = 1:Ny+1
+  z=y(j);
+  Lj = legendrePoly(Nyd,z);
+  pht(j,:) = transpose(Lj);
+end
+Nyd_spec2GLL = pht;
+
+%--------------------------------------------------  
+truncated_interpolationx = Nxd_spec2GLL*filterx*Nxd_Gauss2spec;
+truncated_interpolationy = Nyd_spec2GLL*filtery*Nyd_Gauss2spec;
+
+filtered_Gauss2GLL = kron(truncated_interpolationy,truncated_interpolationx);
+
+dbstop in MESem2D8 at 500
+%-------------------------------------------------- 
 
 % matrix for vdu/dx.           
 % This is a full matrix.
@@ -761,6 +860,7 @@ lpbc = zeros(N+1);             % Boundary terms for laplacian operator. vdudx(1)
 %% Build basis change matrix
 %% Taken directly from nek
 %% In the x-direction
+pht=[];
 nx = Nx+1;
 kj = 0;
 n = nx-1;
@@ -785,7 +885,7 @@ Nx_nodal2spec = inv(Nx_spec2nodal);
 alpha_x=0.1;
 Gx = eye(Nx+1);
 Gx(Nx+1,Nx+1)=1-alpha_x;
-Gx(Nx,Nx)=1-alpha_x.^2;
+%Gx(Nx,Nx)=1-alpha_x.^2;
 
 % Build matrix which applies filter on Boyd transformed basis.
 % And then transforms back to physical space.
@@ -805,6 +905,7 @@ fil_mat_x = boydstonodal_x*Gx*nodaltoboyds_x;
 
 
 %% In the y-direction
+pht=[];
 ny = Ny+1;
 kj = 0;
 n = ny-1;
@@ -841,7 +942,7 @@ nodaltoboyds_y = inv(boydstonodal_y);
 alpha_y=0.1;
 Gy = eye(Ny+1);
 Gy(Ny+1,Ny+1)=1-alpha_y;
-Gy(Ny,Ny)=1-alpha_y.^2;
+%Gy(Ny,Ny)=1-alpha_y.^2;
 
 % Build matrix which applies filter on Boyd transformed basis.
 % And then transforms back to physical space.
@@ -932,15 +1033,19 @@ dealias2gll = dealias_truncatedspec2gll*NxdNyd_nodal2spec;
 %convyd = mass*dealias2gll*diag(Cyd_fld(:))*gradm1yd;
 %convalld = convxd + convyd;
 
-convxd = mass*dealias2gll*diag(intpm1d*Cx_fld(:))*gradm1xd;
-convyd = mass*dealias2gll*diag(intpm1d*Cy_fld(:))*gradm1yd;
-convalld = convxd + convyd;
+%convxd = mass*dealias2gll*diag(intpm1d*Cx_fld(:))*gradm1xd;
+%convyd = mass*dealias2gll*diag(intpm1d*Cy_fld(:))*gradm1yd;
+%convalld = convxd + convyd;
 
 %convxd = mass*intpd2m1*diag(intpm1d*Cx_fld(:))*gradm1xd;
 %convyd = mass*intpd2m1*diag(intpm1d*Cy_fld(:))*gradm1yd;
 %convalld = convxd + convyd;
 %
 %max(max(convalld - convalld1))
+
+convxd = mass*filtered_Gauss2GLL*diag(intpm1d*Cx_fld(:))*gradm1xd;
+convyd = mass*filtered_Gauss2GLL*diag(intpm1d*Cy_fld(:))*gradm1yd;
+convalld = convxd + convyd;
 
 
 %% Another method for convection operator. This procedure does complete integration.
