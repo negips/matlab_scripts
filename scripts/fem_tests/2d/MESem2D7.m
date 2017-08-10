@@ -1,4 +1,4 @@
-function [mass nek_mass DXM1 DYM1 DXM1D DYM1D RXM1 RYM1 SXM1 SYM1 convx convy convall convxd convyd convalld convxd_new convyd_new convalld_new Cx_fld Cy_fld gradm1x gradm1y gradm1xd gradm1yd intpm1d wtsvecd nek_conv lpx lpy lpall nek_lp lpbc forc NxNy_nodal2spec NxdNyd_spec2nodal x_coeff y_coeff Dx Dy w2m1 xm1 ym1 JACM1 JACM1D xm1d ym1d] = MESem2D7(Nx,Ny,Nxd,Nyd,xc,yc,ifboyd,ifplot)
+function [mass nek_mass DXM1 DYM1 DXM1D DYM1D RXM1 RYM1 SXM1 SYM1 convx convy convall convxd convyd convalld convxd_new convyd_new convalld_new Cx_fld Cy_fld gradm1x gradm1y gradm1xd gradm1yd intpm1d intpd2m1 wtsvecd massd nek_conv lpx lpy lpall nek_lp lpbc forc NxNy_nodal2spec NxdNyd_spec2nodal x_coeff y_coeff Dx Dy w2m1 xm1 ym1 JACM1 JACM1D xm1d ym1d] = MESem2D7(Nx,Ny,Nxd,Nyd,xc,yc,ifboyd,ifplot)
 
 %addpath '../../';
 
@@ -248,11 +248,153 @@ nek_mass = zeros(Nx+1,Ny+1);           % Only the diagonal terms are stored (as 
 %
 modeno=0;
 for jj = 0:Ny     
-     for ii = 0:Nx
-          modeno=modeno+1;
-          nek_mass(ii+1,jj+1) = mass(modeno,modeno);
-     end
+  for ii = 0:Nx
+    modeno=modeno+1;
+    nek_mass(ii+1,jj+1) = mass(modeno,modeno);
+  end
 end
+
+%% Over-integration matrices
+if Nxd>1
+  [xd wxd p]= lglnodes(Nxd);
+  xd =xd(end:-1:1);
+  wxd =wxd(end:-1:1);
+else
+  xd=[0];
+  wxd=[1];
+end
+
+if Nyd>1
+  [yd wyd p]= lglnodes(Nyd);
+  yd =yd(end:-1:1);
+  wyd = wyd(end:-1:1);
+else
+  yd=[0];
+  wyd=[1];
+end
+
+% Build polynomial coefficients for xd 
+A1 = [];
+for i = 0:Nxd
+  A1= [A1 xd.^i];
+end
+xd_coeff = zeros(Nxd+1);
+
+for i = 0:Nxd
+  b = zeros(Nxd+1,1);
+  b(i+1) = 1;
+
+  solns = A1\b;
+  xd_coeff(:,i+1) = solns;
+end
+%---------------------------------------- 
+% Build polynomial coefficients for yd 
+A1 = [];
+for i = 0:Nyd
+  A1= [A1 yd.^i];
+end
+yd_coeff = zeros(Nyd+1);
+
+for i = 0:Nyd
+  b = zeros(Nyd+1,1);
+  b(i+1) = 1;
+
+  solns = A1\b;
+  yd_coeff(:,i+1) = solns;
+end
+
+%---------------------------------------- 
+% Build derivative matrix (d/dx)
+Dxd = [];
+for i = 0:Nxd
+  j = (i-1);
+  t1 = i*xd_coeff(i+1,:);
+  nans = isnan(t1);
+  if max(nans)
+    ind = find(nans);
+    t1(ind) = 0;
+  end
+  Dxd= [Dxd; t1];
+end
+%---------------------------------------- 
+% Build derivative matrix (d/dy)
+Dyd = [];
+for i = 0:Nyd
+  j = (i-1);
+  t1 = i*yd_coeff(i+1,:);
+  nans = isnan(t1);
+  if max(nans)
+    ind = find(nans);
+    t1(ind) = 0;
+  end
+  Dyd= [Dyd; t1];
+end
+%---------------------------------------- 
+
+
+%% Derivative operator d/dx
+DXM1D = zeros(Nxd+1,Nx+1);
+for ii=0:Nxd
+  xi = xd(ii+1);
+  for jj=0:Nx
+    dLj = Dx(:,jj+1);
+    ifderiv=1;
+    dLj_xi = FuncEval(dLj,xi,ifderiv);
+  
+    DXM1D(ii+1,jj+1) = dLj_xi;
+  end
+end
+
+%---------------------------------------- 
+
+%% Derivative operator d/dy
+DYM1D = zeros(Nyd+1,Ny+1);
+for ii=0:Nyd
+  yi = yd(ii+1);
+  for jj=0:Ny
+    dLj = Dy(:,jj+1);
+    ifderiv=1;
+    dLj_yi = FuncEval(dLj,yi,ifderiv);
+  
+    DYM1D(ii+1,jj+1) = dLj_yi;
+  end
+end
+
+DYTM1D = transpose(DYM1D);
+%----------------------------------------
+[xm1d ym1d] = getlgll(Nxd,Nyd,xc,yc);
+
+XRM1D = zeros(Nxd+1,Nyd+1);
+YRM1D = zeros(Nxd+1,Nyd+1);
+for ii=0:Nyd
+  xtmp = getlgll1D(Nx,xm1d(1,ii+1),xm1d(end,ii+1));
+  ytmp = getlgll1D(Nx,ym1d(1,ii+1),ym1d(end,ii+1));
+
+  XRM1D(:,ii+1) = DXM1D*xtmp;
+  YRM1D(:,ii+1) = DXM1D*ytmp;
+end
+
+XSM1D = zeros(Nxd+1,Nyd+1);
+YSM1D = zeros(Nxd+1,Nyd+1);
+for ii=0:Nxd
+  xtmp = getlgll1D(Ny,xm1d(ii+1,1),xm1d(ii+1,end));
+  ytmp = getlgll1D(Ny,ym1d(ii+1,1),ym1d(ii+1,end));
+
+  XSM1D(ii+1,:) = transpose(xtmp)*DYTM1D;
+  YSM1D(ii+1,:) = transpose(ytmp)*DYTM1D;
+end
+
+JACM1D = XRM1D.*YSM1D - XSM1D.*YRM1D;
+%---------------------------------------- 
+% All these factors need to be divided by the jacobian (point wise multiplication).
+% It get multiplied by the jacobian during integral.
+% Hence it is skipped right now.
+RXM1D = YSM1D;
+RYM1D = -XSM1D;
+
+SXM1D = -YRM1D;
+SYM1D = XRM1D;
+
 
 
 % matrix for vdu/dx.           
@@ -276,157 +418,6 @@ nek_conv = zeros(Nx+1,Nx+1,Ny+1);
 %-------------------------------------------------- 
 disp('Calculating dealiased linear convective matrix')
 
-if Nxd>1
-     [xd wxd p]= lglnodes(Nxd);
-     xd =xd(end:-1:1);
-     wxd =wxd(end:-1:1);
-else
-     xd=[0];
-     wxd=[1];
-end
-
-if Nyd>1
-     [yd wyd p]= lglnodes(Nyd);
-     yd =yd(end:-1:1);
-     wyd = wyd(end:-1:1);
-else
-     yd=[0];
-     wyd=[1];
-end
-
-% Build polynomial coefficients for xd 
-A1 = [];
-for i = 0:Nxd
-     A1= [A1 xd.^i];
-end
-xd_coeff = zeros(Nxd+1);
-
-for i = 0:Nxd
-     b = zeros(Nxd+1,1);
-     b(i+1) = 1;
-
-     solns = A1\b;
-     xd_coeff(:,i+1) = solns;
-end
-%---------------------------------------- 
-% Build polynomial coefficients for yd 
-A1 = [];
-for i = 0:Nyd
-     A1= [A1 yd.^i];
-end
-yd_coeff = zeros(Nyd+1);
-
-for i = 0:Nyd
-     b = zeros(Nyd+1,1);
-     b(i+1) = 1;
-
-     solns = A1\b;
-     yd_coeff(:,i+1) = solns;
-end
-
-%---------------------------------------- 
-% Build derivative matrix (d/dx)
-Dxd = [];
-for i = 0:Nxd
-     j = (i-1);
-     t1 = i*xd_coeff(i+1,:);
-     nans = isnan(t1);
-     if max(nans)
-          ind = find(nans);
-          t1(ind) = 0;
-     end
-     Dxd= [Dxd; t1];
-end
-%---------------------------------------- 
-% Build derivative matrix (d/dy)
-Dyd = [];
-for i = 0:Nyd
-     j = (i-1);
-     t1 = i*yd_coeff(i+1,:);
-     nans = isnan(t1);
-     if max(nans)
-          ind = find(nans);
-          t1(ind) = 0;
-     end
-     Dyd= [Dyd; t1];
-end
-%---------------------------------------- 
-
-
-%% Derivative operator d/dx
-DXM1D = zeros(Nxd+1,Nx+1);
-for ii=0:Nxd
-     xi = xd(ii+1);
-for jj=0:Nx
-     dLj = Dx(:,jj+1);
-     ifderiv=1;
-     dLj_xi = FuncEval(dLj,xi,ifderiv);
-
-     DXM1D(ii+1,jj+1) = dLj_xi;
-end
-end
-
-%---------------------------------------- 
-
-%% Derivative operator d/dy
-DYM1D = zeros(Nyd+1,Ny+1);
-for ii=0:Nyd
-     yi = yd(ii+1);
-for jj=0:Ny
-     dLj = Dy(:,jj+1);
-     ifderiv=1;
-     dLj_yi = FuncEval(dLj,yi,ifderiv);
-
-     DYM1D(ii+1,jj+1) = dLj_yi;
-end
-end
-
-DYTM1D = transpose(DYM1D);
-%----------------------------------------
-[xm1d ym1d] = getlgll(Nxd,Nyd,xc,yc);
-
-XRM1D = zeros(Nxd+1,Nyd+1);
-YRM1D = zeros(Nxd+1,Nyd+1);
-for ii=0:Nyd
-
-     xtmp = getlgll1D(Nx,xm1d(1,ii+1),xm1d(end,ii+1));
-     ytmp = getlgll1D(Nx,ym1d(1,ii+1),ym1d(end,ii+1));
-
-     XRM1D(:,ii+1) = DXM1D*xtmp;
-     YRM1D(:,ii+1) = DXM1D*ytmp;
-end
-
-XSM1D = zeros(Nxd+1,Nyd+1);
-YSM1D = zeros(Nxd+1,Nyd+1);
-for ii=0:Nxd
-
-     xtmp = getlgll1D(Ny,xm1d(ii+1,1),xm1d(ii+1,end));
-     ytmp = getlgll1D(Ny,ym1d(ii+1,1),ym1d(ii+1,end));
-
-     XSM1D(ii+1,:) = transpose(xtmp)*DYTM1D;
-     YSM1D(ii+1,:) = transpose(ytmp)*DYTM1D;
-end
-
-JACM1D = XRM1D.*YSM1D - XSM1D.*YRM1D;
-%---------------------------------------- 
-% Mass matrix for dealiased operator
-massd = zeros((Nxd+1)*(Nyd+1),(Nxd+1)*(Nyd+1));
-for n=0:Nyd
-  for m=0:Nxd
-    ii=n*(Nxd+1) + m+1;
-    massd(ii,ii) = JACM1D(n+1,m+1)*wyd(n+1)*wxd(m+1);
-  end    
-end    
-%---------------------------------------- 
-% All these factors need to be divided by the jacobian (point wise multiplication).
-% It get multiplied by the jacobian during integral.
-% Hence it is skipped right now.
-RXM1D = YSM1D;
-RYM1D = -XSM1D;
-
-SXM1D = -YRM1D;
-SYM1D = XRM1D;
-
 % matrix for vdu/dx.           
 % This is a full matrix.
 % Nek doesn't really build these matrices
@@ -439,11 +430,88 @@ convxd = zeros((Nx+1)*(Ny+1),(Nx+1)*(Ny+1));
 convyd = zeros((Nx+1)*(Ny+1),(Nx+1)*(Ny+1));
 convalld = convxd + convyd;
 
+%% Interpolation to over-integration grid
+%-------------------------------------------------- 
+intpm1d = zeros((Nxd+1)*(Nyd+1),(Nx+1)*(Ny+1));
+wtsvecd = zeros((Nxd+1)*(Nyd+1),1);       % Weight vector for dealiased grid.
+%% over-integration points 
+for l =0:Nyd                        % points along y
+     wts = wyd(l+1);
+     sl = yd(l+1);
+
+for k =0:Nxd                        % points along x
+     wtr = wxd(k+1);
+     rk = xd(k+1);
+
+     intp_val = 0; 
+     for j = 0:Ny
+          Lj = y_coeff(:,j+1);          % Trial function (uy)
+          dLj = Dy(:,j+1);
+     for i = 0:Nx
+          Li = x_coeff(:,i+1);          % Trial Function (ux)
+          dLi = Dx(:,i+1);
+
+%         Test function/derivative values.
+          ifderiv = 0;
+          Li_rk = FuncEval(Li,rk,ifderiv);
+          ifderiv = 0;
+          Lj_sl = FuncEval(Lj,sl,ifderiv);
+
+%         No derivates here ...
+
+          intp_val = Li_rk*Lj_sl;
+
+          posx = l*(Nxd+1) + (k + 1);
+          posy = j*(Nx+1) + (i + 1);
+%         Since we build this very generally...
+%         Numerical errors occur (O(1e-14))
+          intpm1d(posx,posy) = intp_val;
+
+     end
+     end
+
+     posx = l*(Nxd+1) + k + 1;
+     wtsvecd(posx,1) = wtr*wts;
+
+end
+end
+
+%% Interpolation from over-integration grid GLL grid
+%-------------------------------------------------- 
+intpd2m1 = zeros((Nx+1)*(Ny+1),(Nxd+1)*(Nyd+1));
+
+% Interpolate Geometrical factors to over-integration grid
+%-------------------------------------------------- 
+%I_RXM1D = reshape(intpm1d*RXM1(:),Nxd+1,Nyd+1);
+%I_RYM1D = reshape(intpm1d*RYM1(:),Nxd+1,Nyd+1);
+%I_SXM1D = reshape(intpm1d*SXM1(:),Nxd+1,Nyd+1);
+%I_SYM1D = reshape(intpm1d*SYM1(:),Nxd+1,Nyd+1);
+%I_JACM1D = reshape(intpm1d*JACM1(:),Nxd+1,Nyd+1);
+
+I_RXM1D = RXM1D; 
+I_RYM1D = RYM1D;
+I_SXM1D = SXM1D;
+I_SYM1D = SYM1D;
+I_JACM1D = JACM1D;
+
+
+% Mass matrix for dealiased operator
+%-------------------------------------------------- 
+massd = zeros((Nxd+1)*(Nyd+1),(Nxd+1)*(Nyd+1));
+for n=0:Nyd
+  for m=0:Nxd
+    ii=n*(Nxd+1) + m+1;
+    massd(ii,ii) = I_JACM1D(m+1,n+1)*wyd(n+1)*wxd(m+1);
+  end    
+end    
+%-------------------------------------------------- 
+
 % Just derivative operator.
 % No integration
 % du/dx (on the dealiased grid).
 
 disp('Calculating derivative operators')
+%-------------------------------------------------- 
 gradm1x = zeros((Nx+1)*(Ny+1),(Nx+1)*(Ny+1));
 
 %% GLL points
@@ -574,7 +642,7 @@ for k =0:Nxd                        % points along r
           ifderiv =1;
           dLj_sl = FuncEval(dLj,sl,ifderiv);
 
-          deriv_val = (dLi_rk*RXM1D(k+1,l+1)*Lj_sl + Li_rk*dLj_sl*SXM1D(k+1,l+1))/JACM1D(k+1,l+1);
+          deriv_val = (dLi_rk*I_RXM1D(k+1,l+1)*Lj_sl + Li_rk*dLj_sl*I_SXM1D(k+1,l+1))/I_JACM1D(k+1,l+1);
 
           posx = l*(Nxd+1) + k + 1;
           posy = j*(Nx+1) + i + 1;
@@ -624,7 +692,7 @@ for k =0:Nxd                        % points along r
           ifderiv =1;
           dLj_sl = FuncEval(dLj,sl,ifderiv);
 
-          deriv_val = (dLi_rk*RYM1D(k+1,l+1)*Lj_sl + Li_rk*dLj_sl*SYM1D(k+1,l+1))/JACM1D(k+1,l+1);
+          deriv_val = (dLi_rk*I_RYM1D(k+1,l+1)*Lj_sl + Li_rk*dLj_sl*I_SYM1D(k+1,l+1))/I_JACM1D(k+1,l+1);
 
           posx = l*(Nxd+1) + k + 1;
           posy = j*(Nx+1) + i + 1;
@@ -639,50 +707,6 @@ for k =0:Nxd                        % points along r
 end
 end
 
-
-%% Interpolation to over-integration grid
-intpm1d = zeros((Nxd+1)*(Nyd+1),(Nx+1)*(Ny+1));
-wtsvecd = zeros((Nxd+1)*(Nyd+1),1);       % Weight vector for dealiased grid.
-%% over-integration points 
-for l =0:Nyd                        % points along y
-     wts = wyd(l+1);
-     sl = yd(l+1);
-
-for k =0:Nxd                        % points along x
-     wtr = wxd(k+1);
-     rk = xd(k+1);
-
-     for j = 0:Ny
-          Lj = y_coeff(:,j+1);          % Trial function (uy)
-          dLj = Dy(:,j+1);
-     for i = 0:Nx
-          Li = x_coeff(:,i+1);          % Trial Function (ux)
-          dLi = Dx(:,i+1);
-
-%         Test function/derivative values.
-          ifderiv =0;
-          Li_rk = FuncEval(Li,rk,ifderiv);
-          ifderiv =0;
-          Lj_sl = FuncEval(Lj,sl,ifderiv);
-
-%         No derivates here ...
-
-          intp_val = Li_rk*Lj_sl;
-
-          posx = l*(Nxd+1) + k + 1;
-          posy = j*(Nx+1) + i + 1;
-%         Since we build this very generally...
-%         Numerical errors occur (O(1e-14))
-          intpm1d(posx,posy) = intp_val;
-
-     end
-     end
-
-     posx = l*(Nxd+1) + k + 1;
-     wtsvecd(posx,1) = wtr*wts;
-
-end
-end
 
 %% Laplacian term                  % Integration by parts:  dudx.dvdx
 %---------------------------------------------------------------------- 
@@ -912,8 +936,25 @@ convxd = mass*dealias2gll*diag(intpm1d*Cx_fld(:))*gradm1xd;
 convyd = mass*dealias2gll*diag(intpm1d*Cy_fld(:))*gradm1yd;
 convalld = convxd + convyd;
 
+%convxd = mass*intpd2m1*diag(intpm1d*Cx_fld(:))*gradm1xd;
+%convyd = mass*intpd2m1*diag(intpm1d*Cy_fld(:))*gradm1yd;
+%convalld = convxd + convyd;
+%
+%max(max(convalld - convalld1))
+
+
 %% Another method for convection operator. This procedure does complete integration.
 % While former is the equivalent of the 3/2 rule of dealiasing in fourier methods.
+%trial_fcn = zeros((Nx+1)*(Ny+1),1);
+%trial = zeros((Nx+1)*(Ny+1),1);
+%intpm1d_trial = zeros((Nx+1)*(Ny+1),(Nxd+1)*(Nyd+1));
+%for l=1:(Nx+1)*(Ny+1)         % trial function
+%  trial = trial_fcn;
+%  trial(l) = 1;
+%  interpolated_trial = intpm1d*trial;
+%  intpm1d_trial(l,:) = transpose(interpolated_trial);
+%end
+
 intpm1d_trial = transpose(intpm1d);
 convxd_new = intpm1d_trial*massd*diag(intpm1d*Cx_fld(:))*gradm1xd;
 convyd_new = intpm1d_trial*massd*diag(intpm1d*Cy_fld(:))*gradm1yd;

@@ -608,6 +608,7 @@ for m = 0:Nx
 %              We don't multiply with jacobian here since RXM1 etc have (JACM1)^(-1) factor.
 %              Which is omitted in those terms
                integral1 = wtx*wty*Lm_xk*Ln_yl*(dLi_xk*RXM1D(k+1,l+1)*Lj_yl + Li_xk*SXM1D(k+1,l+1)*dLj_yl);
+
                integral = integral + integral1; 
           end
           end
