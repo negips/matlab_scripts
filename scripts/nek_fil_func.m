@@ -5,7 +5,7 @@ clear
 clc
 close all
 
-N=11;
+N=4;
 [x w] = lglnodes(N);
 x = x(end:-1:1);
 nx = N+1;
@@ -30,11 +30,11 @@ phi = pht;
 
 boyd = 1;
 if boyd
-     for i = 3:nx
-     for j = 1:nx
-          phi(i,j) = pht(i,j) - pht(i-2,j);
-     end
-     end
+  for i = 3:nx
+    for j = 1:nx
+      phi(i,j) = pht(i,j) - pht(i-2,j);
+    end
+  end
 end
 boydstonodal = transpose(phi);
 
@@ -58,11 +58,11 @@ filter_func=zeros(N+1,1);
 diag = zeros(N+1,N+1);
 k0=nx-kut;
 for k=k0+1:nx
-     kk=k+nx*(k-1);
-     amp=wght*(k-k0)*(k-k0)/(kut*kut);        % quadratic growth
-     [k amp]
-     diag(k,k) = 1-amp;
-     filter_func(k) = amp;
+  kk=k+nx*(k-1);
+  amp=wght*(k-k0)*(k-k0)/(kut*kut);        % quadratic growth
+  [k amp]
+  diag(k,k) = 1-amp;
+  filter_func(k) = amp;
 end
 
 h1=figure;  

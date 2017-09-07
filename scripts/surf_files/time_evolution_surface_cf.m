@@ -12,6 +12,7 @@ ifhdr = 1;
 fs = 16;                % fontsize
 lfs = 16;               % legend fontsize
 ifcols = 1;
+ifplot = 0;
 destn = 'plots/';
 
 [sfiles tout] = LoadSurfFiles(fol);
@@ -89,7 +90,7 @@ for i = 1:nfiles
     for it = 1:length(tstamps)
       if (tstamps(it)>=tlast)
          if nplots>0
-%           delete(pvar)
+           delete(pvar)
          end   
          dtmpx = sdata(1).data(:,t_els,it);
          dtmpy = sdata(2).data(:,t_els,it);
@@ -104,31 +105,33 @@ for i = 1:nfiles
          surf_v = [surf_v; vsort'];      
          surf_c = [surf_c; sign(vsort)'];      
 
-%         figure(h1)  
-%         pvar = plot(xsort/Chord, vsort, 'b.', 'MarkerSize', 8);
-%         set(gca,'Ydir', 'reverse')
-%         ylim([-3.5 1.1]);
-%         grid on   
-%         hold on
-%         lgs{1} =  ['T=' num2str(tstamps(it))]; 
-%         lg = legend(pvar,lgs, 'FontSize', lfs, 'Location', 'North', 'Fontsize', lfs, 'Box', 'off');
-%         if nplots == 0 
-%           ylabel('C_{p}', 'Interpreter', 'tex', 'Fontsize', fs);
-%           xlabel('x/C', 'Interpreter', 'tex', 'Fontsize', fs);
-%         end   
-         nplots = nplots+1;   
-%         mov(nplots) = getframe(gcf);
+         if ifplot   
+           figure(h1)  
+           pvar = plot(xsort/Chord, vsort, 'b.', 'MarkerSize', 8);
+           set(gca,'Ydir', 'reverse')
+%           ylim([-3.5 1.1]);
+%           grid on   
+%           hold on
+           lgs{1} =  ['T=' num2str(tstamps(it))]; 
+           lg = legend(pvar,lgs, 'FontSize', lfs, 'Location', 'SouthWest', 'Fontsize', lfs, 'Box', 'off');
+           if nplots == 0 
+             ylabel('\tau_{w}', 'Interpreter', 'tex', 'Fontsize', fs);
+             xlabel('x/C', 'Interpreter', 'tex', 'Fontsize', fs);
+           end   
+           nplots = nplots+1; 
+%           mov(nplots) = getframe(gcf);
 
-         svfname = sprintf('%0.4d', nplots);   
-         svfname = ['cp_fig' svfname '.png'];
-         destn = 'plots/';   
-%         SaveFig(gcf, svfname, destn, 1)
+           svfname = sprintf('%0.4d', nplots);   
+           svfname = ['cp_fig' svfname '.png'];
+           destn = 'plots/';   
+%           SaveFig(gcf, svfname, destn, 1)
+         end  % ifplot 
       end
       tlast = tstamps(it);
       pause(0.01)
     end
   end
-end           
+end     
 
 
 figure(2)
@@ -143,7 +146,7 @@ xlim([0 1])
 % cplot=contour(surf_x,surf_t,surf_v,cont_vec);
 svfname = ['cf_time_surf.eps'];
 destn = 'plots/';   
-%SaveFig(gcf, svfname, destn, 1)
+SaveFig(gcf, svfname, destn, 1)
 
 figure(3)
 splot=surf(surf_x,surf_t,surf_v,'EdgeColor', 'none', 'LineStyle', 'none', 'FaceColor', 'interp', 'FaceAlpha', 0.25); hold on
@@ -156,7 +159,7 @@ xlim([0 1])
 colormap('gray')
 svfname = ['cf_time_surf_grey.eps'];
 destn = 'plots/';   
-%SaveFig(gcf, svfname, destn, 1)
+SaveFig(gcf, svfname, destn, 1)
 
 
 %mov2 = mov(1:nplots); 

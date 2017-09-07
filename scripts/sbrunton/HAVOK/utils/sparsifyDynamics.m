@@ -9,7 +9,7 @@ function Xi = sparsifyDynamics(Theta,dXdt,lambda,n)
 Xi = Theta\dXdt;  % initial guess: Least-squares
 
 % lambda is our sparsification knob.
-for k=1:10
+for k=1:1
     smallinds = (abs(Xi)<lambda);   % find small coefficients
     Xi(smallinds)=0;                % and threshold
     for ind = 1:n                   % n is state dimension

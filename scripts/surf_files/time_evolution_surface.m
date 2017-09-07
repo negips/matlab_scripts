@@ -26,7 +26,7 @@ h1=figure('units','normalized','outerposition',[0 0 0.4 0.6]);
 %mov = VideoWriter('cp_movie.avi');
 
 % Load mean aoa normals
-snormals = importdata('surf_normals.67');
+snormals = importdata('surf_normals.67.N5');
 
 x_imp = snormals.data(:,1);
 [x_imp I] = sort(x_imp);

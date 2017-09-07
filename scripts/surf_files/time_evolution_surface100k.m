@@ -7,18 +7,18 @@ close all
 addpath '/home/prabal/workstation/git_kth/matlabscripts/scripts/'
 % addpath '/scratch/negi/git_repos/matlabscripts/scripts/'
 
-fol = 're750k_pitch';
+fol = 're100k';
 ifhdr = 1;
 fs = 16;                % fontsize
 lfs = 16;               % legend fontsize
 ifcols = 1;
 ifplot = 0;
-tlast = 6.00;
-tstart0 = tlast;
-tend = 100; 
+tlast = 19.05;
+tstart0 = tlast; 
 destn = 'plots/';
 ifcontour=0;
-iftr = 1;
+iftr=1;
+iftrabs=1;
 ifsave = 1;
 
 [sfiles tout] = LoadSurfFiles(fol);
@@ -34,7 +34,7 @@ end
 %mov = VideoWriter('cp_movie.avi');
 
 % Load mean aoa normals for polynomial order 5
-snormals = importdata('surf_normals.24.N5');
+snormals = importdata('surf_normals.67.N5');
 
 x_imp5 = snormals.data(:,1);
 [x_imp5 I] = sort(x_imp5);
@@ -64,48 +64,48 @@ for i=1:length(snx_bot5)
   sty_bot5(i) = snx_bot5(i);
 end
 %---------------------------------------- 
-snormals = importdata('surf_normals.24.N8');
+snormals = importdata('surf_normals.67');
 
-x_imp8 = snormals.data(:,1);
-[x_imp8 I] = sort(x_imp8);
-y_imp8 = snormals.data(I,2);
+x_imp11 = snormals.data(:,1);
+[x_imp11 I] = sort(x_imp11);
+y_imp11 = snormals.data(I,2);
 
-snx8 = -snormals.data(I,4);
-sny8 = -snormals.data(I,5);
+snx11 = -snormals.data(I,4);
+sny11 = -snormals.data(I,5);
 
-ind = sny8>0;
-snx_top8 = snx8(find(ind));
-sny_top8 = sny8(find(ind));
-xt_imp8  = x_imp8(find(ind));
-yt_imp8  = y_imp8(find(ind));
+ind = sny11>0;
+snx_top11 = snx11(find(ind));
+sny_top11 = sny11(find(ind));
+xt_imp11  = x_imp11(find(ind));
+yt_imp11  = y_imp11(find(ind));
 
-snx_bot8 = snx8(find(~ind));
-sny_bot8 = sny8(find(~ind));
-xb_imp8  = x_imp8(find(~ind));
-yb_imp8  = y_imp8(find(~ind));
+snx_bot11 = snx11(find(~ind));
+sny_bot11 = sny11(find(~ind));
+xb_imp11  = x_imp11(find(~ind));
+yb_imp11  = y_imp11(find(~ind));
 
-for i=1:length(snx_top8)
-  stx_top8(i) = sny_top8(i);
-  sty_top8(i) = -snx_top8(i);
+for i=1:length(snx_top11)
+  stx_top11(i) = sny_top11(i);
+  sty_top11(i) = -snx_top11(i);
 end
 
-for i=1:length(snx_bot8)
-  stx_bot8(i) = -sny_bot8(i);
-  sty_bot8(i) = snx_bot8(i);
+for i=1:length(snx_bot11)
+  stx_bot11(i) = -sny_bot11(i);
+  sty_bot11(i) = snx_bot11(i);
 end
 %% 
 
 U0=1.;
-kred=0.4;
+kred=0.5;
 chord=1.0;
 semichord=chord/2;
 omega=kred*U0/semichord;
 Tosc=2*pi/omega;
-ptch_amp = 1.0;
-ptch_start = 6.;
+ptch_amp = 1.3;
+ptch_start = 0.;
 axis_x0 = 0.35;
 axis_y0 = 0.034;
-phase=-pi/2;
+phase=0;
 
 nplots = 0;
 bcnt = 0;
@@ -115,15 +115,15 @@ surf_v5 = [];
 surf_c5 = [];
 npts5 = 0;
 
-surf_x8 = [];
-surf_t8 = [];
-surf_v8 = [];
-surf_c8 = [];
-npts8 = 0;
+surf_x11 = [];
+surf_t11 = [];
+surf_v11 = [];
+surf_c11 = [];
+npts11 = 0;
 
 icalld = 0;
 for i = 1:nfiles
-  if (tout(i)>=tlast) 
+  if (tout(i)>=tlast)
     fname = sfiles{i};
         
     [sdata sintegrals tstamps sno lx1 selt maxtsaves x y timeout hdr] = readsurf(fname,ifhdr);
@@ -133,11 +133,11 @@ for i = 1:nfiles
       stx_top = stx_top5;
       xt_imp = xt_imp5;
       yt_imp = yt_imp5;
-    elseif (lx1(1)==9)    
-      sty_top = sty_top8;
-      stx_top = stx_top8;
-      xt_imp = xt_imp8;
-      yt_imp = yt_imp8;
+    elseif (lx1(1)==12)    
+      sty_top = sty_top11;
+      stx_top = stx_top11;
+      xt_imp = xt_imp11;
+      yt_imp = yt_imp11;
     end  
 
     xmax = max(x(:));
@@ -189,7 +189,7 @@ for i = 1:nfiles
 
       
     for it = 1:length(tstamps)
-      if (tstamps(it)>=tlast && tstamps(it)<=tend)
+      if (tstamps(it)>=tlast)
          if ifplot && nplots>0
            delete(pvar)
          end   
@@ -243,7 +243,7 @@ for i = 1:nfiles
            grid on
 %           xlim([0.05 .30])    
 %           set(gca,'Ydir', 'reverse')
-           ylim([-0.0035 0.005]);
+           ylim([-0.005 0.006]);
 %           grid on   
 %           hold on
            lgs{1} =  ['T=' num2str(tstamps(it))]; 
@@ -264,27 +264,16 @@ for i = 1:nfiles
            surf_v5 = [surf_v5; cf'];
            surf_c5 = [surf_c5; sign(cf)'];
            npts5=npts5+1;
-         elseif(lx1(1)==9)    
-           surf_x8 = [surf_x8; xsort'/Chord];
-           surf_t8 = [surf_t8; tstamps(it)*ones(1,length(xsort))];
-           surf_v8 = [surf_v8; cf'];
-           surf_c8 = [surf_c8; sign(cf)'];
-           npts8=npts8+1;
+         elseif(lx1(1)==12)    
+           surf_x11 = [surf_x11; xsort'/Chord];
+           surf_t11 = [surf_t11; tstamps(it)*ones(1,length(xsort))];
+           surf_v11 = [surf_v11; cf'];
+           surf_c11 = [surf_c11; sign(cf)'];
+           npts11=npts11+1;
          end   
 
          ind2 = find(cf<0,1);
          xbub_st = xsort(ind2);
-
-%         if xbub_st<0.18                  % arbitrarily set aposteriory
-%           bcnt = bcnt+1; 
-%           bubble_start(bcnt) = xbub_st; 
-%
-%           tmp_x = xsort(ind2:end);
-%           tmp_cf = cf(ind2:end);
-%           ind3 = find(tmp_cf>0,1);           % first time cf goes positive
-%           bubble_end(bcnt) = tmp_x(ind3);
-%           bubble_time(bcnt) = tstamps(it);
-%         end    
 
          nplots = nplots+1;   
 %         mov(nplots) = getframe(gcf);
@@ -300,7 +289,7 @@ for i = 1:nfiles
       end
     end
   end
-end           
+end  % end of files 
 
 figure(2)
 i=0;
@@ -319,9 +308,9 @@ if (npts5>0)
   end    
 end
 
-if (npts8>0)
+if (npts11>0)
   i=i+1;
-  splot(i)=surf(ax1,surf_x8,(surf_t8-ptch_start)/Tosc-0.0,surf_v8,'EdgeColor', 'none', 'LineStyle', 'none', 'FaceColor', 'interp');
+  splot(i)=surf(ax1,surf_x11,(surf_t11-ptch_start)/Tosc-0.0,surf_v11,'EdgeColor', 'none', 'LineStyle', 'none', 'FaceColor', 'interp');
   view(2)
   ylabel('$\frac{t}{T_{osc}}$', 'Interpreter','Latex', 'rot', 0, 'FontSize', 16)
   xlabel('x/c', 'FontSize', 16)
@@ -329,7 +318,7 @@ if (npts8>0)
   hold on
 
   if (ifcontour)
-    cplot{i}=contour(ax1,surf_x8,(surf_t8-ptch_start)/Tosc,surf_v8, [0 0], 'LineColor', 'k', 'LineWidth', 1.5 );
+    cplot{i}=contour(ax1,surf_x11,(surf_t11-ptch_start)/Tosc,surf_v11, [0 0], 'LineColor', 'k', 'LineWidth', 1.5 );
   end 
 
 end
@@ -342,14 +331,22 @@ set(ax1, 'YTick', yticks);
 set(ax1, 'FontSize', 14)
 %set(ax1, 'PlotBoxAspectRatio', [1 1.5 1])
 
-svfname = ['cf_time_surf750k.eps'];
+
+svfname = ['cf_time_surf100k.eps'];
 if (iftr)
-  tr = load('tr750k.mat');
+  tr = load('tr100k.mat');
   figure(2)
-  cfmax = max(max(surf_v8));    
+  cfmax = max(max(surf_v11));    
   zdata = zeros(length(tr.tr_time),1)+cfmax;
   trplot = plot3(ax1, tr.trx_uv, (tr.tr_time-ptch_start)/Tosc,zdata, 'LineWidth', 1.5, 'Color', 'k');
-  svfname = ['cf_time_surf750k_tr.eps'];
+  svfname = ['cf_time_surf100k_tr.eps'];
+
+  if (iftrabs)
+    tabs = 20.65; 
+    trabs = interp1(tr.tr_time,tr.trx_uv,20.65);
+    absplot = plot3(ax1,trabs,tabs/Tosc, cfmax, 'o', 'MarkerSize', 20, 'LineWidth', 2.5, 'MarkerFaceColor', 'b');
+    svfname = ['cf_time_surf100k_trabs.eps'];
+  end 
 end      
 
 
@@ -389,10 +386,10 @@ if (npts5>0)
   axis tight
 end
 
-if (npts8>0)
+if (npts11>0)
   axes(ax3)    
   j=j+1;
-  gplot(j)=surf(ax3,surf_x8,(surf_t8-ptch_start)/Tosc-0.0,surf_c8,surf_c8,'EdgeColor', 'none', 'LineStyle', 'none', 'FaceColor', 'interp'); hold on
+  gplot(j)=surf(ax3,surf_x11,(surf_t11-ptch_start)/Tosc-0.0,surf_c11,surf_c11,'EdgeColor', 'none', 'LineStyle', 'none', 'FaceColor', 'interp'); hold on
   set(ax3,'Color', 'none')
   view(2)
   colormap(ax3,'gray');
@@ -403,7 +400,7 @@ if (npts8>0)
   hold on
 
   axes(ax4)
-  gplot2(j)=surf(ax4,surf_x8,(surf_t8-ptch_start)/Tosc,surf_c8,surf_c8,'EdgeColor', 'none', 'LineStyle', 'none', 'FaceColor', 'interp'); hold on
+  gplot2(j)=surf(ax4,surf_x11,(surf_t11-ptch_start)/Tosc,surf_c11,surf_c11,'EdgeColor', 'none', 'LineStyle', 'none', 'FaceColor', 'interp'); hold on
   view(2)
   axis tight
 end
@@ -423,7 +420,7 @@ for i=1:nlines
     icol = lncol2;
   end
 
-  ypts = [i i]*0.25;
+  ypts = 3 + [i i]*0.25;
   iln(i) = line([0 1], ypts, [2 2], 'LineStyle', '--', 'LineWidth', 1.0, 'Color', icol, 'Parent', ax4);
 
 end
@@ -432,9 +429,9 @@ set(ax4,'YAxisLocation', 'right');
 set(ax4, 'XTick', []);
 set(ax4, 'Color', 'none')
 set(ax4, 'YTickMode', 'manual')
-yticks = [0:nlines]*0.25;
+yticks = 3 + [0:nlines]*0.25;
 set(ax4, 'YTick', yticks);
-ylbl = {'3p/2', '0', 'p/2', 'p'};
+ylbl = {'0', 'p/2', 'p', '3p/2'};
 set(ax4, 'YTickLabel', ylbl, 'FontName', 'symbol', 'FontSize', 14);
 %ylabel('Oscillation phase', 'Font','Helvetica', 'FontSize', 16)
 %set(ax4, 'PlotBoxAspectRatio', [1 1.5 1])
@@ -447,7 +444,7 @@ set(ax3,'Position', get(ax1,'Position'));
 set(ax4,'Position', get(ax1,'Position'));
 
 figure(3)
-svfname = ['cf_time_surf_grey750k.eps'];
+svfname = ['cf_time_surf_grey100k.eps'];
 destn = 'plots/';   
 if (ifsave)
   SaveFig(gcf, svfname, destn, 1)
