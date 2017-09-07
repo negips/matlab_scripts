@@ -1,4 +1,4 @@
-function [mass nek_mass DXM1 DYM1 DXM1D DYM1D RXM1 RYM1 SXM1 SYM1 convx convy convall convxd convyd convalld convxd_new convyd_new convalld_new Cx_fld Cy_fld gradm1x gradm1y gradm1xd gradm1yd intpm1d intpd2m1 wtsvecd massd nek_conv lpx lpy lpall nek_lp lpbc forc NxNy_nodal2spec NxdNyd_spec2nodal x_coeff y_coeff Dx Dy w2m1 xm1 ym1 JACM1 JACM1D xm1d ym1d] = MESem2D8(Nx,Ny,Nxd,Nyd,xc,yc,ifboyd,ifplot)
+function [mass nek_mass DXM1 DYM1 DXM1D DYM1D RXM1 RYM1 SXM1 SYM1 convx convy convall convxd convyd convalld convxd_new convyd_new convalld_new Cx_fld Cy_fld gradm1x gradm1y gradm1xd gradm1yd intpm1d intpd2m1 wtsvecd massd nek_conv lpx lpy lpall nek_lp lpbc forc NxNy_nodal2spec NxdNyd_spec2nodal Nx_GLL2Gauss x_coeff y_coeff Dx Dy w2m1 xm1 ym1 JACM1 JACM1D xm1d ym1d] = MESem2D8(Nx,Ny,Nxd,Nyd,xc,yc,ifboyd,ifplot)
 
 %addpath '../../';
 
@@ -258,8 +258,8 @@ end
 %-------------------------------------------------- 
 if Nxd>1
   [xd wxd p]= lglnodes(Nxd);
-  xd =xd(end:-1:1);
-  wxd =wxd(end:-1:1);
+%  xd =xd(end:-1:1);
+%  wxd =wxd(end:-1:1);
 else
   xd=[0];
   wxd=[1];
@@ -267,8 +267,8 @@ end
 
 if Nyd>1
   [yd wyd p]= lglnodes(Nyd);
-  yd =yd(end:-1:1);
-  wyd = wyd(end:-1:1);
+%  yd =yd(end:-1:1);
+%  wyd = wyd(end:-1:1);
 else
   yd=[0];
   wyd=[1];
@@ -402,6 +402,8 @@ SYM1D = XRM1D;
 %-------------------------------------------------- 
 if Nxd>1
   [xGL wxGL]= lgwt(Nxd+1,-1,1);
+  xGL = flipud(xGL);
+  wxGL = flipud(wxGL);
 else
   xGL=[0];
   wxGL=[1];
@@ -409,6 +411,8 @@ end
 
 if Nyd>1
   [yGL wyGL]= lgwt(Nyd+1,-1,1);
+  yGL = flipud(yGL);
+  wyGL = flipud(wyGL);
 else
   yGL=[0];
   wyGL=[1];
@@ -416,6 +420,25 @@ end
 
 %% Interpolate to Gauss Legendre points.
 %% Work in progress
+% Legendre transform in x
+pht = zeros(Nx+1,Nx+1);
+for j = 1:Nx+1
+  z=x(j);
+  Lj = legendrePoly(Nx,z);
+  pht(j,:) = transpose(Lj);
+end
+Nx_spec2GLL = pht;
+Nx_GLL2spec = inv(pht);
+
+% Legendre transform in y
+pht = zeros(Ny+1,Ny+1);
+for j = 1:Ny+1
+  z=y(j);
+  Lj = legendrePoly(Ny,z);
+  pht(j,:) = transpose(Lj);
+end
+Ny_spec2GLL = pht;
+Ny_GLL2spec = inv(pht);
 
 %% GLL spectral to Gauss Legendre nodal
 %% In the x-direction
@@ -426,6 +449,8 @@ for j = 1:Nxd+1
   pht(j,:) = transpose(Lj);
 end
 Nx_spec2Gauss = pht;
+Nx_GLL2Gauss = Nx_spec2Gauss*Nx_GLL2spec ;
+Nx_Gauss2GLL = transpose(Nx_GLL2Gauss);
 
 %% In the y-direction
 pht = zeros(Nyd+1,Ny+1);
@@ -435,6 +460,13 @@ for j = 1:Nyd+1
   pht(j,:) = transpose(Lj);
 end
 Ny_spec2Gauss = pht;
+Ny_GLL2Gauss = Ny_spec2Gauss*Ny_GLL2spec;
+Ny_Gauss2GLL = transpose(Ny_GLL2Gauss);
+%-------------------------------------------------- 
+GLL2Gauss = kron(Ny_GLL2Gauss,Nx_GLL2Gauss);
+Gauss2GLL = kron(Ny_Gauss2GLL,Nx_Gauss2GLL);
+
+
 %-------------------------------------------------- 
 pht = zeros(Nxd+1,Nxd+1);
 for j = 1:Nxd+1
@@ -457,17 +489,17 @@ Nyd_Gauss2spec = inv(pht);
 %-------------------------------------------------- 
 % filter
 filterx=eye(Nxd+1);
-if (Nxd>Nx)
-  for ii=Nx+2:Nxd+1
-    filterx(ii,ii)=0;
-  end
-end  
+%if (Nxd>Nx)
+%  for ii=Nx+2:Nxd+1
+%    filterx(ii,ii)=0;
+%  end
+%end  
 filtery=eye(Nyd+1);
-if (Nyd>Ny)
-  for ii=Ny+2:Nyd+1
-    filtery(ii,ii)=0;
-  end
-end 
+%if (Nyd>Ny)
+%  for ii=Ny+2:Nyd+1
+%    filtery(ii,ii)=0;
+%  end
+%end 
 %--------------------------------------------------
 % Gauss spectral to GLL
 pht = zeros(Nx+1,Nxd+1);
@@ -493,7 +525,7 @@ truncated_interpolationy = Nyd_spec2GLL*filtery*Nyd_Gauss2spec;
 
 filtered_Gauss2GLL = kron(truncated_interpolationy,truncated_interpolationx);
 
-dbstop in MESem2D8 at 500
+%dbstop in MESem2D8 at 500
 %-------------------------------------------------- 
 
 % matrix for vdu/dx.           
@@ -575,10 +607,6 @@ for k =0:Nxd                        % points along x
 end
 end
 
-%% Interpolation from over-integration grid GLL grid
-%-------------------------------------------------- 
-intpd2m1 = zeros((Nx+1)*(Ny+1),(Nxd+1)*(Nyd+1));
-
 % Interpolate Geometrical factors to over-integration grid
 %-------------------------------------------------- 
 %I_RXM1D = reshape(intpm1d*RXM1(:),Nxd+1,Nyd+1);
@@ -593,6 +621,11 @@ I_SXM1D = SXM1D;
 I_SYM1D = SYM1D;
 I_JACM1D = JACM1D;
 
+I2_RXM1D = reshape(GLL2Gauss*RXM1(:),Nxd+1,Nyd+1);   
+I2_RYM1D = reshape(GLL2Gauss*RYM1(:),Nxd+1,Nyd+1);
+I2_SXM1D = reshape(GLL2Gauss*SXM1(:),Nxd+1,Nyd+1);
+I2_SYM1D = reshape(GLL2Gauss*SYM1(:),Nxd+1,Nyd+1);
+I2_JACM1D = reshape(GLL2Gauss*JACM1(:),Nxd+1,Nyd+1);
 
 % Mass matrix for dealiased operator
 %-------------------------------------------------- 
@@ -799,6 +832,96 @@ for k =0:Nxd                        % points along r
 %         Numerical errors occur (O(1e-14))
           if (abs(deriv_val)>epstol)  
             gradm1yd(posx,posy) = deriv_val;
+          end  
+     end
+     end
+
+end
+end
+
+%% Derivative to Gauss grid
+% du/dx (on the Gauss grid).
+gradm2xd = zeros((Nxd+1)*(Nyd+1),(Nx+1)*(Ny+1));
+%% over-integration points 
+for l =0:Nyd                        % points along s
+     wts = wyGL(l+1);
+     sl = yGL(l+1);
+
+for k =0:Nxd                        % points along r
+     wtr = wxGL(k+1);
+     rk = xGL(k+1);
+
+     for j = 0:Ny
+          Lj = y_coeff(:,j+1);          % Trial function (us)
+          dLj = Dy(:,j+1);
+     for i = 0:Nx
+          Li = x_coeff(:,i+1);          % Trial Function (ur)
+          dLi = Dx(:,i+1);
+
+%         Test function/derivative values.
+          ifderiv =0;
+          Li_rk = FuncEval(Li,rk,ifderiv);
+          ifderiv =0;
+          Lj_sl = FuncEval(Lj,sl,ifderiv);
+
+          ifderiv =1;
+          dLi_rk = FuncEval(dLi,rk,ifderiv);
+          ifderiv =1;
+          dLj_sl = FuncEval(dLj,sl,ifderiv);
+
+          deriv_val = (dLi_rk*I2_RXM1D(k+1,l+1)*Lj_sl + Li_rk*dLj_sl*I2_SXM1D(k+1,l+1))/I2_JACM1D(k+1,l+1);
+
+          posx = l*(Nxd+1) + k + 1;
+          posy = j*(Nx+1) + i + 1;
+%         Since we build this very generally...
+%         Numerical errors occur (O(1e-14))
+          if (abs(deriv_val)>epstol)  
+            gradm2xd(posx,posy) = deriv_val;
+          end  
+
+     end
+     end
+
+end
+end
+
+% du/dy (on the Gauss grid).
+gradm2yd = zeros((Nxd+1)*(Nyd+1),(Nx+1)*(Ny+1));
+%% over-integration points 
+for l =0:Nyd                        % points along s
+     wts = wyGL(l+1);
+     sl = yGL(l+1);
+
+for k =0:Nxd                        % points along r
+     wtr = wxGL(k+1);
+     rk = xGL(k+1);
+
+     for j = 0:Ny
+          Lj = y_coeff(:,j+1);          % Trial function (us)
+          dLj = Dy(:,j+1);
+     for i = 0:Nx
+          Li = x_coeff(:,i+1);          % Trial Function (ur)
+          dLi = Dx(:,i+1);
+
+%         Test function/derivative values.
+          ifderiv =0;
+          Li_rk = FuncEval(Li,rk,ifderiv);
+          ifderiv =0;
+          Lj_sl = FuncEval(Lj,sl,ifderiv);
+
+          ifderiv =1;
+          dLi_rk = FuncEval(dLi,rk,ifderiv);
+          ifderiv =1;
+          dLj_sl = FuncEval(dLj,sl,ifderiv);
+
+          deriv_val = (dLi_rk*I2_RYM1D(k+1,l+1)*Lj_sl + Li_rk*dLj_sl*I2_SYM1D(k+1,l+1))/I2_JACM1D(k+1,l+1);
+
+          posx = l*(Nxd+1) + k + 1;
+          posy = j*(Nx+1) + i + 1;
+%         Since we build this very generally...
+%         Numerical errors occur (O(1e-14))
+          if (abs(deriv_val)>epstol)  
+            gradm2yd(posx,posy) = deriv_val;
           end  
      end
      end
@@ -1043,8 +1166,10 @@ dealias2gll = dealias_truncatedspec2gll*NxdNyd_nodal2spec;
 %
 %max(max(convalld - convalld1))
 
-convxd = mass*filtered_Gauss2GLL*diag(intpm1d*Cx_fld(:))*gradm1xd;
-convyd = mass*filtered_Gauss2GLL*diag(intpm1d*Cy_fld(:))*gradm1yd;
+intpd2m1 = Gauss2GLL;
+
+convxd = mass*Gauss2GLL*diag(GLL2Gauss*Cx_fld(:))*gradm2xd;
+convyd = mass*Gauss2GLL*diag(GLL2Gauss*Cy_fld(:))*gradm2yd;
 convalld = convxd + convyd;
 
 

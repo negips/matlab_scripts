@@ -67,7 +67,7 @@ ampall2=[];
 toffall2=[];
 sofstall2=[];
 
-for jj= [10] %1:nfiles
+for jj= [33] %1:nfiles
 
   clc    
   fname=filenames{jj};

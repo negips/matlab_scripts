@@ -4,9 +4,9 @@ function SaveFig(h, filename, destn, col)
 
 if ~isempty(strfind(lower(filename), '.eps'))
   if col
-       print( h, '-r150', '-depsc2', filename)
+       print( h, '-r100', '-depsc2', filename)
   else
-       print( h, '-r150', '-deps2', filename)
+       print( h, '-r100', '-deps2', filename)
   end
   movefile([filename],destn)
 
@@ -20,9 +20,9 @@ elseif ~isempty(strfind(lower(filename), '.png'))
 
 else
   if col
-       print( h, '-r150', '-depsc2', filename)
+       print( h, '-r100', '-depsc2', filename)
   else
-       print( h, '-r150', '-deps2', filename)
+       print( h, '-r100', '-deps2', filename)
   end
 
   movefile([filename '.eps'],destn)

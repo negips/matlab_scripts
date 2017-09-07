@@ -26,7 +26,7 @@ for ii=1:nelv
      % clc 
      display(['Building Matrices for Element ', num2str(ii)])
 
-     [mass nek_mass DXM1 DYM1 DXM1D DYM1D RXM1 RYM1 SXM1 SYM1 convx convy convall convxd convyd convalld convxd_new convyd_new convalld_new Cfx Cfy gradm1x gradm1y gradm1xd gradm1yd intpm1d intpd2m1 wtsvecd massd nek_conv lpx lpy lpall nek_lp lpbc forc NxNy_nodal2spec NxdNyd_spec2nodal x_coeff y_coeff Dx Dy w2m1 xm1 ym1 JACM1 JACM1D xm1d ym1d] = MESem2D8(Nx,Ny,Nxd,Nyd,El(ii).xc,El(ii).yc,ifboyd,ifplot);
+     [mass nek_mass DXM1 DYM1 DXM1D DYM1D RXM1 RYM1 SXM1 SYM1 convx convy convall convxd convyd convalld convxd_new convyd_new convalld_new Cfx Cfy gradm1x gradm1y gradm1xd gradm1yd intpm1d intpd2m1 wtsvecd massd nek_conv lpx lpy lpall nek_lp lpbc forc NxNy_nodal2spec NxdNyd_spec2nodal Nx_GLL2Gauss x_coeff y_coeff Dx Dy w2m1 xm1 ym1 JACM1 JACM1D xm1d ym1d] = MESem2D8(Nx,Ny,Nxd,Nyd,El(ii).xc,El(ii).yc,ifboyd,ifplot);
 
      El(ii).mass = mass;      
      El(ii).nek_mass = nek_mass;
@@ -48,6 +48,7 @@ for ii=1:nelv
      El(ii).forc = forc;
      El(ii).NxNy_nodal2spec = NxNy_nodal2spec;
      El(ii).NxdNyd_spec2nodal = NxdNyd_spec2nodal;
+     El(ii).Nx_GLL2Gauss = Nx_GLL2Gauss;
 
      El(ii).convxd = convxd;
      El(ii).convyd = convyd;

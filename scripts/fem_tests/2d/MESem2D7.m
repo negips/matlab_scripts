@@ -782,10 +782,17 @@ Nx_spec2nodal = transpose(pht);
 Nx_nodal2spec = inv(Nx_spec2nodal);
 
 % Filter function. Modes and amplitudes
-alpha_x=0.1;
+alpha_x=1.0;
 Gx = eye(Nx+1);
-Gx(Nx+1,Nx+1)=1-alpha_x;
-Gx(Nx,Nx)=1-alpha_x.^2;
+kc=Nx-2;
+for k=1:Nx+1
+  if (k>kc)    
+    alpha_x=((k-kc)/(Nx+1-kc))^2;
+  else
+    alpha_x=0;
+  end
+  Gx(k,k)=1. - alpha_x;
+end  
 
 % Build matrix which applies filter on Boyd transformed basis.
 % And then transforms back to physical space.
@@ -838,10 +845,17 @@ boydstonodal_y = transpose(phi);
 nodaltoboyds_y = inv(boydstonodal_y);
 
 % Filter function. Modes and amplitudes
-alpha_y=0.1;
+alpha_y=1.0;
 Gy = eye(Ny+1);
-Gy(Ny+1,Ny+1)=1-alpha_y;
-Gy(Ny,Ny)=1-alpha_y.^2;
+kc=Ny-2;
+for k=1:Ny+1
+  if (k>kc)    
+    alpha_y=((k-kc)/(Ny+1-kc))^2;
+  else
+    alpha_y=0;
+  end
+  Gy(k,k)=1. - alpha_y;
+end  
 
 % Build matrix which applies filter on Boyd transformed basis.
 % And then transforms back to physical space.
@@ -867,9 +881,9 @@ for j = 1:lx
   z=x(j);
   Lj = legendrePoly(n,z);
   pht(j,:) = transpose(Lj);
-  if (Nxd>Nx) 
-    pht(j,Nx+2:Nxd+1) = 0;               % Truncate space to order N
-  end 
+%  if (Nxd>Nx) 
+%    pht(j,Nx+2:Nxd+1) = 0;               % Truncate space to order N
+%  end 
 end
 dealiased_intpx = pht;
 
@@ -883,9 +897,9 @@ for j = 1:ly
   z=y(j);
   Lj = legendrePoly(n,z);
   pht(j,:) = transpose(Lj);
-  if (Nyd>Ny)
-    pht(j,Ny+2:Nyd+1) = 0;               % Truncate space to order N
-  end    
+%  if (Nyd>Ny)
+%    pht(j,Ny+2:Nyd+1) = 0;               % Truncate space to order N
+%  end    
 end
 
 dealiased_intpy = pht;
@@ -932,15 +946,21 @@ dealias2gll = dealias_truncatedspec2gll*NxdNyd_nodal2spec;
 %convyd = mass*dealias2gll*diag(Cyd_fld(:))*gradm1yd;
 %convalld = convxd + convyd;
 
-convxd = mass*dealias2gll*diag(intpm1d*Cx_fld(:))*gradm1xd;
-convyd = mass*dealias2gll*diag(intpm1d*Cy_fld(:))*gradm1yd;
-convalld = convxd + convyd;
+%convxd = mass*dealias2gll*diag(intpm1d*Cx_fld(:))*gradm1xd;
+%convyd = mass*dealias2gll*diag(intpm1d*Cy_fld(:))*gradm1yd;
+%convalld = convxd + convyd;
 
 %convxd = mass*intpd2m1*diag(intpm1d*Cx_fld(:))*gradm1xd;
 %convyd = mass*intpd2m1*diag(intpm1d*Cy_fld(:))*gradm1yd;
 %convalld = convxd + convyd;
 %
 %max(max(convalld - convalld1))
+
+mapback = transpose(intpm1d);
+
+convxd = mass*mapback*diag(intpm1d*Cx_fld(:))*gradm1xd;
+convyd = mass*mapback*diag(intpm1d*Cy_fld(:))*gradm1yd;
+convalld = convxd + convyd;
 
 
 %% Another method for convection operator. This procedure does complete integration.

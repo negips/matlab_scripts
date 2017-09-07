@@ -12,7 +12,7 @@ close all
 %load 'matrices_N11_NELV4_CART3'
 %load 'matrices_N9_NELV9_CART5_1'
 Re=1e+5;
-nu=1/Re;
+nu=0; %1/Re;
 
 % Reset Initial Conditions
 %El = SetICs(El,nelv);
@@ -56,8 +56,8 @@ ex2   = [0 3 -3 1];
 %% Rea file parameters.
 deltat = 0.002;
 istep = 0;
-nsteps = 100000;
-iostep = 100;
+nsteps = 300000;
+iostep = 1000;
 
 chi = -0.0;
 re=1e5;
@@ -72,9 +72,10 @@ iocount=0;
 tic
 
 verbose=1;
+verbosestep = 50;
 for i = 0:nsteps
 
-     if (istep>0 && verbose)
+     if (istep>0 && verbose && (mod(istep,verbosestep)==0))
           disp(['Step, Time, Relative residual,iter: ', num2str(istep), ', ' num2str(time), ', ' ...
           num2str(relres) ', ' num2str(pcgiter)]);     
      end
@@ -103,7 +104,7 @@ for i = 0:nsteps
      b1 = bigmass*(b11+b12+b13);
 %     b1 = b11+b12+b13;
 
-     c_op = (bigconvd - 0*bigforc)*un;
+     c_op = (bigconvd_new - 0*bigforc)*un;
      b21 = extk(2)*c_op;
      b22 = extk(3)*blag1;
      b23 = extk(4)*blag2;
@@ -125,7 +126,7 @@ for i = 0:nsteps
      if mod(istep,iostep)==0
           ifsolnplot=1;
           Elout = UpdSoln(El,soln,gno,nelv,lx1,ly1,hsoln,ifsolnplot);
-          zlim([-1.2 1.2]);
+          zlim([-0.5 2.2]);
 %          azim=-20;
 %          elev=60;
 %          view([azim elev]);
@@ -157,14 +158,17 @@ for i = 0:nsteps
 
 end
 El = ScatterBig(El,'umean', umean,nelv);
-PlotVar(El,'umean',nelv)
+ttl='U_{mean}';
+PlotVar(El,'umean',nelv,ttl)
 
 El = ScatterBig(El,'u2mean', u2mean,nelv);
-PlotVar(El,'u2mean',nelv)
+ttl='U^{2}_{mean}';
+PlotVar(El,'u2mean',nelv,ttl)
 
 uvariance = u2mean - umean.^2;
 El = ScatterBig(El,'uvar', uvariance,nelv);
-PlotVar(El,'uvar',nelv)
+ttl='\sigma_{u}';
+PlotVar(El,'uvar',nelv,ttl)
 
 
 tt = toc;

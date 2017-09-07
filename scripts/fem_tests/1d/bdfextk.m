@@ -109,7 +109,7 @@ colorbar
 
 figure(h5);
 cline2 = contour(betar,betai,transpose(G4), [1 1], 'r');
-title('Third Order', 'FontSize', 16)
+title('Stability Regions', 'FontSize', 16)
 view([0 90])
 legend({'$3^{rd}$ order', '$2^{nd}$ Order'}, 'Interpreter', 'Latex');
 %xlim([-1e-10 1e+10]);ylim([-0.1 0.1]);

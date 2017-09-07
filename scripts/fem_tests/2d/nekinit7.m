@@ -15,6 +15,7 @@ re2            %    domain/decomposition/mapping/boundary conditions.
 
 Re=1e+3;
 nu=1/Re;
+nu = 0;
 ifboyd = 0;
 destn  = 'plots/';
 ifplot = 0;
@@ -215,51 +216,70 @@ bdfkstability = 0;
 %% Convective matrix with overintegration. eigen values  
 sysmat = inv(bigmass +nu*biglapl)*bigconvd_new;
 col='b';
+ifplot=1;
 [evec lambda] = SystemEig(sysmat,ifplot,eigfigure,ifsparse,sparsehandle,bdfkstability,col);
 pause(2)    
 %
-%if (ifplot)
-%  filename=['spectra_conv_N' num2str(Nx), '_Nxd' num2str(Nxd) '_nelv' num2str(nelv) '.eps'];
-%  SaveFig(eigfigure,filename,destn,1);
-%end
+if (ifplot)
+  filename=['spectra_conv_N' num2str(Nx), '_Nxd' num2str(Nxd) '_nelv' num2str(nelv) '.eps'];
+  if (bdfkstability) 
+    xlabel('\lambda_{r}\Delta t', 'FontSize', 18)  
+    ylabel('\lambda_{i}\Delta t', 'FontSize', 18)
+  else
+    xlabel('\lambda_{r}', 'FontSize', 18)  
+    ylabel('\lambda_{i}', 'FontSize', 18)
+  end  
+
+  SaveFig(eigfigure,filename,destn,1);
+end
 %
 %%% (Convective - Forcing) matrix eigenvalues
-%sysmat = inv(bigmass)*(bigconvd_new - bigforc);
-%col='r';
-%ifsparse=0;
-%ifplot=1;
-%[evec lambda] = SystemEig(sysmat,ifplot,eigfigure,ifsparse,sparsehandle,bdfkstability, col);
-%pause(2)    
-%
-%if (ifplot)
-%  filename=['spectra_rhs_N' num2str(Nx), '_Nxd' num2str(Nxd) '_nelv' num2str(nelv) '.eps'];
-%%  SaveFig(eigfigure,filename,destn,1);
-%end
-
-%% Testing dealiased convection operator.
-% Convective matrix eigen values 
-sysmat = inv(bigmass)*bigconvd;
-col='k';
-ifsparse=0;
-[evec lambda] = SystemEig(sysmat,ifplot,eigfigure,ifsparse,sparsehandle,bdfkstability,col);
-pause(2)    
-%%
-%%%% (Convective - Forcing) matrix eigenvalues
-sysmat = inv(bigmass + 0.1*nu*biglapl)*(bigconvd - bigforc);
+deltat = 2.5e-3;
+chideltat = 0.0010;
+chi = chideltat/deltat;
+sysmat = inv(bigmass)*(bigconvd_new - chi*bigforc);
 col='r';
 ifsparse=0;
 ifplot=1;
 [evec lambda] = SystemEig(sysmat,ifplot,eigfigure,ifsparse,sparsehandle,bdfkstability, col);
 pause(2)    
 
+if (ifplot)
+  filename=['spectra_rhs_N' num2str(Nx), '_Nxd' num2str(Nxd) '_nelv' num2str(nelv) '.eps'];
+  if (bdfkstability) 
+    xlabel('\lambda_{r}\Delta t', 'FontSize', 18)  
+    ylabel('\lambda_{i}\Delta t', 'FontSize', 18)
+  else
+    xlabel('\lambda_{r}', 'FontSize', 18)  
+    ylabel('\lambda_{i}', 'FontSize', 18)
+  end  
+  SaveFig(eigfigure,filename,destn,1);
+end
+
+%% Testing dealiased convection operator.
+% Convective matrix eigen values 
+%sysmat = inv(bigmass)*bigconvd;
+%col='k';
+%ifsparse=0;
+%[evec lambda] = SystemEig(sysmat,ifplot,eigfigure,ifsparse,sparsehandle,bdfkstability,col);
+%pause(2)    
+%%%
+%%%%% (Convective - Forcing) matrix eigenvalues
+%sysmat = inv(bigmass + 0.1*nu*biglapl)*(bigconvd - bigforc);
+%col='r';
+%ifsparse=0;
+%ifplot=1;
+%[evec lambda] = SystemEig(sysmat,ifplot,eigfigure,ifsparse,sparsehandle,bdfkstability, col);
+%pause(2)    
+
 %%
 
-clearvars mass nek_mass DXM1 DYM1 DXM1D DYM1D RXM1 RYM1 SXM1 SYM1 convx convy convall convxd convyd convalld gradm1xd gradm1yd intpm1d wtsvecd nek_conv lpx lpy lpall nek_lp lpbc forc x_coeff y_coeff Dx Dy w2m1 xm1 ym1 JACM1 JACM1D xm1d ym1d
-
-clearvars xpt ypt ee ii jj ifplot plotspy plotgll
-
-display(['Initialization completed: ' datestr(clock)])
-toc(tstart)
-
-save(['matrices_N' num2str(Nx) '_NELV' num2str(nelv) '_CART5_1.mat'], '-v7.3');
+% clearvars mass nek_mass DXM1 DYM1 DXM1D DYM1D RXM1 RYM1 SXM1 SYM1 convx convy convall convxd convyd convalld gradm1xd gradm1yd intpm1d wtsvecd nek_conv lpx lpy lpall nek_lp lpbc forc x_coeff y_coeff Dx Dy w2m1 xm1 ym1 JACM1 JACM1D xm1d ym1d
+% 
+% clearvars xpt ypt ee ii jj ifplot plotspy plotgll
+% 
+% display(['Initialization completed: ' datestr(clock)])
+% toc(tstart)
+% 
+% save(['matrices_N' num2str(Nx) '_NELV' num2str(nelv) '_CART5_1.mat'], '-v7.3');
 %% SOLVE

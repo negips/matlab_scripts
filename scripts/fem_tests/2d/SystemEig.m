@@ -12,6 +12,7 @@ function [evec lambda] = SystemEig(sysmat,ifplot,plothandle,ifsparsity,sparsityh
   end
 
 %% Eigenvalues:
+%  deltat = 2.5E-3;
   deltat = 1.0;
   [evec lambda] = eig(sysmat);
 
@@ -21,15 +22,15 @@ function [evec lambda] = SystemEig(sysmat,ifplot,plothandle,ifsparsity,sparsityh
   if ifplot
     figure(plothandle);
     plot(lambdar,lambdai,'.', 'Color',col, 'MarkerSize', 16)
-    set(gca,'FontSize', 20)
+%    set(gca,'FontSize', 16)
     hold on
-    xlabel('\lambda_{r}', 'FontSize', 24)  
-    ylabel('\lambda_{i}', 'FontSize', 24)
-    xlbl = get(gca,'XLabel');
-    lblpos = get(xlbl,'Position');
-    set(xlbl,'Position',lblpos - [0.0 3. 0]) 
-    axpos = get(gca,'Position');
-    set(gca,'Position', axpos + [0 0.05 -0.05 0])    % Move bottom left corner up by 0.05. Reduce height by 0.05 
+%    xlabel('\lambda_{r}', 'FontSize', 16)  
+%    ylabel('\lambda_{i}', 'FontSize', 16)
+%    xlbl = get(gca,'XLabel');
+%    lblpos = get(xlbl,'Position');
+%    set(xlbl,'Position',lblpos - [0.0 3. 0]) 
+%    axpos = get(gca,'Position');
+%    set(gca,'Position', axpos + [0 0.05 -0.05 0])    % Move bottom left corner up by 0.05. Reduce height by 0.05 
 
     if (ifbdfk)  
       clines = load('bdfk-neutral-curve.mat');

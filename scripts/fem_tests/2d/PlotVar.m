@@ -1,4 +1,4 @@
-function PlotVar(El,varname,nelv)
+function PlotVar(El,varname,nelv,ttl)
 
   h=figure;
   for elno=1:nelv
@@ -9,6 +9,7 @@ function PlotVar(El,varname,nelv)
     surf(El(elno).xm1,El(elno).ym1,El(elno).scrtch1, 'EdgeColor', 'none', 'FaceColor', 'interp');
     hold on
   end
+  title(ttl)
   colorbar
 
 
