@@ -92,7 +92,7 @@ function [bigmass bigconv bigconvd bigconvxd velvec gno nreps nn] = AssembleBig(
      deltat = 0.001;
      e1 = eig(inv(bigmass)*bigconvd);
      lambda_deltat = e1;
-     clines = load('bdfk-neutral-curve.mat');
+%     clines = load('bdfk-neutral-curve.mat');
 
      lambdar = real(e1)*deltat;
      lambdai = imag(e1)*deltat;

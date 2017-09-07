@@ -4,10 +4,10 @@
 
 % Polynomial orders
 
-Nx = 6;
+Nx = 10;
 lx1=Nx+1;
-Nxd = 9;
-%Nxd = ceil(3/2*(Nx+1));
+%Nxd = 4;
+Nxd = ceil(3/2*(Nx+1))+1;
 
 Ny = Nx;            % For now. Maybe will test a more general case later.
 ly1=Ny+1;

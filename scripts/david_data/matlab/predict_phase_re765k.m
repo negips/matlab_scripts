@@ -24,8 +24,8 @@ k=0.4;           % min value is 0.02
 %k=0.32;           % min value is 0.02
 
 %% propose
-mean_aoa=3.3;
-dalpha=2.0;
+mean_aoa=3.4;
+dalpha=1.0;
 k=0.4;           % min value is 0.02
 
 

@@ -67,7 +67,7 @@ ampall2=[];
 toffall2=[];
 sofstall2=[];
 
-for jj= [33] %1:nfiles
+for jj= [10] %1:nfiles
 
   clc    
   fname=filenames{jj};
@@ -272,6 +272,25 @@ for jj= [33] %1:nfiles
 %    continue;
 %   end  
 
+%    k0=0;
+%    kmax=1000;
+%    nk=kmax*100;
+%    k=linspace(k0,kmax,nk);
+    theoderson_k = k;
+    theoderson_C = besselh(1,2,k)./(besselh(1,2,k) + i*besselh(0,2,k));
+    theoderson_F=real(theoderson_C);
+    theoderson_G=imag(theoderson_C);
+    theoderson_U0=1;
+    theoderson_chord=0.5;
+    theoderson_b=theoderson_chord/2;
+    theoderson_omega_k = k*theoderson_U0/theoderson_b;
+    theoderson_a=-0.15/2;
+%    theoderson_ptch_amp=1.0*pi/180;
+%    theoderson_r2 = sqrt(1 + (theoderson_a*theoderson_omega_k).^2);
+%    theoderson_added_m_eff_amp = -pi*theoderson_ptch_amp*theoderson_omega_k.*theoderson_r2;
+%    theoderson_added_m_phi = asin(1/theoderson_r2);
+
+
     disp(['File: ', fname, '; No:', num2str(jj)]) 
     disp(['Reduced Frequency: ', num2str(k), ';  iseg= ', num2str(iseg)])
     disp(['Mean alpha: ', num2str(mean_alpha)])
@@ -279,7 +298,8 @@ for jj= [33] %1:nfiles
     disp(['Time Period (nek): ', num2str(nek_timeperiod)])
     legs{ii} = ['Re=', num2str(Re) '; k=', num2str(k)]; 
     disp(['--------------'])
-  
+
+    % Get mean angle, pitching amplitude and initial phase
     theta=0;
     ini_aoa=1;
     amp2=1*pi/180;
@@ -289,76 +309,32 @@ for jj= [33] %1:nfiles
     
     options=optimset('MaxFunEvals',1000,'MaxIter',10000,'TolX',1e-8,'Tolfun',1e-8);
     [par,fval,exitflag,output] = fminsearch(@(par) unsteady_alpha2(par,q_time,q_alpha,k,uoo), par0,options);
-    theta=par(1);
-    mean_alpha2=par(2);
-    amp2=par(3);
 
+    theta=par(1);             % inital phase
+    mean_alpha2=par(2);       % Mean alpha
+    amp2=par(3);              % Pitching amplitude
+
+    % Keep amplitude positive
     if amp2<0
       amp2=abs(amp2);
       theta=theta+pi;
     end
 
+    % modelled alpha
     alpha_pred = mean_alpha2 + amp2*sin(omega*q_time + theta);
-    
-%    figure(21)
-%    plot(q_time,q_alpha*180/pi); hold on
-%    plot(q_time,alpha_pred*180/pi, ' ok')
     
     % cm/cz model
 
 %    par0(4)=0;    % steady curve offset      
     options=optimset('MaxFunEvals',10000,'MaxIter',10000,'TolX',1e-8,'TolFun', 1e-8);
 
-%     [par,fval,exitflag,output] = fminsearch(@(par) unsteady_force_model3(par,q_time,q_cz,modelcz,modelalpha,k,uoo,mean_alpha2,amp2,theta), par0,options);
+%   Reduced mass contribution is now precalculated up to a phase shift.    
+    phi=-0*pi/180;
+    par0(1)=phi;              % phase shift for both terms
 
-%    if (delayfound)
-%      phi=-5*pi/180;
-%      intg_const=1;
-%      toff=0.;
-%      par0(1)=phi;
-%      par0(2)=intg_const;
-%
-%      [par,fval,exitflag,output] = fminsearch(@(par) unsteady_force_model3(par,q_time,q_cz,modelcz,modelalpha,k,uoo,mean_alpha2,amp2,theta), par0,options);
-%
-%      phi=par(1);
-%      intg_const=par(2);
-%
-%    else      
-      phi=-5*pi/180;
-      intg_const=1;
-      toff=0.;
-      par0(1)=phi;
-      par0(2)=intg_const;
-      par0(3)=toff;
+    [par,fval,exitflag,output] = fminsearch(@(par) unsteady_force_theoderson_model(par,q_time,q_cz,modelcz,modelalpha,k,uoo,mean_alpha2,amp2,theta), par0,options);
 
-      [par,fval,exitflag,output] = fminsearch(@(par) unsteady_force_model2(par,q_time,q_cz,modelcz,modelalpha,k,uoo,mean_alpha2,amp2,theta), par0,options);
-
-%      [par,fval,exitflag,output] = fmincon(@(par) unsteady_force_model2(par,q_time,q_cz,modelcz,modelalpha,k,uoo,mean_alpha2,amp2,theta), par0,[],[],[],[],[-pi 0 -5],[0 10 5],[],options);
-
-      phi=par(1);
-      intg_const=par(2);
-      toff=par(3);
-
-%    end
-
-%    if (intg_const<0)
-%      intg_const=abs(intg_const);
-%      phi = phi - pi;
-%      if (phi>0)
-%        phi=phi-2*pi;
-%      end
-%    end  
-        
-
-%   [par,fval,exitflag,output] = fminsearch(@(par) unsteady_force_model(par,q_time,q_cz,modelcz,modelalpha,k,uoo,mean_alpha2,amp2,theta), par0,options);
-
-%    [par,fval,exitflag,output] = fmincon(@(par) unsteady_force_model(par,q_time,q_cz,model.cz,model.alpha,k,uoo,mean_alpha2,amp2,theta),par0,[],[],[],[],[-pi/2 -100],[pi/2 100],[],options);
-
-%    if iseg==1
-%      phi=0;
-%      toff=0;
-%    end  
-
+    phi=par(1);
    
     if (isnan(fval))
       fval    
@@ -369,35 +345,23 @@ for jj= [33] %1:nfiles
 %    [[mean_alpha2 amp2 theta phi]*180/pi intg_const]
     
     % omega = 2*k*uoo/c;
-    time  = q_time+toff;
+    time  = q_time;
  
     alpha_pred2 = mean_alpha2 + amp2*sin(omega*time + theta);
-    alpha_lagg  = mean_alpha2+amp2*sin(omega*time + theta + phi);
-    
-%    inst_OMEGA=omega*amp2*cos(omega*time+theta);
-    inst_OMEGA=cos(omega*time+theta);
-   
-    p_motion = intg_const*(inst_OMEGA);
-    
-    cz_lagg = interp1(modelalpha,modelcz,alpha_lagg*180/pi,'linear');
-    
-    cz_pred = p_motion + cz_lagg;
+    [cz_pred] = rebuild_unsteady_force(time,q_cz,modelcz,modelalpha,k,uoo,mean_alpha2,amp2,theta,phi);
 
-    gamma = omega*(toff-deltaT);
-
-%    [toff deltaT (toff-deltaT) omega gamma gamma*180/pi]
   
     kall=[kall k];
     phiall = [phiall phi];
-    gammaall = [gammaall gamma];
-    intgall = [intgall intg_const];
-    intgbydalpha=[intgbydalpha intg_const/amp2];
-    intgnorm=[intgnorm intg_const/amp2*uoo/30];             % uoo/30 to keep the factor ~ O(1)
+%    gammaall = [gammaall gamma];
+%    intgall = [intgall intg_const];
+%    intgbydalpha=[intgbydalpha intg_const/amp2];
+%    intgnorm=[intgnorm intg_const/amp2*uoo/30];             % uoo/30 to keep the factor ~ O(1)
     alpha_all=[alpha_all mean_alpha2];
     theta_all=[theta_all theta];
-    ampall = [ampall amp2];
-    toffall = [toffall toff-deltaT]; 
-    omgall = [omgall omega];  
+%    ampall = [ampall amp2];
+%    toffall = [toffall toff-deltaT]; 
+%    omgall = [omgall omega];  
     %    sofstall = [sofstall steady_offset];  
 
     % Phase plot
