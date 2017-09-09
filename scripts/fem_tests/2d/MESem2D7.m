@@ -331,7 +331,6 @@ for i = 0:Nyd
 end
 %---------------------------------------- 
 
-
 %% Derivative operator d/dx
 DXM1D = zeros(Nxd+1,Nx+1);
 for ii=0:Nxd
