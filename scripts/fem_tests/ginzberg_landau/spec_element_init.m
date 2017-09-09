@@ -53,9 +53,14 @@ mu_x = zeros(npts,nels);
 mu0 = 0.6; %3/4;
 mu1 = -1e-3;
 mut = 0.4;
+mu_diss = -3.0;
+diss_xs=800;
+diss_xe=1000;
+diss_xrise=100;
+diss_xfall=100;
 
-step_xs=10;
-step_xe=100;
+step_xs=100;
+step_xe=150;
 step_xrise=20;
 step_xfall=20;
 
@@ -104,15 +109,21 @@ for i=1:nels
      nek_mu(:,:,i)       = diag(mu0 + mu1*xm1);
      nek_mud(:,:,i)      = diag(mu0 + mu1*xm1d);
 
-%     nek_mu(:,:,i)       = diag(mu0 + mu1*SimsonStep(xm1,);
-%     step_xd             = SimsonStep(xm1d,step_xs,step_xe,step_xrise,step_xfall);
-     s1d                 = smoothstep(xm1d,step_xs,step_xs+step_xrise); 
+%    Add dissipative region at the end 
+     s1d                 = smoothstep(xm1d ,diss_xs,diss_xs+diss_xrise); 
+     s2d                 = -smoothstep(xm1d,diss_xe,diss_xe+diss_xfall); 
+     diss_xd             = s1d+s2d;     
+     nek_mud(:,:,i)      = nek_mud(:,:,i) + mu_diss*diag(diss_xd);
+
+%    Add absolutely unstable region (time-dependent) 
+     s1d                 = smoothstep(xm1d, step_xs,step_xs+step_xrise); 
      s2d                 = -smoothstep(xm1d,step_xe,step_xe+step_xfall); 
      step_xd             = s1d+s2d;     
      nek_mutd(:,:,i)      = diag(step_xd);
 
      xgll(:,i) = xm1;
-%     mu_x(:,i) = mu0 + mu1*SimsonStep(xm1,step_xs,step_xe,step_xrise,step_xfall);
+
+%    Just saving 
      s1                  = smoothstep(xm1,step_xs,step_xs+step_xrise); 
      s2                  = -smoothstep(xm1,step_xe,step_xe+step_xfall); 
      mu_x(:,i)           = mu0 + mu1*xm1; %+ mut*(s1 + s2);     

@@ -42,10 +42,6 @@ un = u0;
 
 %u0_deriv = pi*0.1*cos(pi*x2);
 
-deltat = 0.001;
-istep = 0;
-nsteps = 500000;
-
 ulag1 = 0*un;
 ulag2 = 0*un;
 
@@ -71,9 +67,12 @@ mass = 0*nek_mass;
 stiff = 0*nek_linear_stiff;
 
 % Parameters
+deltat = 0.001;
+istep = 0;
+%nsteps = 500000;
 time = 0;
-iostep = 200;
-isave  = 100;
+iostep = 1000;
+isave  = 200;
 OMEGA=0.1;
 Tosc=2*pi/OMEGA;
 amp=mut;
@@ -160,7 +159,7 @@ for i = 1:nsteps
     b6 = deltat*(b61 + b62 + b63);
 
 %   sum
-    b(:,els) = -b1 + b2 + b3 - b4 + b5;
+    b(:,els) = -b1 + b2 + b3 + b4 + b5 - b6;
 
     gl_pos_j1 = (els-1)*N + 1;
     gl_pos_i1 = (els-1)*N + 1;
@@ -188,7 +187,7 @@ for i = 1:nsteps
   b = DSSUM(b,nels,periodic);
 
   mass(1,1) = 1;                % strong bc
-  b(1,1)    = -1e-3 + 2e-3*rand(1);    % random noise O(1e-6)
+  b(1,1)    = 2e-4 + 1e-4*rand(1);    % random noise O(1e-6)
 %  b(1,1)    = 0;
 %  b(1,1)    = 0.1*sin(time);
   big_b(1)  = b(1,1); 
@@ -234,7 +233,7 @@ for i = 1:nsteps
 
   end
 
-  if (mod(istep,isave)==0) && istep>20000
+  if (mod(istep,isave)==0)
     u_save = [u_save un(:)];
     t_save = [t_save time];
   end       
