@@ -7,10 +7,10 @@ close all
 addpath 'templates/'
 ifplot = 0;
 
-N=6;
+N=16;
 lx1 = N+1;
 npts=lx1;
-nels = 60;
+nels = 50;
 Nd=ceil(1.5*N);
 Nd2=ceil((4*N+3)/2);
 Nd3=ceil((6*N+3)/2);
@@ -20,7 +20,7 @@ dof = N*nels+1;
 nnodes = nels+1;
 
 d_start = 0;
-d_end = 80;
+d_end = 60;
 d_len = abs(d_end-d_start);
 
 periodic = 0;
@@ -51,21 +51,21 @@ mu_x = zeros(npts,nels);
 
 % Parameters
 U0=10;
-mu0   = 20.; %3/4;  % Constant
-mut_0 =  3.0;        % time depentdent spatially constant
+mu0   = 15; %3/4;  % Constant
+mut_0 = 5.0;        % time depentdent spatially constant
 mu1 = 0.e-3;        % spatially varying mu
 mut_conv = 0.0;     % Temporal strength for spatially varying mu
-mut_abs = 10.0;      % Temporal strength for unstable region
-mu_diss = -100.0;
+mut_abs = 0.0;      % Temporal strength for unstable region
+mu_diss = -5.0;
 diss_xs=40;
 diss_xe=100;
-diss_xrise=30;
+diss_xrise=10;
 diss_xfall=100;
 
 step_xs=5;
-step_xe=15;
-step_xrise=5;
-step_xfall=5;
+step_xe=10;
+step_xrise=3;
+step_xfall=3;
 
 for i=1:nels
 
@@ -73,7 +73,7 @@ for i=1:nels
 
      xst = el_nodes(i);
      xen = el_nodes(i+1);
-     [MASS DXM1 DXM1D RXM1 gradm1 lpx FORC x_coeff Dx w1m1 xm1 JACM1 JACM1D xm1d xm1d2 GLL2Dealias Dealias2GLL GLL2Dealias2 Dealias2GLL2 GLL2Dealias3 Dealias2GLL3 gradm1d gradm1d2 gradm1d3 intgd intgd2 intgd3] = MESem1D2(N,Nd,Nd2,Nd3,xst,xen,ifboyd,ifplot);
+     [MASS DXM1 DXM1D RXM1 gradm1 lpx FORC x_coeff Dx w1m1 xm1 JACM1 JACM1D xm1d xm1d2 GLL2Dealias Dealias2GLL GLL2Dealias2 Dealias2GLL2 GLL2Dealias3 Dealias2GLL3 gradm1d gradm1d2 gradm1d3 intgd intgd2 intgd3] = MESem1D(N,Nd,Nd2,Nd3,xst,xen,ifboyd,ifplot);
 
 
      El(i).MASS   = MASS; 

@@ -70,13 +70,13 @@ mass = 0*nek_mass;
 stiff = 0*nek_linear_stiff;
 
 % Parameters
-deltat = 0.001;
+deltat = 0.0001;
 istep = 0;
 %nsteps = 500000;
 time = 0;
-iostep = 5000;
+iostep = 100;
 isave  = 500;
-OMEGA=0.10;
+OMEGA=0.05;
 Tosc=2*pi/OMEGA;
 nsteps=ceil(4*Tosc/deltat);
 verbose=1;
@@ -153,7 +153,7 @@ for i = 1:nsteps
     b3 = deltat*(b31 + b32 + b33);
 
 %   Time varying convectively unstable region
-    mu_time = mut_conv*sin(OMEGA*time); 
+    mu_time = max([0 mut_conv*sin(OMEGA*time)]); 
     mu_conv_term(:,:,els) = mu_time*nek_intgd(:,:,els)*nek_mud_conv(:,:,els)*nek_intpm1d(:,:,els)*un(:,els); 
     b41 = extk(2)*mu_conv_term(:,els);
     b42 = extk(3)*mu_conv_lag1(:,els);
@@ -161,7 +161,7 @@ for i = 1:nsteps
     b4 = deltat*(b41 + b42 + b43);
 
 %   Time varying absolute instability term
-    mu_time = max([0 mut_abs*sin(OMEGA*time)]);
+    mu_time = mut_abs*sin(OMEGA*time);
     mu_abs_term(:,:,els) = mu_time*nek_intgd(:,:,els)*nek_mutd(:,:,els)*nek_intpm1d(:,:,els)*un(:,els); 
     b51 = extk(2)*mu_abs_term(:,els);
     b52 = extk(3)*mu_abs_lag1(:,els);
@@ -222,7 +222,7 @@ for i = 1:nsteps
   b = DSSUM(b,nels,periodic);
 
   mass(1,1) = 1;                % strong bc
-  b(1,1)    = 2e-13 + 1e-13*rand(1);    % random noise O(1e-6)
+  b(1,1)    = 2e-3 + 1e-3*rand(1);    % random noise O(1e-6)
 %  b(1,1)    = 0;
 %  b(1,1)    = 0.1*sin(time);
   big_b(1)  = b(1,1); 
@@ -262,7 +262,7 @@ for i = 1:nsteps
     legend(ax1,['T/T_{osc}=' num2str(time/Tosc) '; istep=' num2str(istep) '; \mu_{t}=' num2str(mu_time)], 'Location', 'Best')
 %    plot(ax2,mu_x,un, '-k', 'MarkerSize', 16);
 
-    plot(ax2,xgll,mu_x+mut_0*sin(OMEGA*time)+max([0 sin(OMEGA*time)])*mu_xt, '--r', 'MarkerSize', 16);
+    plot(ax2,xgll,mu_x+mu_xt*sin(OMEGA*time), '--r', 'MarkerSize', 16);
     set(ax2,'XAxisLocation', 'Top')
     set(ax2,'YAxisLocation', 'Right')
 %    set(ax2,'XDir', 'reverse')  
