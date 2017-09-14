@@ -73,17 +73,18 @@ mass = 0*nek_mass;
 stiff = 0*nek_linear_stiff;
 
 % Parameters
-deltat = 0.0001;
+deltat = 0.0025;
 istep = 0;
 %nsteps = 500000;
 time = 0;
-iostep = 20000;
-isave  = 1000;
-OMEGA=0.0002;
+iostep = 50000;
+isave  = 100;
+OMEGA=0.01;
 Tosc=2*pi/OMEGA;
-nsteps=ceil(0.5*Tosc/deltat);
+nsteps=ceil(4.0*Tosc/deltat);
+surfupd = 0.25;               % make surface evry surfupd of a period
 verbose=1;
-verbosestep=100;
+verbosestep=500;
 ifpcg=0;
 ifdealias=0;
 
@@ -154,11 +155,11 @@ for i = 1:nsteps
     end  
 
 %   Time varying spatially constant source term
-    mu_time = mut_0*sin(OMEGA*time);
+    mu_time_0t = mut_0*sin(OMEGA*time);
     if ifdealias 
-      mu_term(:,:,els) = mu_term(:,:,els) + nek_intgd(:,:,els)*mu_time*nek_intpm1d(:,:,els)*un(:,els);
+      mu_term(:,:,els) = mu_term(:,:,els) + nek_intgd(:,:,els)*mu_time_0t*nek_intpm1d(:,:,els)*un(:,els);
     else  
-      mu_term(:,:,els) = mu_term(:,:,els) + nek_mass(:,:,els)*mu_time*un(:,els);
+      mu_term(:,:,els) = mu_term(:,:,els) + nek_mass(:,:,els)*mu_time_0t*un(:,els);
     end
     b31 = extk(2)*mu_term(:,els);
     b32 = extk(3)*mu_lag1(:,els);
@@ -166,11 +167,11 @@ for i = 1:nsteps
     b3 = deltat*(b31 + b32 + b33);
 
 %   Time varying convectively unstable region
-    mu_time = mut_conv*sin(OMEGA*time);
+    mu_time_ct = mut_conv*sin(OMEGA*time);
     if ifdealias 
-      mu_conv_term(:,:,els) = mu_time*nek_intgd(:,:,els)*nek_mud_conv(:,:,els)*nek_intpm1d(:,:,els)*un(:,els); 
+      mu_conv_term(:,:,els) = mu_time_ct*nek_intgd(:,:,els)*nek_mud_conv(:,:,els)*nek_intpm1d(:,:,els)*un(:,els); 
     else  
-      mu_conv_term(:,:,els) = mu_time*nek_mass(:,:,els)*nek_mu_conv(:,:,els)*un(:,els); 
+      mu_conv_term(:,:,els) = mu_time_ct*nek_mass(:,:,els)*nek_mu_conv(:,:,els)*un(:,els); 
     end
     b41 = extk(2)*mu_conv_term(:,els);
     b42 = extk(3)*mu_conv_lag1(:,els);
@@ -178,11 +179,11 @@ for i = 1:nsteps
     b4 = deltat*(b41 + b42 + b43);
 
 %   Time varying absolute instability term
-    mu_time = max([0 mut_abs*sin(OMEGA*time)]);
+    mu_time_at = max([0 mut_abs*sin(OMEGA*time)]);
     if ifdealias
-      mu_abs_term(:,:,els) = mu_time*nek_intgd(:,:,els)*nek_mutd(:,:,els)*nek_intpm1d(:,:,els)*un(:,els);
+      mu_abs_term(:,:,els) = mu_time_at*nek_intgd(:,:,els)*nek_mutd(:,:,els)*nek_intpm1d(:,:,els)*un(:,els);
     else  
-      mu_abs_term(:,:,els) = mu_time*nek_mass(:,:,els)*nek_mut(:,:,els)*un(:,els);
+      mu_abs_term(:,:,els) = mu_time_at*nek_mass(:,:,els)*nek_mut(:,:,els)*un(:,els);
     end  
     b51 = extk(2)*mu_abs_term(:,els);
     b52 = extk(3)*mu_abs_lag1(:,els);
@@ -250,7 +251,7 @@ for i = 1:nsteps
   periodic = 0; 
   b = DSSUM(b,nels,periodic);
 
-  b(1,1)    = 2e-12 + 1e-12*rand(1);    % random noise O(1e-6)
+  b(1,1)    = 2e-14 + 1e-14*rand(1);    % random noise O(1e-6)
 %  b(1,1)    = 0;
 %  b(1,1)    = 0.1*sin(time);
   big_b(1)  = b(1,1); 
@@ -285,7 +286,7 @@ for i = 1:nsteps
     plot(ax1,xgll,un, '-k', 'MarkerSize', 16);
 %    set(ax1,'Color', 'none');
 %    xlim(ax1,[1 600])
-    legend(ax1,['T/T_{osc}=' num2str(time/Tosc) '; istep=' num2str(istep) '; \mu_{t}=' num2str(mu_time)], 'Location', 'Best')
+    legend(ax1,['T/T_{osc}=' num2str(time/Tosc)], 'Location', 'Best')
 %    plot(ax2,mu_x,un, '-k', 'MarkerSize', 16);
 
     plot(ax2,xgll,mu_x+mut_0*sin(OMEGA*time)+max([0 sin(OMEGA*time)])*mu_xt, '--r', 'MarkerSize', 16);
@@ -297,7 +298,6 @@ for i = 1:nsteps
     ylabel(ax2,'\mu') 
     axes(ax2)
     pause(0.01)
-
   end
 
   if (mod(istep,isave)==0)
@@ -306,14 +306,14 @@ for i = 1:nsteps
   end       
 
   %dbstop in me_periodic at 335
-  iperiod=floor(time/Tosc);    
-  if (iperiod>nperiods)
+  iperiod=time/Tosc;
+  if (floor(1/surfupd*(iperiod-nperiods))>=1)
     figure(10)
     surf(xgll(:),t_save/Tosc,transpose(u_save), 'EdgeColor', 'none')
     view(2)
+    colorbar
     pause(2)
-    colorbar  
-    nperiods=iperiod;  
+    nperiods=nperiods+surfupd;
   end      
          
   time_it = toc(t_it);
@@ -323,6 +323,7 @@ figure(10)
 surf(xgll(:),t_save/Tosc,transpose(u_save), 'EdgeColor', 'none')
 colorbar
 view(2)
+pause(2)
 
-save('homogeneous_conv_quasi_steady.mat')
+save(['homogeneous_conv_mu0_' num2str(10*mu0) '_mut_0' num2str(10*mut_0) '.mat'])
 

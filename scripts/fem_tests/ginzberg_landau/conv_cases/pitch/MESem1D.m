@@ -1,4 +1,4 @@
-function [mass DXM1 DXM1D RXM1 gradm1 lpx forc x_coeff Dx w1m1 xm1 JACM1 JACM1D xm1d xm1d2 GLL2Dealias Dealias2GLL GLL2Dealias2 Dealias2GLL2 GLL2Dealias3 Dealias2GLL3 gradm1d gradm1d2 gradm1d3 intgd intgd2 intgd3] = MESem1D2(Nx,Nxd,Nxd2,Nxd3,xs,xe,ifboyd,ifplot)
+function [mass DXM1 DXM1D RXM1 gradm1 lpx forc x_coeff Dx w1m1 xm1 JACM1 JACM1D xm1d xm1d2 GLL2Dealias Dealias2GLL GLL2Dealias2 Dealias2GLL2 GLL2Dealias3 Dealias2GLL3 gradm1d gradm1d2 gradm1d3 intgd intgd2 intgd3] = MESem1D(Nx,Nxd,Nxd2,Nxd3,xs,xe,ifboyd,ifplot)
 
 %addpath '../../';
 
@@ -38,27 +38,66 @@ for i = 0:Nx
      A1= [A1 x.^i];
 end
 x_coeff = zeros(Nx+1);
-%
-%for i = 0:Nx
-%  b = zeros(Nx+1,1);
-%  b(i+1) = 1;
-%
-%  solns = A1\b;
-%  x_coeff(:,i+1) = solns;
-%end
+
+for i = 0:Nx
+  b = zeros(Nx+1,1);
+  b(i+1) = 1;
+
+  solns = A1\b;
+  x_coeff(:,i+1) = solns;
+end
 %---------------------------------------- 
 % Build derivative matrix (d/dx)
 Dx = [];
-%for i = 0:Nx
-%  j = (i-1);
-%  t1 = i*x_coeff(i+1,:);
-%  nans = isnan(t1);
-%  if max(nans)
-%    ind = find(nans);
-%    t1(ind) = 0;
-%  end
-%  Dx= [Dx; t1];
-%end
+for i = 0:Nx
+  j = (i-1);
+  t1 = i*x_coeff(i+1,:);
+  nans = isnan(t1);
+  if max(nans)
+    ind = find(nans);
+    t1(ind) = 0;
+  end
+  Dx= [Dx; t1];
+end
+%---------------------------------------- 
+
+%% Plot Basis functions (in x) 
+if ifplot
+  xtemp = transpose(linspace(-1,1,200));
+  l2 = length(xtemp);
+  basis = zeros(l2,Nx+1);
+  for i = 0:Nx
+  val = zeros(l2,1);
+  for j = 0:Nx
+       val = val + x_coeff(j+1,i+1)*xtemp.^j;
+  end
+  basis(:,i+1) = val;
+  end
+
+  h1 = figure;
+  hold on
+  plot(xtemp,basis)
+end
+
+% Derivative function
+if ifplot
+  deriv = zeros(l2,Nx+1);
+  for i = 0:Nx
+  val = zeros(l2,1);
+  for j = 0:Nx
+       val1 = Dx(j+1,i+1)*(xtemp.^(j-1));
+       if (j-1)<0
+            val1 = zeros(l2,1);
+       end
+       val = val + val1;
+  end
+  deriv(:,i+1) = val;
+  end
+
+  h2 = figure;
+  hold on
+  plot(xtemp,deriv)
+end
 %---------------------------------------- 
 disp('Calculating Jacobian')
 %% Derivative operator d/dx
@@ -68,15 +107,15 @@ for ii=0:Nx
   for jj=0:Nx
     DXM1(ii+1,jj+1) = 0;
     if ii~=jj
-      lni = legendrePoly(Nx,x(ii+1));
-      lnj = legendrePoly(Nx,x(jj+1));
-      DXM1(ii+1,jj+1) = lni(end)/lnj(end)/(x(ii+1)-x(jj+1));
+         lni = legendrePoly(Nx,x(ii+1));
+         lnj = legendrePoly(Nx,x(jj+1));
+         DXM1(ii+1,jj+1) = lni(end)/lnj(end)/(x(ii+1)-x(jj+1));
     end
     if ii==jj && ii==0
-      DXM1(ii+1,jj+1) = -d0;
+         DXM1(ii+1,jj+1) = -d0;
     end
     if ii==jj && ii==Nx
-      DXM1(ii+1,jj+1) = d0;
+         DXM1(ii+1,jj+1) = d0;
     end
   end
 end
@@ -114,13 +153,55 @@ else
   wxd=[1];
 end
 
+% Build polynomial coefficients for xd 
+A1 = [];
+for i = 0:Nxd
+  A1= [A1 xd.^i];
+end
+xd_coeff = zeros(Nxd+1);
+
+for i = 0:Nxd
+  b = zeros(Nxd+1,1);
+  b(i+1) = 1;
+
+  solns = A1\b;
+  xd_coeff(:,i+1) = solns;
+end
+%---------------------------------------- 
+% Build derivative matrix (d/dx)
+Dxd = [];
+for i = 0:Nxd
+  j = (i-1);
+  t1 = i*xd_coeff(i+1,:);
+  nans = isnan(t1);
+  if max(nans)
+    ind = find(nans);
+    t1(ind) = 0;
+  end
+  Dxd= [Dxd; t1];
+end
 %---------------------------------------- 
 %% Derivative operator d/dx
 DXM1D = zeros(Nxd+1,Nx+1);
+for ii=0:Nxd
+  xi = xd(ii+1);
+  for jj=0:Nx
+    dLj = Dx(:,jj+1);
+    ifderiv=1;
+    dLj_xi = FuncEval(dLj,xi,ifderiv);
+  
+    DXM1D(ii+1,jj+1) = dLj_xi;
+  end
+end
 %----------------------------------------
 xm1d = getlgll1D(Nxd,xs,xe);
 
+XRM1D = DXM1D*xm1;
 JACM1D = 2/(xe-xs);
+% All these factors need to be divided by the jacobian (point wise multiplication).
+% It get multiplied by the jacobian during integral.
+% Hence it is skipped right now.
+RXM1D = 1/XRM1D;
 %-------------------------------------------------- 
 %% Over-integration matrix 2
 if Nxd2>1
@@ -131,14 +212,57 @@ else
   xd2=[0];
   wxd2=[1];
 end
+
+% Build polynomial coefficients for xd 
+A1 = [];
+for i = 0:Nxd2
+  A1= [A1 xd2.^i];
+end
+xd2_coeff = zeros(Nxd2+1);
+
+for i = 0:Nxd2
+  b = zeros(Nxd2+1,1);
+  b(i+1) = 1;
+
+  solns = A1\b;
+  xd2_coeff(:,i+1) = solns;
+end
 %---------------------------------------- 
+% Build derivative matrix (d/dx)
+Dxd2 = [];
+for i = 0:Nxd2
+  j = (i-1);
+  t1 = i*xd2_coeff(i+1,:);
+  nans = isnan(t1);
+  if max(nans)
+    ind = find(nans);
+    t1(ind) = 0;
+  end
+  Dxd2= [Dxd2; t1];
+end
+%---------------------------------------- 
+%% Derivative operator d/dx
+DXM1D2 = zeros(Nxd2+1,Nx+1);
+for ii=0:Nxd2
+  xi = xd2(ii+1);
+  for jj=0:Nx
+    dLj = Dx(:,jj+1);
+    ifderiv=1;
+    dLj_xi = FuncEval(dLj,xi,ifderiv);
+  
+    DXM1D2(ii+1,jj+1) = dLj_xi;
+  end
+end
+%----------------------------------------
 xm1d2 = getlgll1D(Nxd2,xs,xe);
 
+XRM1D2 = DXM1D2*xm1;
 JACM1D2 = 2/(xe-xs);
 %---------------------------------------- 
 % All these factors need to be divided by the jacobian (point wise multiplication).
 % It get multiplied by the jacobian during integral.
 % Hence it is skipped right now.
+RXM1D2 = 1/XRM1D2;
 
 %-------------------------------------------------- 
 %% Over-integration matrix 3
@@ -150,20 +274,96 @@ else
   xd3=[0];
   wxd3=[1];
 end
+
+% Build polynomial coefficients for xd 
+A1 = [];
+for i = 0:Nxd3
+  A1= [A1 xd3.^i];
+end
+xd3_coeff = zeros(Nxd3+1);
+
+for i = 0:Nxd3
+  b = zeros(Nxd3+1,1);
+  b(i+1) = 1;
+
+  solns = A1\b;
+  xd3_coeff(:,i+1) = solns;
+end
 %---------------------------------------- 
+% Build derivative matrix (d/dx)
+Dxd3 = [];
+for i = 0:Nxd3
+  j = (i-1);
+  t1 = i*xd3_coeff(i+1,:);
+  nans = isnan(t1);
+  if max(nans)
+    ind = find(nans);
+    t1(ind) = 0;
+  end
+  Dxd3= [Dxd3; t1];
+end
+%---------------------------------------- 
+%% Derivative operator d/dx
+DXM1D3 = zeros(Nxd3+1,Nx+1);
+for ii=0:Nxd3
+  xi = xd3(ii+1);
+  for jj=0:Nx
+    dLj = Dx(:,jj+1);
+    ifderiv=1;
+    dLj_xi = FuncEval(dLj,xi,ifderiv);
+  
+    DXM1D3(ii+1,jj+1) = dLj_xi;
+  end
+end
+%----------------------------------------
 xm1d3 = getlgll1D(Nxd3,xs,xe);
 
+XRM1D3 = DXM1D3*xm1;
 JACM1D3 = 2/(xe-xs);
 %---------------------------------------- 
 % All these factors need to be divided by the jacobian (point wise multiplication).
 % It get multiplied by the jacobian during integral.
 % Hence it is skipped right now.
+RXM1D3 = 1/XRM1D3;
 
 %% Dealiasing
 %-------------------------------------------------- 
 %disp('Calculating dealiased linear convective matrix')
+
+%% Interpolation to over-integration grid
+%-------------------------------------------------- 
+intpm1d = zeros((Nxd+1),(Nx+1));
+wtsvecd = zeros((Nxd+1),1);       % Weight vector for dealiased grid.
+%% over-integration points 
+for k =0:Nxd                        % points along x
+  wtr = wxd(k+1);
+  rk = xd(k+1);
+
+  intp_val = 0; 
+  for i = 0:Nx
+    Li = x_coeff(:,i+1);          % Trial Function (ux)
+    dLi = Dx(:,i+1);
+
+%   Test function/derivative values.
+    ifderiv = 0;
+    Li_rk = FuncEval(Li,rk,ifderiv);
+
+    intp_val = Li_rk;
+
+    posx = (k + 1);
+    posy = (i + 1);
+%   Since we build this very generally...
+%   Numerical errors occur (O(1e-14))
+    intpm1d(posx,posy) = intp_val;
+  end
+  posx = k + 1;
+  wtsvecd(posx,1) = wtr;
+
+end
+
 % Interpolate Geometrical factors to over-integration grid
 %-------------------------------------------------- 
+I_RXM1D = RXM1D; 
 I_JACM1D = JACM1D;
 
 
@@ -195,55 +395,34 @@ disp('Calculating derivative operators')
 gradm1 = zeros((Nx+1),(Nx+1));
 
 %% GLL points
-%for k =0:Nx                        % points along r
-%  wtr = wx(k+1);
-%  rk = x(k+1);
-%
-%  for i = 0:Nx
-%    Li = x_coeff(:,i+1);          % Trial Function (ur)
-%    dLi = Dx(:,i+1);
-%
-%%   Test function/derivative values.
-%    ifderiv =0;
-%    Li_rk = FuncEval(Li,rk,ifderiv);
-%
-%    ifderiv =1;
-%    dLi_rk = FuncEval(dLi,rk,ifderiv);
-%
-%    deriv_val = dLi_rk*RXM1(k+1);
-%
-%    posx = k + 1;
-%    posy = i + 1;
-%%   Since we build this very generally...
-%%   Numerical errors occur (O(1e-14))
-%    if (abs(deriv_val)>epstol)  
-%      gradm1(posx,posy) = deriv_val;
-%    end  
-%  end
-%end
+for k =0:Nx                        % points along r
+  wtr = wx(k+1);
+  rk = x(k+1);
 
-%% testing
-%% Build legendre transform
-pht = zeros(Nx+1,Nx+1);
-dpht = zeros(Nx+1,Nx+1);
-nx = Nx+1;
-lx = Nx+1;
-kj = 0;
-n = nx-1;
-for j = 1:lx
-  z=x(j);
-  Lj = legendrePoly(n,z);
-  dLj=legendreDeriv(n,z)*RXM1(j);
-  pht(j,:)  = transpose(Lj);
-  dpht(j,:) = transpose(dLj);
+  for i = 0:Nx
+    Li = x_coeff(:,i+1);          % Trial Function (ur)
+    dLi = Dx(:,i+1);
+
+%   Test function/derivative values.
+    ifderiv =0;
+    Li_rk = FuncEval(Li,rk,ifderiv);
+
+    ifderiv =1;
+    dLi_rk = FuncEval(dLi,rk,ifderiv);
+
+    deriv_val = dLi_rk*RXM1(k+1)/JACM1;
+
+    posx = k + 1;
+    posy = i + 1;
+%   Since we build this very generally...
+%   Numerical errors occur (O(1e-14))
+    if (abs(deriv_val)>epstol)  
+      gradm1(posx,posy) = deriv_val;
+    end  
+  end
+
 end
 
-InvLegendreTransform = pht;             % Spectral to nodal 
-LegendreTransform = inv(pht);           % Nodal to Spectral
-gradm1 = dpht*LegendreTransform;    % gradm1
-
-%dbstop in MESem1D at 331
-%%
 
 %% Laplacian term                  % Integration by parts:  dudx.dvdx
 %---------------------------------------------------------------------- 
@@ -324,7 +503,11 @@ fil_mat_x = boydstonodal_x*Gx*nodaltoboyds_x;
 forc = mass*(eye((Nx+1))-fil_mat_x);
 %-------------------------------------------------- 
 
-%% Build Over-integration matrices
+%% Build reverse interpolation
+% Dealiasing grid to GLL grid
+
+%% Build dealiasing matrix
+%% In the x-direction
 % Nxd1
 pht = zeros(Nx+1,Nxd+1);
 nx = Nxd+1;
@@ -336,9 +519,8 @@ for j = 1:lx
   Lj = legendrePoly(n,z);
   pht(j,:) = transpose(Lj);
 end
-
-dealiased_intpx = pht;              % Nxd spectral to Nx nodal
-%% Build spectral transform matrix on Nxd
+dealiased_intpx = pht;
+%% Build nodal to spectral transform in dealiasing grid
 pht = zeros(Nxd+1,Nxd+1);
 nx = Nxd+1;
 lx = Nxd+1;
@@ -349,29 +531,19 @@ for j = 1:lx
   Lj = legendrePoly(n,z);
   pht(j,:) = transpose(Lj);
 end
-Nxd_spec2nodal = pht;              % Nxd spectral to Nxd nodal
-Nxd_nodal2spec = inv(pht);         % Nxd nodal to Nxd spectral
+
+Nxd_spec2nodal = pht;              % Legendre transform of order Nxd
+Nxd_nodal2spec = inv(pht);         % Inverse legendre transform of order Nxd
 
 Dealias2GLL = dealiased_intpx*Nxd_nodal2spec;
-intgd = Dealias2GLL*massd;
-%% Spectral Nx to nodal Nxd
-pht = zeros(Nxd+1,Nx+1);
-nx = Nx+1;
-lx = Nxd+1;
-kj = 0;
-n = nx-1;
-for j = 1:lx
-  z=xd(j);
-  Lj = legendrePoly(n,z);
-  pht(j,:) = transpose(Lj);
-end
+GLL2Dealias = transpose(Dealias2GLL);
 
-Nxspec_to_Nxdnodal = pht;              % Nx spectral to Nxd nodal
-
-GLL2Dealias = Nxspec_to_Nxdnodal*LegendreTransform;
 gradm1d = GLL2Dealias*gradm1;
+intgd = Dealias2GLL*massd;
 
 %-------------------------------------------------- 
+%% Build dealiasing matrix
+%% In the x-direction
 % Nxd2
 pht = zeros(Nx+1,Nxd2+1);
 nx = Nxd2+1;
@@ -383,8 +555,8 @@ for j = 1:lx
   Lj = legendrePoly(n,z);
   pht(j,:) = transpose(Lj);
 end
-dealiased_intpx2 = pht;            % Nxd2 spectral to Nx nodal
-%% Build spectral transform matrix on Nxd2
+dealiased_intpx2 = pht;
+%% Build nodal to spectral transform in dealiasing grid
 pht = zeros(Nxd2+1,Nxd2+1);
 nx = Nxd2+1;
 lx = Nxd2+1;
@@ -395,30 +567,20 @@ for j = 1:lx
   Lj = legendrePoly(n,z);
   pht(j,:) = transpose(Lj);
 end
-Nxd2_spec2nodal = pht;              % Nxd spectral to Nxd nodal
-Nxd2_nodal2spec = inv(pht);         % Nxd nodal to Nxd spectral
 
-Dealias2GLL2 = dealiased_intpx2*Nxd2_nodal2spec;
-intgd2 = Dealias2GLL2*massd2;
+Nxd_spec2nodal = pht;              % Legendre transform of order Nxd
+Nxd_nodal2spec = inv(pht);         % Inverse legendre transform of order Nxd
 
-%% Spectral Nx to nodal Nxd2
-pht = zeros(Nxd2+1,Nx+1);
-nx = Nx+1;
-lx = Nxd2+1;
-kj = 0;
-n = nx-1;
-for j = 1:lx
-  z=xd2(j);
-  Lj = legendrePoly(n,z);
-  pht(j,:) = transpose(Lj);
-end
-Nxspec_to_Nxd2nodal = pht;              % Nx spectral to Nxd2 nodal
-
-GLL2Dealias2 = Nxspec_to_Nxd2nodal*LegendreTransform;
+Dealias2GLL2 = dealiased_intpx2*Nxd_nodal2spec;
+GLL2Dealias2 = transpose(Dealias2GLL2);
 
 gradm1d2 = GLL2Dealias2*gradm1;
+intgd2 = Dealias2GLL2*massd2;
+
 
 %-------------------------------------------------- 
+%% Build dealiasing matrix
+%% In the x-direction
 % Nxd3
 pht = zeros(Nx+1,Nxd3+1);
 nx = Nxd3+1;
@@ -430,8 +592,8 @@ for j = 1:lx
   Lj = legendrePoly(n,z);
   pht(j,:) = transpose(Lj);
 end
-dealiased_intpx3 = pht;             % Nxd3 spectral to Nx nodal
-%% Build spectral transform matrix on Nxd3 
+dealiased_intpx3 = pht;
+%% Build nodal to spectral transform in dealiasing grid
 pht = zeros(Nxd3+1,Nxd3+1);
 nx = Nxd3+1;
 lx = Nxd3+1;
@@ -442,29 +604,16 @@ for j = 1:lx
   Lj = legendrePoly(n,z);
   pht(j,:) = transpose(Lj);
 end
-Nxd3_spec2nodal = pht;              % Nxd spectral to Nxd nodal
-Nxd3_nodal2spec = inv(pht);         % Nxd nodal to Nxd spectral
 
-Dealias2GLL3 = dealiased_intpx3*Nxd3_nodal2spec;
+Nxd_spec2nodal = pht;              % Legendre transform of order Nxd
+Nxd_nodal2spec = inv(pht);         % Inverse legendre transform of order Nxd
 
-intgd3 = Dealias2GLL3*massd3;
-
-%% Spectral Nx to nodal Nxd3
-pht = zeros(Nxd3+1,Nx+1);
-nx = Nx+1;
-lx = Nxd3+1;
-kj = 0;
-n = nx-1;
-for j = 1:lx
-  z=xd3(j);
-  Lj = legendrePoly(n,z);
-  pht(j,:) = transpose(Lj);
-end
-Nxspec_to_Nxd3nodal = pht;         % Nx spectral to Nxd3 nodal
-
-GLL2Dealias3 = Nxspec_to_Nxd3nodal*LegendreTransform;
+Dealias2GLL3 = dealiased_intpx3*Nxd_nodal2spec;
+GLL2Dealias3 = transpose(Dealias2GLL3);
 
 gradm1d3 = GLL2Dealias3*gradm1;
+intgd3 = Dealias2GLL3*massd3;
+
 
 toc
 

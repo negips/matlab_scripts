@@ -4,13 +4,13 @@ clear
 clc
 close all
 
-addpath 'templates/'
+%addpath 'templates/'
 ifplot = 0;
 
 N=6;
 lx1 = N+1;
 npts=lx1;
-nels = 60;
+nels = 25;
 Nd=ceil(1.5*N);
 Nd2=ceil((4*N+3)/2);
 Nd3=ceil((6*N+3)/2);
@@ -20,7 +20,7 @@ dof = N*nels+1;
 nnodes = nels+1;
 
 d_start = 0;
-d_end = 100;
+d_end = 80;
 d_len = abs(d_end-d_start);
 
 periodic = 0;
@@ -51,13 +51,13 @@ mu_x = zeros(npts,nels);
 
 % Parameters
 U0    = 4;
-mu0   = 1.0; %3/4;  % Constant
-mut_0 = 2.9;        % time depentdent spatially constant
+mu0   = 3.7; %3/4;  % Constant
+mut_0 = 1.00;        % time depentdent spatially constant
 mu1 = 0.e-3;        % spatially varying mu
 mut_conv = 0.0;     % Temporal strength for spatially varying mu
 mut_abs = 0.0;      % Temporal strength for unstable region
-mu_diss = -10.0;
-diss_xs=60;
+mu_diss = -6.0;
+diss_xs=100;
 diss_xe=300;
 diss_xrise=30;
 diss_xfall=100;

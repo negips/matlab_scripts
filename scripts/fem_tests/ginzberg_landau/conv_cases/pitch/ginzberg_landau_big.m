@@ -23,9 +23,9 @@ x2 = linspace(d_start,d_end,interp_pts);
 u0 = 0.0*xgll;
 % use a normalized gaussian
 nu = 0;
-sigma = 0.05;
-xofst = 20;
-%u0 = normpdf(xgll-xofst,nu,sigma);
+sigma = 1.0;
+xofst = 40;
+u0 = normpdf(xgll-xofst,nu,sigma);
 %u0 = 0.01*u0/max(max(u0));
 %u0_int = normpdf(x2,mu,sigma);
 %u0_int = u0_int/max(u0_int);
@@ -48,14 +48,8 @@ un = u0;
 ulag1 = 0*un;
 ulag2 = 0*un;
 
-mu_lag1 = 0*un;
-mu_lag2 = 0*un;
-
-mu_conv_lag1 = 0*un;
-mu_conv_lag2 = 0*un;
-
-mu_abs_lag1 = 0*un;
-mu_abs_lag2 = 0*un;
+source_lag1 = 0*un;
+source_lag2 = 0*un;
 
 cubic_lag1 = 0*un;
 cubic_lag2 = 0*un;
@@ -63,8 +57,8 @@ cubic_lag2 = 0*un;
 quintic_lag1 = 0*un;
 quintic_lag2 = 0*un;
 
-ualag1 = 0*un;
-ualag2 = 0*un;
+forcing_lag1 = 0*un;
+forcing_lag2 = 0*un;
 
 conv_s = U0;
 nek_linear_stiff = -conv_s*nek_conv - nek_lp;
@@ -73,23 +67,23 @@ mass = 0*nek_mass;
 stiff = 0*nek_linear_stiff;
 
 % Parameters
-deltat = 0.0001;
+deltat = 0.001;
 istep = 0;
 %nsteps = 500000;
 time = 0;
-iostep = 20000;
-isave  = 1000;
-OMEGA=0.0002;
+iostep = 1000;
+isave  = 100;
+OMEGA=0.02;
 Tosc=2*pi/OMEGA;
-nsteps=ceil(0.5*Tosc/deltat);
+nsteps=ceil(2.0*Tosc/deltat);
+surfupd = 0.10;               % make surface evry surfupd of a period
 verbose=1;
-verbosestep=100;
+verbosestep=500;
 ifpcg=0;
 ifdealias=0;
 
 u_save = [];
 t_save = []; 
-
 
 %% SOLVE
 h3=figure;
@@ -148,53 +142,61 @@ for i = 1:nsteps
 
 %   Constant Source term
     if ifdealias  
-      mu_term(:,:,els) = nek_intgd(:,:,els)*nek_mud(:,:,els)*nek_intpm1d(:,:,els)*un(:,els);
+      mu_term(:,els) = nek_intgd(:,:,els)*nek_mud(:,:,els)*nek_intpm1d(:,:,els)*un(:,els);
     else  
-      mu_term(:,:,els) = nek_mass(:,:,els)*nek_mu(:,:,els)*un(:,els);
+      mu_term(:,els) = nek_mass(:,:,els)*nek_mu(:,:,els)*un(:,els);
     end  
 
 %   Time varying spatially constant source term
-    mu_time = mut_0*sin(OMEGA*time);
+    mu_time_0t = mut_0*sin(OMEGA*time);
     if ifdealias 
-      mu_term(:,:,els) = mu_term(:,:,els) + nek_intgd(:,:,els)*mu_time*nek_intpm1d(:,:,els)*un(:,els);
+      mu_term(:,els) = mu_term(:,els) + nek_intgd(:,:,els)*mu_time_0t*nek_mud(:,:,els)*nek_intpm1d(:,:,els)*un(:,els);
     else  
-      mu_term(:,:,els) = mu_term(:,:,els) + nek_mass(:,:,els)*mu_time*un(:,els);
+      mu_term(:,els) = mu_term(:,els) + nek_mass(:,:,els)*mu_time_0t*nek_mu(:,:,els)*un(:,els);
     end
-    b31 = extk(2)*mu_term(:,els);
-    b32 = extk(3)*mu_lag1(:,els);
-    b33 = extk(4)*mu_lag2(:,els);
-    b3 = deltat*(b31 + b32 + b33);
+
+%   Pitching term 
+    mu_time_p = mu_pitch*sin(OMEGA*time);
+    if ifdealias 
+      mu_pitch_term(:,els) = mu_time_p*nek_intgd(:,:,els)*(nek_mud_conv(:,:,els)-pitch_x0)*nek_intpm1d(:,:,els)*un(:,els); 
+    else  
+      mu_pitch_term(:,els) = mu_time_p*nek_mass(:,:,els)*(nek_mu_conv(:,:,els)-pitch_x0)*un(:,els); 
+    end
+
+%   Convectively unstable region (constant in time)
+    mu_c = mu1;
+    if ifdealias 
+      mu_conv_term(:,els) = mu_c*nek_intgd(:,:,els)*nek_mud_conv(:,:,els)*nek_intpm1d(:,:,els)*un(:,els); 
+    else  
+      mu_conv_term(:,els) = mu_c*nek_mass(:,:,els)*nek_mu_conv(:,:,els)*un(:,els); 
+    end
 
 %   Time varying convectively unstable region
-    mu_time = mut_conv*sin(OMEGA*time);
+    mu_time_ct = mut_conv*sin(OMEGA*time);
     if ifdealias 
-      mu_conv_term(:,:,els) = mu_time*nek_intgd(:,:,els)*nek_mud_conv(:,:,els)*nek_intpm1d(:,:,els)*un(:,els); 
+      mu_conv_term(:,els) = mu_conv_term(:,els) + mu_time_ct*nek_intgd(:,:,els)*nek_mud_conv(:,:,els)*nek_intpm1d(:,:,els)*un(:,els); 
     else  
-      mu_conv_term(:,:,els) = mu_time*nek_mass(:,:,els)*nek_mu_conv(:,:,els)*un(:,els); 
+      mu_conv_term(:,els) = mu_conv_term(:,els) + mu_time_ct*nek_mass(:,:,els)*nek_mu_conv(:,:,els)*un(:,els); 
     end
-    b41 = extk(2)*mu_conv_term(:,els);
-    b42 = extk(3)*mu_conv_lag1(:,els);
-    b43 = extk(4)*mu_conv_lag2(:,els);
-    b4 = deltat*(b41 + b42 + b43);
 
 %   Time varying absolute instability term
-    mu_time = max([0 mut_abs*sin(OMEGA*time)]);
+    mu_time_at = max([0 mut_abs*sin(OMEGA*time)]);
     if ifdealias
-      mu_abs_term(:,:,els) = mu_time*nek_intgd(:,:,els)*nek_mutd(:,:,els)*nek_intpm1d(:,:,els)*un(:,els);
+      mu_abs_term(:,els) = mu_time_at*nek_intgd(:,:,els)*nek_mutd(:,:,els)*nek_intpm1d(:,:,els)*un(:,els);
     else  
-      mu_abs_term(:,:,els) = mu_time*nek_mass(:,:,els)*nek_mut(:,:,els)*un(:,els);
+      mu_abs_term(:,els) = mu_time_at*nek_mass(:,:,els)*nek_mut(:,:,els)*un(:,els);
     end  
-    b51 = extk(2)*mu_abs_term(:,els);
-    b52 = extk(3)*mu_abs_lag1(:,els);
-    b53 = extk(4)*mu_abs_lag2(:,els);
-    b5 = deltat*(b51 + b52 + b53);
+
+    source_term(:,els) = mu_term(:,els) + mu_pitch_term(:,els) + mu_conv_term(:,els) + mu_abs_term(:,els); 
+    b_source = deltat*(extk(2)*source_term(:,els) + extk(3)*source_lag1(:,els) + extk(4)*source_lag2(:,els));
+
 
 %   Cubic term
     if ifdealias  
       intpd2_u = nek_intpm1d2(:,:,els)*un(:,els);
-      cubic_term(:,:,els) = nek_intgd2(:,:,els)*(intpd2_u.^3);
+      cubic_term(:,els) = nek_intgd2(:,:,els)*(intpd2_u.^3);
     else 
-      cubic_term(:,:,els) = nek_mass(:,:,els)*(un(:,els).^3);  
+      cubic_term(:,els) = nek_mass(:,:,els)*(un(:,els).^3);  
     end
     b_cubic1 = extk(2)*cubic_term(:,els);
     b_cubic2 = extk(3)*cubic_lag1(:,els);
@@ -204,17 +206,38 @@ for i = 1:nsteps
 %   Quintic term
     if ifdealias  
       quintic_intp = nek_intpm1d3(:,:,els)*un(:,els);
-      quintic_term(:,:,els) = nek_intgd3(:,:,els)*(quintic_intp.^5);
+      quintic_term(:,els) = nek_intgd3(:,:,els)*(quintic_intp.^5);
     else  
-      quintic_term(:,:,els) = nek_mass(:,:,els)*(un(:,els).^5);
+      quintic_term(:,els) = nek_mass(:,:,els)*(un(:,els).^5);
     end  
     b_quintic1 = extk(2)*quintic_term(:,els);
     b_quintic2 = extk(3)*quintic_lag1(:,els);
     b_quintic3 = extk(4)*quintic_lag2(:,els);
     b_quintic = deltat*(b_quintic1 + b_quintic2 + b_quintic3);
 
+%   Forcing term (impulse)
+    % spatial extent
+    impulse_amp=0;
+    nu = 0;
+    sigma = 1.0;
+    xofst_imp = 20;
+    f_imp = impulse_amp*normpdf(xgll(:,els)-xofst_imp,nu,sigma);
+    % temporal extent
+    nu_t = 0;
+    sigma_t = 0.01;
+    tofst = 0.0;        % which part of the cycle
+    tcycle = mod(time,Tosc)/Tosc;
+    timp = tcycle-tofst;
+    tnorm = normpdf(timp,nu_t,sigma_t)/normpdf(0,nu_t,sigma_t);
+    forcing_term(:,els) = nek_mass(:,:,els)*f_imp*tnorm;
+
+    b_forcing1 = extk(2)*forcing_term(:,els);
+    b_forcing2 = extk(3)*forcing_lag1(:,els);
+    b_forcing3 = extk(4)*forcing_lag2(:,els);
+    b_forcing = deltat*(b_forcing1 + b_forcing2 + b_forcing3);
+
 %   sum
-    b(:,els) = -b1 + b2 + (b3 - b4 + b5) + b_cubic - b_quintic;
+    b(:,els) = -b1 + b2 + b_source + b_cubic - b_quintic + b_forcing;
 
     gl_pos_j1 = (els-1)*N + 1;
     gl_pos_i1 = (els-1)*N + 1;
@@ -231,27 +254,24 @@ for i = 1:nsteps
   ulag2 = ulag1;
   ulag1 = un;
 
-  mu_lag2 = mu_lag1;
-  mu_lag1 = mu_term;
-
-  mu_conv_lag2 = mu_conv_lag1;
-  mu_conv_lag1 = mu_conv_term;
-
-  mu_abs_lag2 = mu_abs_lag1;
-  mu_abs_lag1 = mu_abs_term;
+  source_lag2 = source_lag1;
+  source_lag1 = source_term; 
 
   cubic_lag2 = cubic_lag1;
   cubic_lag1 = cubic_term; 
 
   quintic_lag2 = quintic_lag1;
   quintic_lag1 = quintic_term;
+
+  forcing_lag2 = forcing_lag1;
+  forcing_lag1 = forcing_term;
 %%
 
   periodic = 0; 
   b = DSSUM(b,nels,periodic);
 
-  b(1,1)    = 2e-12 + 1e-12*rand(1);    % random noise O(1e-6)
-%  b(1,1)    = 0;
+%  b(1,1)    = 2e-14 + 1e-14*rand(1);    % random noise O(1e-6)
+  b(1,1)    = 0;
 %  b(1,1)    = 0.1*sin(time);
   big_b(1)  = b(1,1); 
 
@@ -280,24 +300,27 @@ for i = 1:nsteps
   un = soln;
 
   %% Just plot Points
-  if mod(istep,iostep)==0    
+  if mod(istep,iostep)==0 || istep==1 
     figure(h3)
     plot(ax1,xgll,un, '-k', 'MarkerSize', 16);
 %    set(ax1,'Color', 'none');
 %    xlim(ax1,[1 600])
-    legend(ax1,['T/T_{osc}=' num2str(time/Tosc) '; istep=' num2str(istep) '; \mu_{t}=' num2str(mu_time)], 'Location', 'Best')
+    legend(ax1,['T/T_{osc}=' num2str(time/Tosc)], 'Location', 'Best')
 %    plot(ax2,mu_x,un, '-k', 'MarkerSize', 16);
 
-    plot(ax2,xgll,mu_x+mut_0*sin(OMEGA*time)+max([0 sin(OMEGA*time)])*mu_xt, '--r', 'MarkerSize', 16);
+    mu_temp = mu_x + mut_0*sin(OMEGA*time) + mu_c*xgll + mu_time_ct*xgll + mu_time_p*(xgll-pitch_x0);
+    plot(ax2,xgll,mu_temp, '--r', 'MarkerSize', 16);
     set(ax2,'XAxisLocation', 'Top')
     set(ax2,'YAxisLocation', 'Right')
 %    set(ax2,'XDir', 'reverse')  
     set(ax2,'Color', 'none')
     ylabel(ax1,'A')
     ylabel(ax2,'\mu') 
+%    ylim(ax2,[3 4.5])
     axes(ax2)
+    set(ax2,'YGrid', 'on')
+    set(ax2,'XGrid', 'on')
     pause(0.01)
-
   end
 
   if (mod(istep,isave)==0)
@@ -306,14 +329,14 @@ for i = 1:nsteps
   end       
 
   %dbstop in me_periodic at 335
-  iperiod=floor(time/Tosc);    
-  if (iperiod>nperiods)
+  iperiod=time/Tosc;
+  if (floor(1/surfupd*(iperiod-nperiods))>=1)
     figure(10)
     surf(xgll(:),t_save/Tosc,transpose(u_save), 'EdgeColor', 'none')
     view(2)
+    colorbar
     pause(2)
-    colorbar  
-    nperiods=iperiod;  
+    nperiods=nperiods+surfupd;
   end      
          
   time_it = toc(t_it);
@@ -323,6 +346,10 @@ figure(10)
 surf(xgll(:),t_save/Tosc,transpose(u_save), 'EdgeColor', 'none')
 colorbar
 view(2)
+pause(2)
 
-save('homogeneous_conv_quasi_steady.mat')
+sfname=['GZ_' 'Uo' num2str(U0) '_muo' num2str(mu0) '_mut_o' num2str(mut_0) '_mu1_' num2str(mu1) '_mut_conv' num2str(mut_conv) '_mut_abs' num2str(mut_abs) '_xofst' num2str(xofst) '.mat'];
+save(sfname)
+
+
 
