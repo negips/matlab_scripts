@@ -4,13 +4,13 @@ clear
 clc
 close all
 
-%addpath 'templates/'
+addpath 'templates/'
 ifplot = 0;
 
 N=6;
 lx1 = N+1;
 npts=lx1;
-nels = 70;
+nels = 60;
 Nd=ceil(1.5*N);
 Nd2=ceil((4*N+3)/2);
 Nd3=ceil((6*N+3)/2);
@@ -51,17 +51,13 @@ mu_x = zeros(npts,nels);
 
 % Parameters
 U0    = 4;
-mu0   = 4.0; %3/4;  % Constant
-mut_0 = 0.0;        % time depentdent spatially constant
-dmu_max  = 0.0;     % maximum deviation of mu from mu0
-pitch_x0 = 50.;     % pitch axis
-dx_max = max(abs([(d_end-pitch_x0) (pitch_x0-d_start)]));
-mu_pitch = 1/dx_max*dmu_max;        % slope of pitching mu
-mu1 = -4.0e-2;      % spatially varying mu
-mut_conv = 0.0e-3;  % Temporal strength for spatially varying mu
+mu0   = 1.0; %3/4;  % Constant
+mut_0 = 2.9;        % time depentdent spatially constant
+mu1 = 0.e-3;        % spatially varying mu
+mut_conv = 0.0;     % Temporal strength for spatially varying mu
 mut_abs = 0.0;      % Temporal strength for unstable region
-mu_diss = -6.0;
-diss_xs=120;
+mu_diss = -10.0;
+diss_xs=60;
 diss_xe=300;
 diss_xrise=30;
 diss_xfall=100;
@@ -117,10 +113,9 @@ for i=1:nels
      nek_mud(:,:,i)      = mu0*eye(length(xm1d));
 
 %    Time and space varying convective region      
-     nek_mu_conv(:,:,i)  = diag(xm1);
-
+     nek_mud_conv(:,:,i) = diag(mu1*xm1d);
 %    On over-integration grid 
-     nek_mud_conv(:,:,i) = diag(xm1d);
+     nek_mu_conv(:,:,i)  = diag(mu1*xm1);
 
 %    Add dissipative region at the end 
      s1                  =  smoothstep(xm1,diss_xs,diss_xs+diss_xrise); 
@@ -151,7 +146,7 @@ for i=1:nels
      s2                  = -smoothstep(xm1,step_xe,step_xe+step_xfall);
      ds1                 =  smoothstep(xm1,diss_xs,diss_xs+diss_xrise); 
      ds2                 = -smoothstep(xm1,diss_xe,diss_xe+diss_xfall); 
-     mu_x(:,i)           = mu0 + mu_diss*(ds1 + ds2); %+ mut*(s1 + s2);
+     mu_x(:,i)           = mu0 + mu1*xm1 + mu_diss*(ds1 + ds2); %+ mut*(s1 + s2);
      mu_xt(:,i)          = mut_abs*(s1 + s2); 
 
      gl_pos_j1 = (i-1)*N + 1;
