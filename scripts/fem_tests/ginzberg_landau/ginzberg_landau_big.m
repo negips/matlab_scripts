@@ -18,14 +18,13 @@ ex2   = [0 3 -3 1];
 who
 
 x=xall;
-x2 = linspace(d_start,d_end,interp_pts);
 
 u0 = 0.0*xgll;
 % use a normalized gaussian
 nu = 0;
 sigma = 1.0;
-xofst = 10;
-%u0 = 2*normpdf(xgll-xofst,nu,sigma);
+xofst = 100;
+u0 = 2*normpdf(xgll-xofst,nu,sigma);
 %u0 = 0.01*u0/max(max(u0));
 %u0_int = normpdf(x2,mu,sigma);
 %u0_int = u0_int/max(u0_int);
@@ -67,22 +66,24 @@ mass = 0*nek_mass;
 stiff = 0*nek_linear_stiff;
 
 % Parameters
-deltat = 0.001;
+deltat = 0.002;
 istep = 0;
 %nsteps = 500000;
 time = 0;
-iostep = 1000;
+iostep = 100000;
 isave  = 100;
 OMEGA=0.01;
 Tosc=2*pi/OMEGA;
-nsteps=ceil(3.0*Tosc/deltat);
-surfupd = 0.10;               % make surface evry surfupd of a period
+nsteps=ceil(0.6*Tosc/deltat);
+surfupd = 1.00;               % make surface evry surfupd of a period
 verbose=1;
 verbosestep=500;
 ifpcg=0;
 ifdealias=0;
+ifrenorm=0;
 
 u_save = [];
+u_renorm = [];
 t_save = []; 
 
 %% SOLVE
@@ -287,8 +288,8 @@ for i = 1:nsteps
   periodic = 0; 
   b = DSSUM(b,nels,periodic);
 
-  b(1,1)    = 2e-14 + 1e-14*rand(1);    % random noise O(1e-6)
-%  b(1,1)    = 0;
+%  b(1,1)    = 2e-14 + 1e-14*rand(1);    % random noise O(1e-6)
+  b(1,1)    = 0;
 %  b(1,1)    = 0.1*sin(time);
   big_b(1)  = b(1,1); 
 
@@ -341,6 +342,13 @@ for i = 1:nsteps
   if (mod(istep,isave)==0)
     u_save = [u_save un(:)];
     t_save = [t_save time];
+
+    if (ifrenorm)
+      [umax ind] = max(un(:));
+      u_renorm = [u_renorm un(:)/umax];
+    end
+
+
   end       
 
   %dbstop in me_periodic at 335
@@ -350,6 +358,14 @@ for i = 1:nsteps
     surf(xgll(:),t_save/Tosc,transpose(u_save), 'EdgeColor', 'none')
     view(2)
     colorbar
+
+    if (ifrenorm)
+      figure(11)
+      surf(xgll(:),t_save/Tosc,transpose(u_renorm), 'EdgeColor', 'none')
+      view(2)
+      colorbar
+    end
+
     pause(2)
     nperiods=nperiods+surfupd;
   end      
@@ -362,6 +378,8 @@ surf(xgll(:),t_save/Tosc,transpose(u_save), 'EdgeColor', 'none')
 colorbar
 view(2)
 pause(2)
+
+close all
 
 sfname=['GZ_' 'Uo' num2str(U0) '_muo' num2str(mu0) '_mut_o' num2str(mut_0) '_mu1_' num2str(mu1) '_mut_conv' num2str(mut_conv) '_mu_abs' num2str(mu_abs) '_mut_abs' num2str(mut_abs) '_xofst' num2str(xofst) '.mat'];
 save(sfname)
