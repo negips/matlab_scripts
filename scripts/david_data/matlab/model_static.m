@@ -14,18 +14,19 @@ lfol = length(fol);
 destn = 'plots/';
 ifcols= 1;
 
-fs = 16;    % fontsize
+fs = 24;    % fontsize
 lfs = 12;   % legend font size
 lw = 1;     % linewidth
 
 c=0.5;
 nu = 1.568E-5;
+Area=1.0;
 
-fname='u30_d14_alphasweep1.h5';
-%fname='u24_d14_alphasweep.h5';
+%fname='u30_d14_alphasweep1.h5';
+fname='u24_d14_alphasweep.h5';
 %fname='u30_d8_alphasweep.h5';
 %fname='u24_d8_alphasweep.h5';
-uoo = 30;
+uoo = 24;
 deltacase=14;
 Re=uoo*c/nu;
 if (Re<600000)
@@ -47,13 +48,16 @@ cm_all = [];
 alpha_all = [];
 time_all = [];
 
-alpha_min = 0;         % degrees
-alpha_max = 10;         % degrees
+alpha_min = 1;         % degrees
+alpha_max = 5;         % degrees
+xlims = [0 6];        % Plot x limits 
+
 
 nsegs = length(segments);
 for iseg=1:nsegs
   qtime=segments(iseg).qtime;
   alpha=segments(iseg).alpha*180/pi;
+  q_alpha = alpha;
   p_time = segments(iseg).ptime;
   p_cz = segments(iseg).Cz;
   p_cm = segments(iseg).Cm;
@@ -98,17 +102,17 @@ figure(3)
 plot_cq1 = plot(alpha3,cm3, '.', 'Color', 'b'); hold on;
 %plot_cq = plot(movalpha,movcm, '--', 'Color', 'm', 'LineWidth',3);
 ylabel('C_{m}', 'Interpreter', 'tex', 'FontSize', fs)
-xlabel('\alpha', 'Interpreter', 'tex', 'FontSize', fs)
+xlabel('\alpha^{\circ}', 'Interpreter', 'tex', 'FontSize', fs)
 hold on
-xlim([-1 11])
+xlim(xlims)
 
 figure(4)
 plot_cq1 = plot(alpha3,cz3, '.', 'Color', 'b'); hold on;
 %plot_cq = plot(movalpha,movcz, '--', 'Color', 'm', 'LineWidth',3);
 ylabel('C_{z}', 'Interpreter', 'tex', 'FontSize', fs)
-xlabel('\alpha', 'Interpreter', 'tex', 'FontSize', fs)
+xlabel('\alpha^{\circ}', 'Interpreter', 'tex', 'FontSize', fs)
 hold on
-xlim([-1 11])
+xlim(xlims)
 
 %% Reduce resolution and save
 npts=10000;
@@ -116,23 +120,63 @@ alpha = linspace(alpha_min,alpha_max,npts);
 cm = interp1(movalpha,movcm,alpha,'pship');
 cz = interp1(movalpha,movcz,alpha,'pship');
 
-figure(3)
-plot_cq2=plot(alpha,cm,'-d', 'Color', 'c', 'LineWidth', 3);
-filename=['static_model_cm.eps'];
-filename = [re_leg '_' filename];
-SaveFig(gcf,filename, destn, ifcols)
-
+%figure(3)
+%plot_cq2=plot(alpha,cm,'-d', 'Color', 'k', 'LineWidth', 3);
+%filename=['static_model_cm.eps'];
+%filename = [re_leg '_' filename];
+%SaveFig(gcf,filename, destn, ifcols)
+%
 figure(4)
-plot_cq2=plot(alpha,cz,'-d', 'Color', 'c', 'LineWidth', 3);
-filename=['static_model_cz.eps'];
-filename = [re_leg '_' filename];
-SaveFig(gcf,filename, destn, ifcols)
+%plot_cq2=plot(alpha,cz,'-d', 'Color', 'k', 'LineWidth', 3);
+%filename=['static_model_cz.eps'];
+%filename = [re_leg '_' filename];
+%SaveFig(gcf,filename, destn, ifcols)
 
 
 % save([num2str(deltacase) '_static_models_' num2str(re_leg) '.mat'], 'alpha', 'cm', 'cz', 'deltacase', 'uoo', 'base', 'fol', 'folder', 'fname')
 
 
 
+ifxfoil = 1;
+iftransition=1;
+
+if ifxfoil
+  if uoo==24
+    xfile = 'polar_re765k_ed36f128+14.dat';
+  else  
+    xfile = 'polar_re1e6_ed36f128+14.dat';
+  end  
+ 
+  xfoil = importdata(xfile);
+  ind1=xfoil.data(:,1)>=alpha_min;
+  ind2=xfoil.data(:,1)<=alpha_max;
+  ind3=find(ind1.*ind2);
+
+  figure(4)
+  plot(xfoil.data(ind3,1), xfoil.data(ind3,2), '--k', 'LineWidth', 4)
+  filename=['static_model_cz_xfoil.eps'];
+  filename = [re_leg '_' filename];
+  SaveFig(gcf,filename, destn, ifcols)
+
+  figure(3)
+  plot(xfoil.data(ind3,1), xfoil.data(ind3,5), '--k', 'LineWidth', 4)
+  filename=['static_model_cm_xfoil.eps'];
+  filename = [re_leg '_' filename];
+  SaveFig(gcf,filename, destn, ifcols)
+
+  if iftransition
+    figure(5)
+    plot(xfoil.data(ind3,1), xfoil.data(ind3,7), '--k', 'LineWidth', 4)
+    ylabel('x/c', 'Interpreter', 'tex', 'FontSize', fs)
+    xlabel('\alpha[^{\circ}]', 'Interpreter', 'tex', 'FontSize', fs)
+    xlim(xlims)
+    filename=['static_model_tr_xfoil.eps'];
+    filename = [re_leg '_' filename];
+    SaveFig(gcf,filename, destn, ifcols)
+  end
+
+
+end
 
 
 

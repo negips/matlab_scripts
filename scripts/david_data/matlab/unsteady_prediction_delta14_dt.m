@@ -10,7 +10,7 @@ ifsave = 1;
 iftsave = 0;
 destn = 'plots/';
 ifcols= 1;
-ifdt = 1;
+ifdt = 0;
 
 c=0.5;
 nu = 1.568E-5;
@@ -22,7 +22,7 @@ lfol = length(fol);
 
 run get_files
 
-fs = 16;
+fs = 18;
 lfs = 10;
 lw = 1;     % linewidth
 
@@ -58,6 +58,7 @@ case_count=0;
 kall2=[];
 phiall2=[];
 gammaall2=[];
+betaall2=[];
 intgall2=[];
 intgbydalpha2=[];
 intgnorm2=[];
@@ -66,8 +67,10 @@ theta_all2=[];
 ampall2=[];
 toffall2=[];
 sofstall2=[];
+dphiall2=[];
+dbetaall2=[];
 
-for jj= [33] %1:nfiles
+for jj= [32:45] %1:nfiles
 
   clc    
   fname=filenames{jj};
@@ -89,6 +92,7 @@ for jj= [33] %1:nfiles
     found=0;
     continue;
   end    
+
   if ifturb(jj)
     found=0;
     continue;
@@ -194,6 +198,7 @@ for jj= [33] %1:nfiles
   kall=[];
   phiall=[];
   gammaall=[];
+  betaall=[];
   intgall=[];
   intgbydalpha=[];
   intgnorm=[];
@@ -262,7 +267,7 @@ for jj= [33] %1:nfiles
       end  
       disp(['Can not find steady shift. Min k=' num2str(k) ])
       continue
-    end  
+    end 
 
     if k<0.05
       continue
@@ -384,19 +389,22 @@ for jj= [33] %1:nfiles
     cz_pred = p_motion + cz_lagg;
 
     gamma = omega*(toff-deltaT);
+    beta  = omega*(toff);
 
 %    [toff deltaT (toff-deltaT) omega gamma gamma*180/pi]
+
   
     kall=[kall k];
-    phiall = [phiall phi];
-    gammaall = [gammaall gamma];
+    phiall = [phiall phi];                                  % phase lag quasi-steady term
+    gammaall = [gammaall gamma];                            % modified phase gain (-deltaT) added mass
+    betaall = [betaall gamma];                              % phase gain added mass
     intgall = [intgall intg_const];
     intgbydalpha=[intgbydalpha intg_const/amp2];
     intgnorm=[intgnorm intg_const/amp2*uoo/30];             % uoo/30 to keep the factor ~ O(1)
     alpha_all=[alpha_all mean_alpha2];
     theta_all=[theta_all theta];
     ampall = [ampall amp2];
-    toffall = [toffall toff-deltaT]; 
+    toffall = [toffall toff];                               % added mass time gain 
     omgall = [omgall omega];  
     %    sofstall = [sofstall steady_offset];  
 
@@ -427,9 +435,9 @@ for jj= [33] %1:nfiles
     end
 
     figure(50)
-    time_plot = plot(q_time,q_cz, '-', 'Color', col2(ii,:), 'LineWidth', 2); hold on
+    time_plot = plot(q_time,q_cz, '. ', 'Color', col2(ii,:), 'LineWidth', 2, 'MarkerSize', 16); hold on
 %    time_pred = plot(q_time,cz_pred, '--', 'Color', col2(ncases+dum,:), 'LineWidth', 2);
-    time_pred = plot(q_time,cz_pred, ' o', 'Color', 'k', 'LineWidth', 1);
+    time_pred = plot(q_time,cz_pred, '-', 'Color', 'k', 'LineWidth', 2);
     ylabel('C_{z}', 'Interpreter', 'tex', 'FontSize', fs)
     xlabel('time', 'Interpreter', 'tex', 'FontSize', fs)
 
@@ -491,22 +499,29 @@ for jj= [33] %1:nfiles
     legend(legs_f, 'Interpreter', 'tex', 'FontSize', lfs, 'Location', 'Best')
     hold on    
 
-    figure(34)
-    plot(kall,abs(intgnorm), mkr, 'Color', col1(jj,:), 'LineWidth', 2)
-%    ylabel('Normalized Integration constant', 'Interpreter', 'tex', 'FontSize', fs)
-    ylabel('C_{1}', 'Interpreter', 'tex', 'FontSize', fs)
-    xlabel('k', 'Interpreter', 'tex', 'FontSize', fs)
-    legend(legs_f, 'Interpreter', 'tex', 'FontSize', lfs, 'Location', 'Best')
-    hold on
-    grid on
+%    figure(34)
+%    plot(kall,abs(intgnorm), mkr, 'Color', col1(jj,:), 'LineWidth', 2)
+%%    ylabel('Normalized Integration constant', 'Interpreter', 'tex', 'FontSize', fs)
+%    ylabel('C_{1}', 'Interpreter', 'tex', 'FontSize', fs)
+%    xlabel('k', 'Interpreter', 'tex', 'FontSize', fs)
+%    legend(legs_f, 'Interpreter', 'tex', 'FontSize', lfs, 'Location', 'Best')
+%    hold on
+%    grid on
 
     figure(35)
-    plot(kall,abs((toffall+deltaT)./deltaT ), mkr, 'Color', col1(jj,:), 'LineWidth', 2)
-    ylabel('toff/deltaT', 'Interpreter', 'tex', 'FontSize', fs)
+    plot(kall,betaall*180/pi, mkr, 'Color', col1(jj,:), 'LineWidth', 2)
+    ylabel('\beta', 'Interpreter', 'tex', 'FontSize', fs)
     xlabel('k', 'Interpreter', 'tex', 'FontSize', fs)
     legend(legs_f, 'Interpreter', 'tex', 'FontSize', lfs, 'Location', 'Best')
-    hold on
-    grid on
+    hold on    
+
+%    figure(36)
+%    plot(kall,abs((toffall+deltaT)./deltaT ), mkr, 'Color', col1(jj,:), 'LineWidth', 2)
+%    ylabel('toff/deltaT', 'Interpreter', 'tex', 'FontSize', fs)
+%    xlabel('k', 'Interpreter', 'tex', 'FontSize', fs)
+%    legend(legs_f, 'Interpreter', 'tex', 'FontSize', lfs, 'Location', 'Best')
+%    hold on
+%    grid on
 
 %    figure(33)
 %    plot(kall,sofstall, '-d', 'Color', col1(jj,:))
@@ -514,9 +529,23 @@ for jj= [33] %1:nfiles
 %    xlabel('k', 'Interpreter', 'tex', 'FontSize', fs)
 %    legend(legs_f, 'Interpreter', 'tex', 'FontSize', lfs, 'Location', 'Best')
 %    hold on
+
+%   Phase lag derivative
+    dphi_all = gradient(phiall,kall);
+    dbeta_all = gradient(betaall,kall);
+
+    figure(36)
+    plot(kall,dphi_all*180/pi, mkr, 'Color', col1(jj,:), 'LineWidth', 2); hold on
+    plot(kall,dbeta_all*180/pi, 'd-', 'Color', col1(jj,:), 'LineWidth', 2)
+    ylabel(['\Delta\phi, \Delta\phi'], 'Interpreter', 'tex', 'FontSize', fs)
+    xlabel('k', 'Interpreter', 'tex', 'FontSize', fs)
+    legend({'\Delta\phi', '\Delta\beta'}, 'Interpreter', 'tex', 'FontSize', lfs, 'Location', 'Best')
+    hold on    
+
     kall2=[kall2 kall];
     phiall2 = [phiall2 phiall];
     gammaall2 = [gammaall2 gammaall];
+    betaall2 = [betaall2 betaall];
     intgall2 = [intgall2 intgall];
     intgbydalpha2=[intgbydalpha2 intgbydalpha];
     intgnorm2 = [intgnorm2 intgnorm];
@@ -524,6 +553,9 @@ for jj= [33] %1:nfiles
     theta_all2=[theta_all2 theta_all];
     ampall2=[ampall2 ampall];
     toffall2=[toffall2 toffall]; 
+
+    dphiall2 = [dphiall2 dphi_all];
+    dbetaall2 = [dbetaall2 dbeta_all];
 
   end
 
@@ -543,10 +575,10 @@ SaveFig(gcf,filename, destn, ifcols)
 %%filename = [re_leg '_' filename];
 %SaveFig(gcf,filename, destn, ifcols)
 %
-figure(34)
-filename=['phase_lag_k-intgnorm.eps'];
-%filename = [re_leg '_' filename];
-SaveFig(gcf,filename, destn, ifcols)
+%figure(34)
+%filename=['phase_lag_k-intgnorm.eps'];
+%%filename = [re_leg '_' filename];
+%SaveFig(gcf,filename, destn, ifcols)
 
 
 
