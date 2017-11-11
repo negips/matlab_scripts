@@ -47,15 +47,15 @@ mu_x = zeros(npts,nels);
 
 % Parameters
 U0    = 4;
-mu0   = 4; %3/4;  % Constant
+mu0   = 1.5; %3/4;  % Constant
 mut_0 = 0.0;        % time dependent spatially constant
 dmu_max  = 0.0;     % maximum deviation of mu from mu0
 pitch_x0 = 50.;     % pitch axis
 dx_max = max(abs([(d_end-pitch_x0) (pitch_x0-d_start)]));
 mu_pitch = 1/dx_max*dmu_max;        % slope of pitching mu
-mu1 = -2.0e-2;      % spatially varying mu
+mu1 = 0.0e-2;      % spatially varying mu
 mut_conv = 0.0e-3;  % Temporal strength for spatially varying mu
-mu_abs = 0.0;        % Constant strength for unstable region    
+mu_abs = 2.0;        % Constant strength for unstable region    
 mut_abs = 0.0;      % Temporal strength for unstable region
 mu_diss = 0.0;
 
@@ -67,7 +67,7 @@ diss_xfall=20;
 
 % Step for unstable region
 step_xs=20;
-step_xe=25;
+step_xe=30;
 step_xrise=5;
 step_xfall=5;
 

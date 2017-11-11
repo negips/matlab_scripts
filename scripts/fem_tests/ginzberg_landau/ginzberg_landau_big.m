@@ -23,8 +23,8 @@ u0 = 0.0*xgll;
 % use a normalized gaussian
 nu = 0;
 sigma = 1.0;
-xofst = 100;
-%u0 = 2*normpdf(xgll-xofst,nu,sigma);
+xofst = 5;
+u0 = 2*normpdf(xgll-xofst,nu,sigma);
 %u0 = 0.01*u0/max(max(u0));
 %u0_int = normpdf(x2,mu,sigma);
 %u0_int = u0_int/max(u0_int);
@@ -74,8 +74,8 @@ iostep = 1000;
 isave  = 100;
 OMEGA=0.01;
 Tosc=2*pi/OMEGA;
-nsteps=ceil(0.6*Tosc/deltat);
-surfupd = 0.10;               % make surface evry surfupd of a period
+nsteps=ceil(1.5*Tosc/deltat);
+surfupd = 1.00;               % make surface evry surfupd of a period
 verbose=1;
 verbosestep=500;
 ifpcg=0;
@@ -337,7 +337,7 @@ for i = 1:nsteps
     axes(ax2)
     set(ax2,'YGrid', 'on')
     set(ax2,'XGrid', 'on')
-    pause(0.01)
+    pause(0.1)
   end
 
   if (mod(istep,isave)==0)
