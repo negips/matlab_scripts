@@ -1,7 +1,7 @@
 function SaveFig(h, filename, destn, col)
 % Save and move the figure
 
-reso='-r150';
+reso='-r300';
 
 
 if ~isempty(strfind(lower(filename), '.eps'))

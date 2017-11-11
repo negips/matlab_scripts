@@ -4,9 +4,10 @@ clear
 clc
 close all
 
-addpath '/scratch/negi/git_repos/matlabscripts/scripts/'
+%addpath '/scratch/negi/git_repos/matlabscripts/scripts/'
 
-base = '/scratch/negi/git_repos/matlabscripts/scripts/david_data/';
+base = '../';
+%base = '/scratch/negi/git_repos/matlabscripts/scripts/david_data/';
 fol = 'delta+14/';
 folder = [base fol];
 % fname = 'u24_a3_d14_fsteps.h5';
@@ -21,11 +22,11 @@ lw = 1;     % linewidth
 c=0.5;
 nu = 1.568E-5;
 
-fname='u30_d14_alphasweep1.h5';
-%fname='u24_d14_alphasweep.h5';
+%fname='u30_d14_alphasweep1.h5';
+fname='u24_d14_alphasweep.h5';
 %fname='u30_d8_alphasweep.h5';
 %fname='u24_d8_alphasweep.h5';
-uoo = 30;
+uoo = 24;
 deltacase=14;
 Re=uoo*c/nu;
 if (Re<600000)

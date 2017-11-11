@@ -24,7 +24,7 @@ u0 = 0.0*xgll;
 nu = 0;
 sigma = 1.0;
 xofst = 100;
-u0 = 2*normpdf(xgll-xofst,nu,sigma);
+%u0 = 2*normpdf(xgll-xofst,nu,sigma);
 %u0 = 0.01*u0/max(max(u0));
 %u0_int = normpdf(x2,mu,sigma);
 %u0_int = u0_int/max(u0_int);
@@ -70,12 +70,12 @@ deltat = 0.002;
 istep = 0;
 %nsteps = 500000;
 time = 0;
-iostep = 100000;
+iostep = 1000;
 isave  = 100;
 OMEGA=0.01;
 Tosc=2*pi/OMEGA;
 nsteps=ceil(0.6*Tosc/deltat);
-surfupd = 1.00;               % make surface evry surfupd of a period
+surfupd = 0.10;               % make surface evry surfupd of a period
 verbose=1;
 verbosestep=500;
 ifpcg=0;
@@ -235,17 +235,18 @@ for i = 1:nsteps
 
 %   Forcing term (impulse)
     % spatial extent
-    impulse_amp=0;
+    impulse_amp=100;
     nu = 0;
     sigma = 1.0;
-    xofst_imp = 15;
+    xofst_imp = 100;
     f_imp = impulse_amp*normpdf(xgll(:,els)-xofst_imp,nu,sigma);
     % temporal extent
     nu_t = 0;
     sigma_t = 0.01;
     tofst = 0.25;        % which part of the cycle
     tcycle = mod(time,Tosc)/Tosc;
-    timp = tcycle-tofst;
+%    timp = tcycle-tofst;
+    timp = time;
     tnorm = normpdf(timp,nu_t,sigma_t)/normpdf(0,nu_t,sigma_t);
     forcing_term(:,els) = nek_mass(:,:,els)*f_imp*tnorm;
 

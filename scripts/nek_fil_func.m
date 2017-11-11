@@ -5,7 +5,7 @@ clear
 clc
 close all
 
-N=4;
+N=20;
 [x w] = lglnodes(N);
 x = x(end:-1:1);
 nx = N+1;
@@ -51,7 +51,7 @@ boydstonodal = transpose(phi);
 
 %G = eye(N+1);
 
-kut=2;
+kut=6;
 wght=1.0;
 nx=N+1;
 filter_func=zeros(N+1,1);
@@ -60,17 +60,18 @@ k0=nx-kut;
 for k=k0+1:nx
   kk=k+nx*(k-1);
   amp=wght*(k-k0)*(k-k0)/(kut*kut);        % quadratic growth
-  [k amp]
   diag(k,k) = 1-amp;
   filter_func(k) = amp;
 end
 
 h1=figure;  
-plot(filter_func)
-ylabel('Amplitude')
+plot(filter_func, 'LineWidth', 2)
+ylabel('$\hat{\mathcal{H}}$', 'Interpreter', 'Latex', 'FontSize', 24)
 xlabel('N')
-title('Filter Function shape')
+%title('Filter Function shape')
+xlim([1 N+1])
 filename='filter_shape';
+
 SaveFig(h1,filename,'./plots',1) 
 
 

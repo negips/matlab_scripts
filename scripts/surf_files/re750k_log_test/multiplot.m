@@ -20,7 +20,7 @@ ylbls{3} = '$C_{m}$';
 
 lafs = 24;        % latex fontsize
 
-pcol = 4;         % plot variable
+pvar = 4;         % plot variable
 
 fileind = [1];
 
@@ -51,15 +51,15 @@ for ii=1:nfiles
   ind = find(pvar.data(:,2)<6.0,1,'last');  % Only plotting for after pitching start
   pvar.data(1:ind,:) = [];
 
-  ind = find(pvar.data(:,2)>50.0);  % Only plotting for after pitching start
+  ind = find(pvar.data(:,2)>40.0); 
   pvar.data(ind,:) = [];
 
   nfigs=nfigs+1;
   figure(nfigs); 
-  plot((pvar.data(:,2) -ptch_start)/Tosc,pvar.data(:,pcol)/norm,'b', 'LineWidth', 2,'Parent', ax1);
+  plot((pvar.data(:,2) -ptch_start)/Tosc,pvar.data(:,4)/norm,'b', 'LineWidth', 2,'Parent', ax1);
   %set(ax1, 'YLim', [1.1 1.6])
   set(ax1, 'Xlim', [min(pvar.data(:,2))-ptch_start max(pvar.data(:,2))-ptch_start]/Tosc)
-%  set(ax1, 'Ylim', [1.1 1.45])
+  set(ax1, 'Ylim', [1.1 1.45])
 
   ylabel(ylbl{ii}, 'FontSize', lafs, 'Parent', ax1)
   xlabel('$(t-t_{0})/T_{osc}$', 'FontSize', lafs, 'Parent', ax1)
@@ -85,7 +85,7 @@ for ii=1:nfiles
   figure(nfigs)
   ax3=axes;
   ind2=find(pvar.data(:,2)>0.0*pi);
-  pvar2=pvar.data(ind2,pcol);
+  pvar2=pvar.data(ind2,4);
   alpha2=alpha(ind2);
   plot(alpha2,pvar2/norm, 'LineWidth',1.5, 'Parent',ax3)
 
@@ -94,16 +94,16 @@ for ii=1:nfiles
     span=100;
     smoothpvar = smooth(smoothpvar,span);
   end
-  ph = arrowh(alpha2,smoothpvar,'k',[300,90],[2 10 20 70]);
-  xlabel(ax3,'$\alpha[^{\circ}]$', 'FontSize', lafs)
+%  ph = arrowh(alpha2,smoothpvar,'r',[300,90],[2 10 20 25 65]);
+  xlabel(ax3,'$\alpha^{o}$', 'FontSize', lafs)
   ylabel(ax3,ylbl{ii}, 'FontSize', lafs)
   hold on    
 
-  ind3=find(pvar.data(:,2)>31.5);
-  pvar3=pvar.data(ind3,pcol);
+  ind3=find(pvar.data(:,2)>29.5);
+  pvar3=pvar.data(ind3,4);
   alpha3=alpha(ind3);
   plot(alpha3,pvar3/norm, 'r', 'LineWidth', 2, 'Parent',ax3)
-%  set(ax3, 'Ylim', [1.1 1.45])
+  set(ax3, 'Ylim', [1.1 1.45])
 
   axpos = get(gca,'Position');    
 %  set(gca,'Position', axpos + [0.02 0 -0.02 -0.02])

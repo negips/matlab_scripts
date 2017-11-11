@@ -12,14 +12,28 @@ ifhdr = 1;
 fs = 16;                % fontsize
 lfs = 16;               % legend fontsize
 ifcols = 1;
-ifplot = 0;
-tlast = 6.00;
+ifplot = 0;             % plot individual wall profiles
+tlast = 6.00;           % start from this time
 tstart0 = tlast;
-tend = 100; 
+tend = 100;             % stop at this time
 destn = 'plots/';
-ifcontour=0;
-iftr = 1;
-ifsave = 1;
+ifcp = 0;               % plot pressure instead of cf
+ifdatasave=0;           % save data into a mat file
+lafs = 22;              % Latex font size
+
+U0=1.;
+kred=0.4;
+chord=1.0;
+semichord=chord/2;
+omega=kred*U0/semichord;
+Tosc=2*pi/omega;
+%Tosc=1;
+ptch_amp = 1.0;
+ptch_start = 6.;
+axis_x0 = 0.35;
+axis_y0 = 0.034;
+phase=-pi/2;
+
 
 [sfiles tout] = LoadSurfFiles(fol);
 
@@ -64,6 +78,36 @@ for i=1:length(snx_bot5)
   sty_bot5(i) = snx_bot5(i);
 end
 %---------------------------------------- 
+snormals = importdata('surf_normals.24.N6');
+
+x_imp6 = snormals.data(:,1);
+[x_imp6 I] = sort(x_imp6);
+y_imp6 = snormals.data(I,2);
+
+snx6 = -snormals.data(I,4);
+sny6 = -snormals.data(I,5);
+
+ind = sny6>0;
+snx_top6 = snx6(find(ind));
+sny_top6 = sny6(find(ind));
+xt_imp6  = x_imp6(find(ind));
+yt_imp6  = y_imp6(find(ind));
+
+snx_bot6 = snx6(find(~ind));
+sny_bot6 = sny6(find(~ind));
+xb_imp6  = x_imp6(find(~ind));
+yb_imp6  = y_imp6(find(~ind));
+
+for i=1:length(snx_top6)
+  stx_top6(i) = sny_top6(i);
+  sty_top6(i) = -snx_top6(i);
+end
+
+for i=1:length(snx_bot6)
+  stx_bot6(i) = -sny_bot6(i);
+  sty_bot6(i) = snx_bot6(i);
+end
+%---------------------------------------- 
 snormals = importdata('surf_normals.24.N8');
 
 x_imp8 = snormals.data(:,1);
@@ -95,30 +139,25 @@ for i=1:length(snx_bot8)
 end
 %% 
 
-U0=1.;
-kred=0.4;
-chord=1.0;
-semichord=chord/2;
-omega=kred*U0/semichord;
-Tosc=2*pi/omega;
-ptch_amp = 1.0;
-ptch_start = 6.;
-axis_x0 = 0.35;
-axis_y0 = 0.034;
-phase=-pi/2;
 
 nplots = 0;
 bcnt = 0;
 surf_x5 = [];
 surf_t5 = [];
-surf_v5 = [];
-surf_c5 = [];
+surf_v5 = [];     % cf
+surf_c5 = [];     % sign(cf)
+surf_p5 = [];     % pressure
+
 npts5 = 0;
 
 surf_x8 = [];
 surf_t8 = [];
 surf_v8 = [];
 surf_c8 = [];
+surf_p8 = [];
+
+cz = [];
+cz_time = [];
 npts8 = 0;
 
 icalld = 0;
@@ -133,6 +172,11 @@ for i = 1:nfiles
       stx_top = stx_top5;
       xt_imp = xt_imp5;
       yt_imp = yt_imp5;
+    elseif (lx1(1)==7)    
+      sty_top = sty_top6;
+      stx_top = stx_top6;
+      xt_imp = xt_imp6;
+      yt_imp = yt_imp6;
     elseif (lx1(1)==9)    
       sty_top = sty_top8;
       stx_top = stx_top8;
@@ -195,7 +239,10 @@ for i = 1:nfiles
          end   
          dtmpx = sdata(1).data(:,t_els,it);
          dtmpy = sdata(2).data(:,t_els,it);
-%         dtmp_v = sdata(3).data(:,t_els,it);    
+%         dtmp_v = sdata(3).data(:,t_els,it);
+         dtmp_cp = sdata(3).data(:,t_els,it);
+         pmax = max(dtmp_cp(:));
+
          dtmp_v = -sdata(5).data(:,t_els,it);
          dtmp_cfx = -sdata(5).data(:,t_els,it);
          dtmp_cfy = -sdata(6).data(:,t_els,it);
@@ -203,7 +250,9 @@ for i = 1:nfiles
          [xsort ind] = sort(dtmpx(:));
          ysort = dtmpy(ind);
          cfx = dtmp_cfx(ind);
-         cfy = dtmp_cfy(ind);    
+         cfy = dtmp_cfy(ind); 
+
+         cp = dtmp_cp(ind);
 
          % Rotate imported values according to simulation time   
          t_sim = tstamps(it);
@@ -237,40 +286,55 @@ for i = 1:nfiles
          sty_ref = sty_new(ind1:ind1+length(xsort)-1);       
 
          cf = cfx.*(stx_ref') + cfy.*(sty_ref');
+         cpy = cp.*(sty_ref'); 
 
-         if (ifplot)   
-           pvar = plot(xsort,cf, 'b.', 'MarkerSize', 6);
-           grid on
-%           xlim([0.05 .30])    
-%           set(gca,'Ydir', 'reverse')
-           ylim([-0.0035 0.005]);
-%           grid on   
-%           hold on
-           lgs{1} =  ['T=' num2str(tstamps(it))]; 
-           lg = legend(pvar,lgs, 'FontSize', lfs, 'Location', 'SouthWest', 'Fontsize', lfs, 'Box', 'off');
-%           if nplots == 0 
-             ylabel('C_{f}', 'Interpreter', 'tex', 'Fontsize', fs);
+         if (ifplot)
+           if (ifcp)
+             pvar = plot(xsort,cp, 'b.', 'MarkerSize', 6);
+             grid on
+             set(gca,'Ydir', 'reverse')
+             ylim([-1.1 0.1]);
+             ylabel('C_{p}', 'Interpreter', 'tex', 'Fontsize', fs);
              xlabel('x/C', 'Interpreter', 'tex', 'Fontsize', fs);
-%           end   
+           else        
+             pvar = plot(xsort,cf, 'b.', 'MarkerSize', 6);
+             grid on
+             ylim([-0.0035 0.005]);
+%             if nplots == 0 
+               ylabel('C_{f}', 'Interpreter', 'tex', 'Fontsize', fs);
+               xlabel('x/C', 'Interpreter', 'tex', 'Fontsize', fs);
+%             end   
+           end 
+           lgs{1} =  ['T=' num2str(tstamps(it))]; 
+           lg = legend(pvar,lgs, 'FontSize', lafs, 'Location', 'SouthWest', 'Box', 'off');
 
-%          surf_x = [surf_x; dtmpx(:)'/Chord];
-%          surf_t = [surf_t; tstamps(it)*ones(1,length(dtmpx(:)))];
-%          surf_v = [surf_v; dtmp_v(:)'];
-         end    
+         end      % ifplot 
 
          if (lx1(1)==6)   
            surf_x5 = [surf_x5; xsort'/Chord];
            surf_t5 = [surf_t5; tstamps(it)*ones(1,length(xsort))];
            surf_v5 = [surf_v5; cf'];
            surf_c5 = [surf_c5; sign(cf)'];
+           surf_p5 = [surf_p5; cp'];
            npts5=npts5+1;
+         elseif(lx1(1)==7)    
+           surf_x8 = [surf_x8; xsort'/Chord];
+           surf_t8 = [surf_t8; tstamps(it)*ones(1,length(xsort))];
+           surf_v8 = [surf_v8; cf'];
+           surf_c8 = [surf_c8; sign(cf)'];
+           surf_p8 = [surf_p8; cp'];
+           npts8=npts8+1;
          elseif(lx1(1)==9)    
            surf_x8 = [surf_x8; xsort'/Chord];
            surf_t8 = [surf_t8; tstamps(it)*ones(1,length(xsort))];
            surf_v8 = [surf_v8; cf'];
            surf_c8 = [surf_c8; sign(cf)'];
+           surf_p8 = [surf_p8; cp'];
            npts8=npts8+1;
-         end   
+         end
+
+         cz = [cz sintegrals(it,2,3)];
+         cz_time = [cz_time tstamps(it)];   
 
          ind2 = find(cf<0,1);
          xbub_st = xsort(ind2);
@@ -302,156 +366,12 @@ for i = 1:nfiles
   end
 end           
 
-figure(2)
-i=0;
-ax1=axes;
-if (npts5>0)
-  i=i+1;
-  splot(i)=surf(ax1,surf_x5,(surf_t5-ptch_start)/Tosc-0.0,surf_v5,'EdgeColor', 'none', 'LineStyle', 'none', 'FaceColor', 'interp');
-  view(2)
-  ylabel('$\frac{t}{T_{osc}}$', 'Interpreter','Latex', 'rot', 0, 'FontSize', 16)
-  xlabel('x/c', 'FontSize', 16)
-  xlim([0 1])
-  hold on
 
-  if (ifcontour)
-    cplot{i}=contour(ax1,surf_x5,(surf_t5-ptch_start)/Tosc,surf_v5, [0 0], 'LineColor', 'k', 'LineWidth', 1.5  );
-  end    
+if ifdatasave
+  save('re750k_surface.mat')
 end
 
-if (npts8>0)
-  i=i+1;
-  splot(i)=surf(ax1,surf_x8,(surf_t8-ptch_start)/Tosc-0.0,surf_v8,'EdgeColor', 'none', 'LineStyle', 'none', 'FaceColor', 'interp');
-  view(2)
-  ylabel('$\frac{t}{T_{osc}}$', 'Interpreter','Latex', 'rot', 0, 'FontSize', 16)
-  xlabel('x/c', 'FontSize', 16)
-  xlim([0 1])
-  hold on
-
-  if (ifcontour)
-    cplot{i}=contour(ax1,surf_x8,(surf_t8-ptch_start)/Tosc,surf_v8, [0 0], 'LineColor', 'k', 'LineWidth', 1.5 );
-  end 
-
-end
-colorbar;
-axis tight
-hold on
-set(ax1, 'YTickMode', 'manual')
-yticks = [0:20]*0.25;
-set(ax1, 'YTick', yticks);
-set(ax1, 'FontSize', 14)
-%set(ax1, 'PlotBoxAspectRatio', [1 1.5 1])
-
-svfname = ['cf_time_surf750k.eps'];
-if (iftr)
-  tr = load('tr750k.mat');
-  figure(2)
-  cfmax = max(max(surf_v8));    
-  zdata = zeros(length(tr.tr_time),1)+cfmax;
-  trplot = plot3(ax1, tr.trx_uv, (tr.tr_time-ptch_start)/Tosc,zdata, 'LineWidth', 1.5, 'Color', 'k');
-  svfname = ['cf_time_surf750k_tr.eps'];
-end      
-
-
-destn = 'plots/';   
-if (ifsave)
-  SaveFig(gcf, svfname, destn, 1)
-end
-
-
-%cplot=contour(ax1,surf_x,surf_t,surf_v,[0 0], 'LineColor', 'k', 'LineWidth', 1.5);
-%view(2)
-%svfname = ['cf_time_surf_contour.eps'];
-%destn = 'plots/';   
-%SaveFig(gcf, svfname, destn, 1)
-
-figure(3)
-ax3=axes;
-ax4=axes;
-axes(ax3);
-j=0;
-if (npts5>0)
-  axes(ax3)
-  j=j+1;
-  gplot(j)=surf(ax3,surf_x5,(surf_t5-ptch_start)/Tosc-0.0,surf_c5,surf_c5,'EdgeColor', 'none', 'LineStyle', 'none', 'FaceColor', 'interp'); hold on
-  set(ax3,'Color', 'none')
-  view(2)
-  colormap(ax3,'gray');
-  %ylabel('t/T_{osc}', 'FontSize', 16)
-  xlabel('x/c', 'FontSize', 16)
-  xlim([0 1])
-  axis tight
-  hold on
-
-  axes(ax4)
-  gplot2(j)=surf(ax4,surf_x5,(surf_t5-ptch_start)/Tosc,surf_c5,surf_c5,'EdgeColor', 'none', 'LineStyle', 'none', 'FaceColor', 'interp'); hold on
-  view(2)
-  axis tight
-end
-
-if (npts8>0)
-  axes(ax3)    
-  j=j+1;
-  gplot(j)=surf(ax3,surf_x8,(surf_t8-ptch_start)/Tosc-0.0,surf_c8,surf_c8,'EdgeColor', 'none', 'LineStyle', 'none', 'FaceColor', 'interp'); hold on
-  set(ax3,'Color', 'none')
-  view(2)
-  colormap(ax3,'gray');
-  %ylabel('t/T_{osc}', 'FontSize', 16)
-  xlabel('x/c', 'FontSize', 16)
-  xlim([0 1])
-  axis tight
-  hold on
-
-  axes(ax4)
-  gplot2(j)=surf(ax4,surf_x8,(surf_t8-ptch_start)/Tosc,surf_c8,surf_c8,'EdgeColor', 'none', 'LineStyle', 'none', 'FaceColor', 'interp'); hold on
-  view(2)
-  axis tight
-end
-set(ax3, 'YTickMode', 'manual')
-yticks = [0:20]*0.25;
-set(ax3, 'YTick', yticks);
-set(ax3, 'FontSize', 14)
-
-lncol1 = 'blue';
-lncol2 = 'red';
-
-nlines = floor((tlast-tstart0)/Tosc*4);
-for i=1:nlines
-  if (mod(i,2)==1)
-    icol = lncol1;
-  else
-    icol = lncol2;
-  end
-
-  ypts = [i i]*0.25;
-  iln(i) = line([0 1], ypts, [2 2], 'LineStyle', '--', 'LineWidth', 1.0, 'Color', icol, 'Parent', ax4);
-
-end
-
-set(ax4,'YAxisLocation', 'right');
-set(ax4, 'XTick', []);
-set(ax4, 'Color', 'none')
-set(ax4, 'YTickMode', 'manual')
-yticks = [0:nlines]*0.25;
-set(ax4, 'YTick', yticks);
-ylbl = {'3p/2', '0', 'p/2', 'p'};
-set(ax4, 'YTickLabel', ylbl, 'FontName', 'symbol', 'FontSize', 14);
-%ylabel('Oscillation phase', 'Font','Helvetica', 'FontSize', 16)
-%set(ax4, 'PlotBoxAspectRatio', [1 1.5 1])
-
-%colorbar
-set(ax3,'OuterPosition', get(ax1,'OuterPosition'));
-set(ax4,'OuterPosition', get(ax1,'OuterPosition'));
-
-set(ax3,'Position', get(ax1,'Position'));
-set(ax4,'Position', get(ax1,'Position'));
-
-figure(3)
-svfname = ['cf_time_surf_grey750k.eps'];
-destn = 'plots/';   
-if (ifsave)
-  SaveFig(gcf, svfname, destn, 1)
-end
+splot_750k
 
 
 % ncontours = 2;

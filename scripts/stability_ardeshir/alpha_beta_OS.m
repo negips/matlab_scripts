@@ -14,7 +14,7 @@ M=4; % Highest order of derivative required
 [y, D] = chebdif(N, M);
 
 %% Velocity profile corresponding to Plane Poiseuille Flow
-ymax = 16;
+ymax = 2;
 y1 = (y+1)*ymax/2;
 a1=1.16;
 b1=1.55;
