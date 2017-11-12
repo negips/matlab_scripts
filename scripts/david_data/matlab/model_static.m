@@ -17,25 +17,29 @@ ifcols= 1;
 
 fs = 24;    % fontsize
 lfs = 12;   % legend font size
+lafs= 24;   % latex font size
+axfs= 13;   % axis font size
 lw = 1;     % linewidth
 
 c=0.5;
 nu = 1.568E-5;
 Area=1.0;
 
-%fname='u30_d14_alphasweep1.h5';
-fname='u24_d14_alphasweep.h5';
+fname='u30_d14_alphasweep1.h5';
+%fname='u24_d14_alphasweep.h5';
 %fname='u30_d8_alphasweep.h5';
 %fname='u24_d8_alphasweep.h5';
-uoo = 24;
+uoo = 30;
 deltacase=14;
 Re=uoo*c/nu;
 if (Re<600000)
   re_leg = '565k';
 elseif (Re>600000 && Re < 900000)
   re_leg = '765k';
+  cols = 'b';
 else
   re_leg = '950k';
+  cols = 'r';
 end        
 
 hfile = [folder fname];
@@ -49,9 +53,9 @@ cm_all = [];
 alpha_all = [];
 time_all = [];
 
-alpha_min = 1;         % degrees
-alpha_max = 5;         % degrees
-xlims = [0 6];        % Plot x limits 
+alpha_min = -1;         % degrees
+alpha_max = 10;         % degrees
+xlims = [-1 11];        % Plot x limits 
 
 
 nsegs = length(segments);
@@ -100,18 +104,18 @@ for j=1:nsmooths
 end
 
 figure(3)
-plot_cq1 = plot(alpha3,cm3, '.', 'Color', 'b'); hold on;
+plot_cq1 = plot(alpha3,cm3, '.', 'Color', cols); hold on;
 %plot_cq = plot(movalpha,movcm, '--', 'Color', 'm', 'LineWidth',3);
-ylabel('C_{m}', 'Interpreter', 'tex', 'FontSize', fs)
-xlabel('\alpha^{\circ}', 'Interpreter', 'tex', 'FontSize', fs)
+ylabel('$C_{m}$', 'FontSize', lafs)
+xlabel('$\alpha[^{\circ}]$', 'FontSize', lafs)
 hold on
 xlim(xlims)
 
 figure(4)
-plot_cq1 = plot(alpha3,cz3, '.', 'Color', 'b'); hold on;
+plot_cq1 = plot(alpha3,cz3, '.', 'Color', cols); hold on;
 %plot_cq = plot(movalpha,movcz, '--', 'Color', 'm', 'LineWidth',3);
-ylabel('C_{z}', 'Interpreter', 'tex', 'FontSize', fs)
-xlabel('\alpha^{\circ}', 'Interpreter', 'tex', 'FontSize', fs)
+ylabel('$C_{z}$', 'FontSize', lafs)
+xlabel('$\alpha[^{\circ}]$', 'FontSize', lafs)
 hold on
 xlim(xlims)
 
@@ -121,24 +125,24 @@ alpha = linspace(alpha_min,alpha_max,npts);
 cm = interp1(movalpha,movcm,alpha,'pship');
 cz = interp1(movalpha,movcz,alpha,'pship');
 
-%figure(3)
+figure(3)
 %plot_cq2=plot(alpha,cm,'-d', 'Color', 'k', 'LineWidth', 3);
-%filename=['static_model_cm.eps'];
-%filename = [re_leg '_' filename];
-%SaveFig(gcf,filename, destn, ifcols)
+filename=['static_model_cm.eps'];
+filename = [re_leg '_' filename];
+SaveFig(gcf,filename, destn, ifcols)
 %
 figure(4)
 %plot_cq2=plot(alpha,cz,'-d', 'Color', 'k', 'LineWidth', 3);
-%filename=['static_model_cz.eps'];
-%filename = [re_leg '_' filename];
-%SaveFig(gcf,filename, destn, ifcols)
+filename=['static_model_cz.eps'];
+filename = [re_leg '_' filename];
+SaveFig(gcf,filename, destn, ifcols)
 
 
 % save([num2str(deltacase) '_static_models_' num2str(re_leg) '.mat'], 'alpha', 'cm', 'cz', 'deltacase', 'uoo', 'base', 'fol', 'folder', 'fname')
 
 
 
-ifxfoil = 1;
+ifxfoil = 0;
 iftransition=1;
 
 if ifxfoil
@@ -168,8 +172,8 @@ if ifxfoil
   if iftransition
     figure(5)
     plot(xfoil.data(ind3,1), xfoil.data(ind3,7), '--k', 'LineWidth', 4)
-    ylabel('x/c', 'Interpreter', 'tex', 'FontSize', fs)
-    xlabel('\alpha[^{\circ}]', 'Interpreter', 'tex', 'FontSize', fs)
+    ylabel('$x/c$', 'FontSize', lafs)
+    xlabel('$\alpha[^{\circ}]$', 'FontSize', lafs)
     xlim(xlims)
     filename=['static_model_tr_xfoil.eps'];
     filename = [re_leg '_' filename];

@@ -7,18 +7,19 @@ close all
 addpath '/home/prabal/workstation/git_kth/matlabscripts/scripts/'
 % addpath '/scratch/negi/git_repos/matlabscripts/scripts/'
 
-fol = 're750k_pitch';
+fol = 're750k_aoa44';
 ifhdr = 1;
 fs = 16;                % fontsize
 lfs = 16;               % legend fontsize
 ifcols = 1;
 ifplot = 0;             % plot individual wall profiles
-tlast = 6.00;           % start from this time
+tlast = 10.00;           % start from this time
 tstart0 = tlast;
 tend = 100;             % stop at this time
 destn = 'plots/';
 ifcp = 0;               % plot pressure instead of cf
-ifdatasave=0;           % save data into a mat file
+ifdatasave=1;           % save data into a mat file
+  datafile='re750k_aoa44.mat';
 lafs = 22;              % Latex font size
 
 U0=1.;
@@ -368,7 +369,7 @@ end
 
 
 if ifdatasave
-  save('re750k_surface.mat')
+  save(datafile)
 end
 
 splot_750k
