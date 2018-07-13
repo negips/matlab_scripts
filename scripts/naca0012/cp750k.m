@@ -7,19 +7,18 @@ close all
 addpath '/home/prabal/workstation/git_kth/matlabscripts/scripts/'
 % addpath '/scratch/negi/git_repos/matlabscripts/scripts/'
 
-fol = 'naca0012_re77k';
+fol = 're750k_pitch';
 ifhdr = 1;
 fs = 16;                % fontsize
 lfs = 16;               % legend fontsize
-lafs = 24;              % Latex font size
 ifcols = 1;
 destn = 'plots/';
 
 [sfiles tout] = LoadSurfFiles(fol);
 
 nfiles = length(sfiles);
-tlast = 6.0;
-tmax = 329.00001;
+tlast = 32.5;
+tmax = 41.0;
 maxframes = nfiles*100;
 
 h1=figure('units','normalized','outerposition',[0 0 0.4 0.6]);
@@ -31,8 +30,8 @@ cfavg = [];
 cfavgx = [];
 cfavgy = [];
 ncf_pts = 0;
-cf_start=531.25;
-cf_end = 538.04;
+cf_start=16.5;
+cf_end = 17.1;
 ifcfplot = 0;
 nplots = 0;
 for i = 1:nfiles
@@ -84,7 +83,6 @@ for i = 1:nfiles
          dtmp_v = sdata(3).data(:,:,it);    
 %         dtmp_v = -sdata(5).data(:,:,it);    
          cf = -sdata(5).data(:,:,it);
-         cp = sdata(3).data(:,:,it);
 
          [xsort ind] = sort(dtmpx(:));
          ysort = dtmpy(:);
@@ -123,14 +121,14 @@ for i = 1:nfiles
 %         set(gca,'Ydir', 'reverse')
 %         ylim([-3.5 1.1]);
          xlim([-0.01 1.000])
-         ylim([-0.003 0.0080])    
+         ylim([-0.003 0.0040])    
          grid on   
          hold on
          lgs{1} =  ['T=' num2str(tstamps(it))]; 
          lg = legend(pvar,lgs, 'FontSize', lfs, 'Location', 'North', 'Fontsize', lfs, 'Box', 'off');
          if nplots == 0 
-           ylabel('$\tau_{w}$', 'Interpreter', 'latex', 'Fontsize', lafs);
-           xlabel('$x/C$', 'Interpreter', 'latex', 'Fontsize', lafs);
+           ylabel('\tau_{w}', 'Interpreter', 'tex', 'Fontsize', fs);
+           xlabel('x/C', 'Interpreter', 'tex', 'Fontsize', fs);
          end   
          nplots = nplots+1;   
 %         mov(nplots) = getframe(gcf);
