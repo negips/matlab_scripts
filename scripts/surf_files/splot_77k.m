@@ -1,11 +1,11 @@
 % Just plotting
 
-load('re77k_k03660_surface.mat');
 
+kred=0.0477;
+load(['re77k_k' num2str(kred*10000) '_surface.mat']);
 
 % Flags/parameters
 U0=1.;
-kred=0.3660;
 chord=1.0;
 semichord=chord/2;
 omega=kred*U0/semichord;
@@ -15,6 +15,8 @@ ptch_start = 16.0;
 axis_x0 = 0.186;
 axis_y0 = 0.0;
 phase=0;
+
+
 
 % fs = 16;                % fontsize
 % lfs = 16;               % legend fontsize
@@ -98,7 +100,7 @@ f2pos = get(gcf,'OuterPosition');
 %set(ax1,'Position', axpos);
 
 
-svfname = ['cf_time_surf77k_k0366.eps'];
+svfname = ['cf_time_surf77k_k' num2str(kred) '.eps'];
 %destn = 'plots/';   
 if (ifsave)
   SaveFig(gcf, svfname, destn, 1)
@@ -233,7 +235,7 @@ set(gcf,'OuterPosition',figpos)
 pbaspect(ax3,plotaspect)
 %pbaspect(ax4,plotaspect)
 
-svfname = ['cf_time_surf_grey77k_0366.eps'];
+svfname = ['cf_time_surf_grey77k_k' num2str(kred) '.eps'];
 figure(3)
 %destn = 'plots/';   
 if (ifsave)

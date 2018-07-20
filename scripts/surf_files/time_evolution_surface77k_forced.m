@@ -7,7 +7,20 @@ close all
 addpath '/home/prabal/workstation/git_kth/matlabscripts/scripts/'
 % addpath '/scratch/negi/git_repos/matlabscripts/scripts/'
 
-fol = 'naca0012_re77k_k0.3660/';
+U0=1.;
+kred=0.0477;
+chord=1.0;
+semichord=chord/2;
+omega=kred*U0/semichord;
+Tosc=2*pi/omega;
+ptch_amp = 5.5;
+ptch_start = 16.0;
+axis_x0 = 0.186;
+axis_y0 = 0.0;
+phase=0;
+
+
+fol = 'naca0012_re77k_k0.0477/';
 ifhdr = 1;
 fs = 16;                % fontsize
 lfs = 16;               % legend fontsize
@@ -98,18 +111,6 @@ for i=1:length(snx_bot9)
 end
 %% 
 
-U0=1.;
-kred=0.3660;
-chord=1.0;
-semichord=chord/2;
-omega=kred*U0/semichord;
-Tosc=2*pi/omega;
-ptch_amp = 5.5;
-ptch_start = 16.0;
-axis_x0 = 0.186;
-axis_y0 = 0.0;
-phase=0;
-
 nplots = 0;
 bcnt = 0;
 surf_x7 = [];
@@ -194,12 +195,12 @@ for i = 1:nfiles
         ntop = length(t_els);
       end
     end    
-
       
     for it = 1:length(tstamps)
       if (tstamps(it)>=tlast)
          if ifplot && nplots>0
            delete(pvar)
+%           delete(pvar2)
          end   
          dtmpx = sdata(1).data(:,t_els,it);
          dtmpy = sdata(2).data(:,t_els,it);
@@ -221,11 +222,18 @@ for i = 1:nfiles
 
          % positive clockwise              
          Rot = [cos(dtheta) sin(dtheta); ...
-                -sin(dtheta) cos(dtheta)]; 
+               -sin(dtheta) cos(dtheta)]; 
 
+%         Rot2 = [cos(dtheta) -sin(dtheta); ...
+%                sin(dtheta) cos(dtheta)]; 
+              
          st_rot = Rot*[stx_top; sty_top];   
          stx_new = st_rot(1,:);
          sty_new = st_rot(2,:);
+
+%         st_rot2 = Rot2*[stx_top; sty_top];   
+%         stx_new2 = st_rot2(1,:);
+%         sty_new2 = st_rot2(2,:);
 
          xnew = xt_imp;
          ynew = yt_imp;
@@ -247,9 +255,16 @@ for i = 1:nfiles
 
          cf = cfx.*(stx_ref') + cfy.*(sty_ref');
 
+%         stx_ref2 = stx_new2(ind1:ind1+length(xsort)-1);
+%         sty_ref2 = sty_new2(ind1:ind1+length(xsort)-1);       
+%
+%         cf2 = cfx.*(stx_ref2') + cfy.*(sty_ref2');
+
          if (ifplot)   
            pvar = plot(xsort,cf, 'b.', 'MarkerSize', 6);
            grid on
+%           pvar2 = plot(xsort,cf2, 'r.', 'MarkerSize', 6); hold off
+
 %           xlim([0.05 .30])    
 %           set(gca,'Ydir', 'reverse')
            ylim([-0.005 0.015]);
@@ -304,7 +319,7 @@ end  % end of files
 
 
 if ifdatasave
-  save('re77k_k03660_surface.mat')
+  save(['re77k_k' num2str(kred*10000) '_surface.mat'])
 end
 
 %splot_100k
