@@ -1,4 +1,4 @@
-function [mass nek_mass DXM1 DYM1 DXM1D DYM1D RXM1 RYM1 SXM1 SYM1 convx convy convall convxd convyd convalld convxd_new convyd_new convalld_new Cx_fld Cy_fld gradm1x gradm1y gradm1xd gradm1yd intpm1d intpd2m1 wtsvecd massd nek_conv lpx lpy lpall nek_lp lpbc forc NxNy_nodal2spec NxdNyd_spec2nodal x_coeff y_coeff Dx Dy w2m1 xm1 ym1 JACM1 JACM1D xm1d ym1d] = MESem2D7(Nx,Ny,Nxd,Nyd,xc,yc,ifboyd,ifplot)
+function [mass nek_mass DXM1 DYM1 DXM1D DYM1D RXM1 RYM1 SXM1 SYM1 convx convy convall convxd convyd convalld convxd_new convyd_new convalld_new Cx_fld Cy_fld gradm1x gradm1y gradm1xd gradm1yd intpm1d intpd2m1 wtsvecd massd nek_conv lpx lpy lpall nek_lp lpbc hpf lpf NxNy_nodal2spec NxdNyd_spec2nodal x_coeff y_coeff Dx Dy w2m1 xm1 ym1 JACM1 JACM1D xm1d ym1d] = MESem2D7(Nx,Ny,Nxd,Nyd,xc,yc,ifboyd,ifplot)
 
 %addpath '../../';
 
@@ -755,7 +755,7 @@ lpbc = zeros(N+1);             % Boundary terms for laplacian operator. vdudx(1)
 
 
 
-%% Build forcing
+%% Build hpf
 %---------------------------------------------------------------------- 
 %% Build basis change matrix
 %% Taken directly from nek
@@ -864,7 +864,8 @@ fil_mat2d = kron(fil_mat_y,fil_mat_x);
 NxNy_spec2nodal = kron(Ny_spec2nodal,Nx_spec2nodal);
 NxNy_nodal2spec = kron(Ny_nodal2spec,Nx_nodal2spec);
 
-forc = mass*(eye((Nx+1)*(Ny+1))-fil_mat2d);
+hpf = mass*(eye((Nx+1)*(Ny+1))-fil_mat2d);
+lpf = mass*fil_mat2d;
 
 %% Build reverse interpolation
 % Dealiasing grid to GLL grid

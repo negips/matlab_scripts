@@ -7,10 +7,10 @@ close all
 %addpath 'templates/'
 ifplot = 0;
 
-N=6;
+N=11;
 lx1 = N+1;
 npts=lx1;
-nels = 100;
+nels = 30;
 Nd=ceil(1.5*N);
 Nd2=ceil((4*N+3)/2);
 Nd3=ceil((6*N+3)/2);
@@ -20,7 +20,7 @@ dof = N*nels+1;
 nnodes = nels+1;
 
 d_start = 0;
-d_end = 200;
+d_end = 100;
 d_len = abs(d_end-d_start);
 
 uniform = 1;
@@ -47,15 +47,15 @@ mu_x = zeros(npts,nels);
 
 % Parameters
 U0    = 4;
-mu0   = 1.5; %3/4;  % Constant
+mu0   = 0.75;          %3/4;  % Constant
 mut_0 = 0.0;        % time dependent spatially constant
 dmu_max  = 0.0;     % maximum deviation of mu from mu0
 pitch_x0 = 50.;     % pitch axis
 dx_max = max(abs([(d_end-pitch_x0) (pitch_x0-d_start)]));
-mu_pitch = 1/dx_max*dmu_max;        % slope of pitching mu
-mu1 = 0.0e-2;      % spatially varying mu
+mu_pitch = 0*1/dx_max*dmu_max;        % slope of pitching mu
+mu1 = -8.7e-3;       % spatially varying mu
 mut_conv = 0.0e-3;  % Temporal strength for spatially varying mu
-mu_abs = 2.0;        % Constant strength for unstable region    
+mu_abs = 0.0;        % Constant strength for unstable region    
 mut_abs = 0.0;      % Temporal strength for unstable region
 mu_diss = 0.0;
 
@@ -66,10 +66,10 @@ diss_xrise=20;
 diss_xfall=20;
 
 % Step for unstable region
-step_xs=20;
-step_xe=30;
-step_xrise=5;
-step_xfall=5;
+step_xs=10;
+step_xe=20;
+step_xrise=2;
+step_xfall=2;
 
 for i=1:nels
 

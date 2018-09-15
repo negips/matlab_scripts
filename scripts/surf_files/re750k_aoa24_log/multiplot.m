@@ -4,6 +4,8 @@ clear
 clc
 close all
 
+ifportrait=0;
+
 area=0.15*1;
 U0=1.0;
 rho=1.0;
@@ -18,15 +20,11 @@ ylbls{2} = '$C_{d}$';
 fnames{3} = 'cm.out';
 ylbls{3} = '$C_{m}$';
 
-fnames{4} = '../re750k_log/cl.out';
-ylbls{4} = '$C_{l2}$';
-
-
 lafs = 24;        % latex fontsize
 
-pvar = 4;         % plot variable
+pcol = 4;         % plot variable
 
-fileind = [1 4];
+fileind = [1];
 
 files = fnames(fileind);
 ylbl = ylbls(fileind);
@@ -38,10 +36,11 @@ Chord=1.0;
 semichord=Chord/2;
 omega=k*U0/semichord;
 phase_shift=-pi/2;
-ptch_start=6.0;
+ptch_start=0.0;
 alpha_0=3.4;
 dalpha=1.0;
 Tosc=2*pi/omega;
+Tosc=1.0;
 
 ax1=axes;
 nfigs=0;
@@ -52,15 +51,15 @@ for ii=1:nfiles
   pvar=importdata(file);
   ind = find(pvar.data(:,1)==0);          % Remove data for istep=0.
   pvar.data(ind,:) = [];
-  ind = find(pvar.data(:,2)<6.0,1,'last');  % Only plotting for after pitching start
+  ind = find(pvar.data(:,2)<0.0,1,'last');  % Only plotting for after pitching start
   pvar.data(1:ind,:) = [];
 
-  ind = find(pvar.data(:,2)>40.0); 
+  ind = find(pvar.data(:,2)>50.0);  % Only plotting for after pitching start
   pvar.data(ind,:) = [];
 
   nfigs=nfigs+1;
   figure(nfigs); 
-  plot((pvar.data(:,2) -ptch_start)/Tosc,pvar.data(:,4)/norm,'b', 'LineWidth', 2,'Parent', ax1);
+  plot((pvar.data(:,2) -ptch_start)/Tosc,pvar.data(:,pcol)/norm,'b', 'LineWidth', 2,'Parent', ax1);
   %set(ax1, 'YLim', [1.1 1.6])
   set(ax1, 'Xlim', [min(pvar.data(:,2))-ptch_start max(pvar.data(:,2))-ptch_start]/Tosc)
 %  set(ax1, 'Ylim', [1.1 1.45])
@@ -85,35 +84,39 @@ for ii=1:nfiles
   
   SaveFig(gcf,'cl-time-alpha750k.eps', 'plots/',1)
 
-  nfigs=nfigs+1;    
-  figure(nfigs)
-  ax3=axes;
-  ind2=find(pvar.data(:,2)>0.0*pi);
-  pvar2=pvar.data(ind2,4);
-  alpha2=alpha(ind2);
-  plot(alpha2,pvar2/norm, 'LineWidth',1.5, 'Parent',ax3)
 
-  smoothpvar=pvar2/norm;
-  for jj=1:5
-    span=100;
-    smoothpvar = smooth(smoothpvar,span);
+  if ifportrait
+
+    nfigs=nfigs+1;    
+    figure(nfigs)
+    ax3=axes;
+    ind2=find(pvar.data(:,2)>0.0*pi);
+    pvar2=pvar.data(ind2,pcol);
+    alpha2=alpha(ind2);
+    plot(alpha2,pvar2/norm, 'LineWidth',1.5, 'Parent',ax3)
+
+    smoothpvar=pvar2/norm;
+    for jj=1:5
+      span=100;
+      smoothpvar = smooth(smoothpvar,span);
+    end
+%    ph = arrowh(alpha2,smoothpvar,'k',[300,90],[2 10 20 70]);
+    xlabel(ax3,'$\alpha[^{\circ}]$', 'FontSize', lafs)
+    ylabel(ax3,ylbl{ii}, 'FontSize', lafs)
+    hold on    
+
+    ind3=find(pvar.data(:,2)>31.5);
+    pvar3=pvar.data(ind3,pcol);
+    alpha3=alpha(ind3);
+    plot(alpha3,pvar3/norm, 'r', 'LineWidth', 2, 'Parent',ax3)
+%    set(ax3, 'Ylim', [1.1 1.45])
+
+    axpos = get(gca,'Position');    
+%    set(gca,'Position', axpos + [0.02 0 -0.02 -0.02])
+
+    SaveFig(gcf,'cl-alpha750k.eps', 'plots/',1)
+
   end
-%  ph = arrowh(alpha2,smoothpvar,'r',[300,90],[2 10 20 25 65]);
-  xlabel(ax3,'$\alpha^{o}$', 'FontSize', lafs)
-  ylabel(ax3,ylbl{ii}, 'FontSize', lafs)
-  hold on    
-
-  ind3=find(pvar.data(:,2)>29.5);
-  pvar3=pvar.data(ind3,4);
-  alpha3=alpha(ind3);
-  plot(alpha3,pvar3/norm, 'r', 'LineWidth', 2, 'Parent',ax3)
-%  set(ax3, 'Ylim', [1.1 1.45])
-
-  axpos = get(gca,'Position');    
-%  set(gca,'Position', axpos + [0.02 0 -0.02 -0.02])
-
-  SaveFig(gcf,'cl-alpha750k.eps', 'plots/',1)
-
 %figure(3)
 %ax3=axes;
 %ind=find(pvar.data(:,2)>4.0*pi);
@@ -124,8 +127,5 @@ for ii=1:nfiles
 %xlabel('\Omega', 'FontSize', 20, 'Parent', ax3)
 %ylabel('C_{L}', 'FontSize', 20, 'Parent', ax3)
 %SaveFig(gcf,'pvar-omega.eps', 'plots/',1)
-
-%cd ../re750k_log/
-%multiplot
 
 end

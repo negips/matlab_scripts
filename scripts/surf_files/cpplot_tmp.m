@@ -4,104 +4,174 @@ clear
 clc
 close all
 
-addpath '/home/prabal/workstation/git_kth/matlabscripts/scripts/'
-% addpath '/scratch/negi/git_repos/matlabscripts/scripts/'
+% addpath '/home/prabal/workstation/git_kth/matlabscripts/scripts/'
+addpath '/scratch/negi/git_repos/matlabscripts/scripts/'
 
-fol = 're100k';
+fol = 're750k_pitch';
 ifhdr = 1;
 fs = 16;                % fontsize
 lfs = 16;               % legend fontsize
+lafs = 24;              % Latex font size
 ifcols = 1;
 destn = 'plots/';
+
+U0=1.;
+kred=0.4;
+chord=1.0;
+semichord=chord/2;
+omega=kred*U0/semichord;
+Tosc=2*pi/omega;
+%Tosc=1;
+ptch_amp = 1.0;
+ptch_start = 6.;
+axis_x0 = 0.35;
+axis_y0 = 0.034;
+phase=-pi/2;
+
+%% Load mean aoa normals for polynomial order 5
+snormals = importdata('surf_normals.24.N5');
+
+x_imp5 = snormals.data(:,1);
+[x_imp5 I] = sort(x_imp5);
+y_imp5 = snormals.data(I,2);
+
+snx5 = -snormals.data(I,4);
+sny5 = -snormals.data(I,5);
+
+ind = sny5>0;
+snx_top5 = snx5(find(ind));
+sny_top5 = sny5(find(ind));
+xt_imp5  = x_imp5(find(ind));
+yt_imp5  = y_imp5(find(ind));
+
+snx_bot5 = snx5(find(~ind));
+sny_bot5 = sny5(find(~ind));
+xb_imp5  = x_imp5(find(~ind));
+yb_imp5  = y_imp5(find(~ind));
+
+for i=1:length(snx_top5)
+  stx_top5(i) = sny_top5(i);
+  sty_top5(i) = -snx_top5(i);
+end
+
+for i=1:length(snx_bot5)
+  stx_bot5(i) = -sny_bot5(i);
+  sty_bot5(i) = snx_bot5(i);
+end
+%---------------------------------------- 
+snormals = importdata('surf_normals.24.N6');
+
+x_imp6 = snormals.data(:,1);
+[x_imp6 I] = sort(x_imp6);
+y_imp6 = snormals.data(I,2);
+
+snx6 = -snormals.data(I,4);
+sny6 = -snormals.data(I,5);
+
+ind = sny6>0;
+snx_top6 = snx6(find(ind));
+sny_top6 = sny6(find(ind));
+xt_imp6  = x_imp6(find(ind));
+yt_imp6  = y_imp6(find(ind));
+
+snx_bot6 = snx6(find(~ind));
+sny_bot6 = sny6(find(~ind));
+xb_imp6  = x_imp6(find(~ind));
+yb_imp6  = y_imp6(find(~ind));
+
+for i=1:length(snx_top6)
+  stx_top6(i) = sny_top6(i);
+  sty_top6(i) = -snx_top6(i);
+end
+
+for i=1:length(snx_bot6)
+  stx_bot6(i) = -sny_bot6(i);
+  sty_bot6(i) = snx_bot6(i);
+end
+%---------------------------------------- 
+snormals = importdata('surf_normals.24.N8');
+
+x_imp8 = snormals.data(:,1);
+[x_imp8 I] = sort(x_imp8);
+y_imp8 = snormals.data(I,2);
+
+snx8 = -snormals.data(I,4);
+sny8 = -snormals.data(I,5);
+
+ind = sny8>0;
+snx_top8 = snx8(find(ind));
+sny_top8 = sny8(find(ind));
+xt_imp8  = x_imp8(find(ind));
+yt_imp8  = y_imp8(find(ind));
+
+snx_bot8 = snx8(find(~ind));
+sny_bot8 = sny8(find(~ind));
+xb_imp8  = x_imp8(find(~ind));
+yb_imp8  = y_imp8(find(~ind));
+
+for i=1:length(snx_top8)
+  stx_top8(i) = sny_top8(i);
+  sty_top8(i) = -snx_top8(i);
+end
+
+for i=1:length(snx_bot8)
+  stx_bot8(i) = -sny_bot8(i);
+  sty_bot8(i) = snx_bot8(i);
+end
+%% 
+
+
+
 
 [sfiles tout] = LoadSurfFiles(fol);
 
 nfiles = length(sfiles);
-tlast = 18.0;
+tlast = 31.0;
+tmax = 39.00001;
 maxframes = nfiles*100;
 
-h1=figure('units','normalized','outerposition', [0 0 0.4 0.6]);
+h1=figure('units','normalized','outerposition',[0 0 0.4 0.6]);
 
 %mov(1:maxframes) = struct('cdata', [],'colormap', []);            % Just allocating
 %mov = VideoWriter('cp_movie.avi');
 
-% Load mean aoa normals
-[xgll wts] = lglnodes(5);
-
-snormals = importdata('surf_normals.67.N5');
-
-x_imp = snormals.data(:,1);
-%[x_imp I] = sort(x_imp);
-I = [1:length(x_imp)];
-y_imp = snormals.data(I,2);
-
-snx = snormals.data(I,4);
-sny = snormals.data(I,5);
-
-ind = sny<0;
-snx_top = snx(find(ind));
-sny_top = sny(find(ind));
-xt_imp  = x_imp(find(ind));
-yt_imp  = y_imp(find(ind));
-
-snx_bot = snx(find(~ind));
-sny_bot = sny(find(~ind));
-xb_imp  = x_imp(find(~ind));
-yb_imp  = y_imp(find(~ind));
-
-for i=1:length(snx_top)
-  stx_top(i) = sny_top(i);
-  sty_top(i) = -snx_top(i);
-end
-
-for i=1:length(snx_bot)
-  stx_bot(i) = -sny_bot(i);
-  sty_bot(i) = snx_bot(i);
-end
-
-x_imp2 = reshape(x_imp,6,length(x_imp)/6);
-y_imp2 = reshape(y_imp,6,length(y_imp)/6);
-snx_imp = reshape(snx,6,length(x_imp)/6);
-sny_imp = reshape(sny,6,length(y_imp)/6);
-
-%% 
-% Load transition point calculations
-
-load('tr.mat')
-
-%%
-U0=1.;
-kred=0.5;
-chord=1.0;
-semichord=chord/2;
-omega=kred*U0/semichord;
-ptch_amp = 1.3;
-ptch_start = 0.;
-axis_x0 = 0.35;
-axis_y0 = 0.034;
-
+cfavg = [];
+cfavgx = [];
+cfavgy = [];
+ncf_pts = 0;
+cf_start=41.25;
+cf_end = 48.04;
+ifcfplot = 0;
 nplots = 0;
-bcnt = 0;
-surf_x = [];
-surf_t = [];
-surf_v = [];
-surf_c = [];
-icalld = 0;
-cl_hist = [];
-time_hist = [];
+
+cols=lines(50);
+
 for i = 1:nfiles
   if (tout(i)>=tlast)
     fname = sfiles{i};
         
     [sdata sintegrals tstamps sno lx1 selt maxtsaves x y timeout hdr] = readsurf(fname,ifhdr);
 
-    if timeout>19.0
-      break
-    end    
+    if (tstamps(1)>tmax)
+       break
+    end     
 
-    xmax = max(x(:));
-    xmin = min(x(:));      
-    Chord=xmax-xmin;
+    if (lx1(1)==6)
+      sty_top = sty_top5;
+      stx_top = stx_top5;
+      x_imp = x_imp5;
+      y_imp = y_imp5;
+    elseif (lx1(1)==7)    
+      sty_top = sty_top6;
+      stx_top = stx_top6;
+      x_imp = x_imp6;
+      y_imp = y_imp6;
+    elseif (lx1(1)==9)    
+      sty_top = sty_top8;
+      stx_top = stx_top8;
+      x_imp = x_imp8;
+      y_imp = y_imp8;
+    end  
 
 %   trying to find top and bottom elements        
     [val ind] = max(sdata(1).data(:,:,1));
@@ -121,70 +191,70 @@ for i = 1:nfiles
       b_els=n12;
     end
 
-    xtels_mean = mean(sdata(1).data(:,t_els,1));
-    [val ind] = max(xtels_mean);
-    t_els(ind)=[];                  % remove trailing edge blunt side 
+    xmin=min(x(:));
+    xmax=max(x(:));
+    Chord=xmax-xmin;
+%    Chord=1; 
 
-%   Remove a few leading edge elements  
-    if (icalld==0)
-
-      for i=1:2   % 5 leading elements
-        xtels_mean = mean(sdata(1).data(:,t_els,1));
-        [val ind] = min(xtels_mean);
-        t_els(ind)=[];                  % remove leading edge element
-
-        xbels_mean = mean(sdata(1).data(:,b_els,1));
-        [val ind] = min(xbels_mean);
-        b_els(ind)=[];                  % remove leading edge element
-      end 
-    
-      total_top_els = length(t_els);
-      total_bot_els = length(b_els);
-      icalld = icalld+1;
-    else
-      ntop = length(t_els);
-      while ntop>total_top_els
-        xtels_mean = mean(sdata(1).data(:,t_els,1));
-        [val ind] = min(xtels_mean);
-        t_els(ind)=[];                  % remove leading edge element 
-        ntop = length(t_els);
-      end
-
-      nbot = length(b_els);
-      while nbot>total_bot_els
-        xbels_mean = mean(sdata(1).data(:,b_els,1));
-        [val ind] = min(xbels_mean);
-        b_els(ind)=[];                  % remove leading edge element 
-        nbot = length(t_els);
-      end
-
-
-    end    
-
-      
     for it = 1:length(tstamps)
       if (tstamps(it)>=tlast)
+         
+         if (tstamps(it)>tmax)
+            break
+         end         
+
          if nplots>0
-%           delete(pvar)
+           delete(pvar)
+           delete(pvar2)
          end   
          dtmpx = sdata(1).data(:,:,it);
          dtmpy = sdata(2).data(:,:,it);
+         dtmp_v = sdata(3).data(:,:,it);    
+%         dtmp_v = -sdata(5).data(:,:,it);    
+         cf = -sdata(5).data(:,:,it);
+         cp = sdata(3).data(:,:,it);
 
-         dtmp_v = sdata(3).data(:,:,it);
-         cl_p = sdata(3).data(:,:,it);
-         cl_v = sdata(6).data(:,:,it);      
+         [xsort ind] = sort(dtmpx(:));
+         ysort = dtmpy(:);
+         ysort = ysort(ind);
+         cf = cf(:);
+         cf = cf(ind);
+         cp = cp(ind); 
 
-%         dtmp_v = -sdata(5).data(:,t_els,it);
-%         dtmp_cfx = sdata(5).data(:,t_els,it);
-%         dtmp_cfy = sdata(6).data(:,t_els,it);
+%%        Average cf   
+         if tstamps(it)>cf_start && tstamps(it)<cf_end
 
+           ncf_pts = ncf_pts+1;
+           avgbeta = 1/ncf_pts;
+           avgalpha = 1 - avgbeta;
+
+           if avgalpha==0
+             cfavg = cf;
+             cfavgx = xsort/Chord;
+             cfavgy = ysort/Chord;
+           else               
+             cfavg =  avgalpha*cfavg +  avgbeta*cf;
+             cfavgx =  avgalpha*cfavgx +  avgbeta*xsort/Chord;
+             cfavgy =  avgalpha*cfavgy +  avgbeta*ysort/Chord;
+           end
+
+         end
+
+         if (tstamps(it)>cf_end) && (ifcfplot==0)
+           cfplot = plot(cfavgx,cfavg, ' .r');
+           ifcfplot=1; 
+         end    
+
+%%
          % Rotate imported values according to simulation time   
          t_sim = tstamps(it);
-         dtheta = ptch_amp*pi/180*sin(omega*(t_sim-ptch_start));
-         theta = atan2(sty_top,stx_top);
-         theta_new = theta-dtheta;        % emperically decided sign
-         sty_new = sin(theta_new);
-         stx_new = cos(theta_new);
+         dtheta = ptch_amp*pi/180*sin(omega*(t_sim-ptch_start)+phase)-ptch_amp*pi/180*sin(phase);
+         alphamin = 2.4*pi/180;
+         alpha = alphamin + dtheta;
+%         theta = atan2(sty_top,stx_top);
+%         theta_new = theta-dtheta;        % emperically decided sign
+%         sty_new = sin(theta_new);
+%         stx_new = cos(theta_new);
 
          xnew = x_imp;
          ynew = y_imp;
@@ -196,95 +266,43 @@ for i = 1:nfiles
          coords = rot*[transpose(xnew)-axis_x0; transpose(ynew)-axis_y0];
          xrnew = coords(1,:) + axis_x0;
          yrnew = coords(2,:) + axis_y0;
-         %% end of rotation
+         %% end of rotation   
 
-         xrnew=reshape(xrnew,6,length(xrnew)/6);   
-         yrnew=reshape(yrnew,6,length(yrnew)/6);   
-
-         snx_new = zeros(lx1(1),selt);
-         sny_new = zeros(lx1(1),selt);
-         indices = [];
-         resid = [];
-         cl = 0;    
-%         for jj=1:selt
-%           for kk=1:selt
-%              if ( (abs(dtmpx(1,jj)-xrnew(1,kk))<1e-6) &&  (abs(dtmpx(lx1(1),jj)-xrnew(lx1(1),kk))<1e-6) )
-%                indices = [indices kk];
-%                resid = [resid  sqrt((dtmpx(1,jj)-xrnew(1,kk))^2 + (dtmpx(lx1(1),jj)-xrnew(lx1(1),kk))^2)];
-%                snx_new(:,jj)=snx_imp(:,kk); 
-%                sny_new(:,jj)=sny_imp(:,kk);
-%                cl_el = (cl_p(:,jj) + 0*cl_v(:,jj)).*sny_new(:,jj);
-%                intg = cl_el.*wts*abs(( max(dtmpx(:,jj)) - min(dtmpx(:,jj)) ))/2;  
-%                cl=cl+sum(intg); 
-%                break
-%              end
-%           end
-%         end
-%         cl_hist = [cl_hist cl];
-%         time_hist = [time_hist tstamps(it)]; 
-
-
-%         pvar = plot(xsort,cf, 'b.', 'MarkerSize', 6);
-%         xlim([0.05 .15])    
+%%
+         
+         figure(h1)      
+%         pvar = plot(x(:)/Chord,dtmp_v(:), 'b.', 'MarkerSize', 10);
+%         pvar = plot(xsort/Chord,cp, ' .', 'Color', cols(it,:), 'MarkerSize', 15);
+         pvar = plot(xsort,ysort, 'b.', 'MarkerSize', 15); hold on
+         pvar2 = plot(xrnew,yrnew, '.r', 'MarkerSize', 15);
+        
 %         set(gca,'Ydir', 'reverse')
 %         ylim([-3.5 1.1]);
-%         grid on   
-%         hold on
-%         tr_pt_uv = interp1(tr_time,trx_uv,tstamps(it));
-%         tr_pt_ww = interp1(tr_time,trx_ww,tstamps(it));
-%         gca_ylims = get(gca,'Ylim');   
-%         ptruv = plot([tr_pt_uv tr_pt_uv], gca_ylims, '--b'); 
-%         ptrww = plot([tr_pt_ww tr_pt_ww], gca_ylims, '--r');   
-
-%         surf_x = [surf_x; xsort'/Chord];
-%         surf_t = [surf_t; tstamps(it)*ones(1,length(xsort))];
-%         surf_v = [surf_v; cf'];
-%         surf_c = [surf_c; sign(cf)'];
-
+%         xlim([-0.01 1.000])
+%         ylim([-0.004 0.0060])
+         xlim([0.96 1])
+         ylim([-0.1 -0.05])
+         grid on   
+         hold on
+         lgs{1} =  ['T=' num2str(tstamps(it)) '; alpha=' num2str(round(100*alpha*180/pi)/100)]; 
+         lg = legend(pvar,lgs, 'FontSize', lfs, 'Location', 'North', 'Fontsize', lfs, 'Box', 'off');
+         if nplots == 0 
+           ylabel('$\tau_{w}$', 'Interpreter', 'latex', 'Fontsize', lafs);
+           xlabel('$x/C$', 'Interpreter', 'latex', 'Fontsize', lafs);
+         end   
          nplots = nplots+1;   
 %         mov(nplots) = getframe(gcf);
 
          svfname = sprintf('%0.4d', nplots);   
-         svfname = ['cp_fig' svfname '.png'];
+         svfname = ['cf_fig' svfname '.eps'];
          destn = 'plots/';   
 %         SaveFig(gcf, svfname, destn, 1)
-
-      end                                 % if tstamps(it)>tlast
+      end
       tlast = tstamps(it);
       pause(0.01)
     end           % it
-%    plot(tstamps,(sintegrals(:,2,3) + sintegrals(:,2,6))*6, 'r'); hold on
-    cl_hist = [cl_hist ;(sintegrals(:,2,3)+sintegrals(:,2,6))];
-    time_hist = [time_hist; tstamps];
   end
 end           
-
-fac=7.6621
-figure(1)
-plot(time_hist, cl_hist*fac)
-
-%figure(2)
-%splot=surf(surf_x,surf_t,surf_v,'EdgeColor', 'none', 'LineStyle', 'none', 'FaceColor', 'interp');
-%colorbar;
-%view(2)
-%ylabel('Time')
-%xlabel('x')
-%xlim([0 1])
-%hold on
-%svfname = ['cf_time_surf.eps'];
-%destn = 'plots/';   
-%%SaveFig(gcf, svfname, destn, 1)
-%
-%cplot=contour(surf_x,surf_t,surf_v,[0 0], 'LineColor', 'k', 'LineWidth', 1.5);
-%svfname = ['cf_time_surf_contour.eps'];
-%destn = 'plots/';   
-%SaveFig(gcf, svfname, destn, 1)
-
-
-
-% ncontours = 2;
-% cont_vec = linspace(min(surf_v(:)),0,ncontours);
-% cplot=contour(surf_x,surf_t,surf_v,cont_vec);
 
 %mov2 = mov(1:nplots); 
 %movie2avi(mov2, 'cp_movie.avi', 'compression', 'None', 'fps', 15, 'quality', 75);

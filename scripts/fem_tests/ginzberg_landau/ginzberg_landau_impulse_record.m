@@ -5,6 +5,8 @@ clc
 close all
 
 % Initialize 1D spectral element
+lafs=24;
+
 spec_element_init
 
 % Temporal discretization
@@ -23,9 +25,9 @@ u0 = 0.0*xgll;
 % use a normalized gaussian
 nu = 0;
 sigma = 1.0;
-xofst = 5;
+xofst = 10;
 u0 = 2*normpdf(xgll-xofst,nu,sigma);
-u0 = 1e-10*u0/max(max(u0));
+u0 = 1e-12*u0/max(max(u0));
 %u0_int = normpdf(x2,mu,sigma);
 %u0_int = u0_int/max(u0_int);
 
@@ -66,11 +68,11 @@ mass = 0*nek_mass;
 stiff = 0*nek_linear_stiff;
 
 % Parameters
-deltat = 0.002;
+deltat = 0.0005;
 istep = 0;
 %nsteps = 500000;
 time = 0;
-iostep = 1000;
+iostep = 100;
 isave  = 100;
 OMEGA=0.01;
 Tosc=2*pi/OMEGA;
@@ -84,13 +86,15 @@ ifrenorm=0;
 
 u_save = [];
 u_renorm = [];
-t_save = []; 
+t_save = [];
+save_frames=0;
 
 %% SOLVE
 h3=figure;
 ax1=axes;
-ax2=axes('XAxisLocation','Top');
-axes(ax1)
+%ax2=axes('XAxisLocation','Top');
+%axes(ax1)
+
 
 nperiods=0;
 for i = 1:nsteps
@@ -235,7 +239,7 @@ for i = 1:nsteps
 
 %   Forcing term (impulse)
     % spatial extent
-    impulse_amp=100;
+    impulse_amp=0;
     nu = 0;
     sigma = 1.0;
     xofst_imp = 100;
@@ -301,13 +305,13 @@ for i = 1:nsteps
   M=[];                         % preconditioner
   restrt=N*nels;
   max_it = 5;
-  tol = 1e-9;
+  tol = 1e-10;
 
 %  [soln err iter] = me_solve(mass,un,b,max_it,tol);
 %  [soln err iter] = solve_strong(mass,un,b,max_it,tol,periodic);
 
   if ifpcg
-    tol=1e-8;
+    tol=1e-10;
     max_it=500;
     [v cflag relres pcgiter] = pcg(gl_mass,big_b,tol,max_it);
   else
@@ -323,21 +327,28 @@ for i = 1:nsteps
     figure(h3)
     plot(ax1,xgll,un, '-k', 'MarkerSize', 16);
 %    set(ax1,'Color', 'none');
-    legend(ax1,['T/T_{osc}=' num2str(time/Tosc)], 'Location', 'Best')
+%    legend(ax1,['$T/T_{osc}=' num2str(time/Tosc) '$'], 'Location', 'Best')
+    ylim(ax1,[0 1e-10])
+    xlim([0 70])
+    set(ax1,'PlotBoxAspectRatio', [2 1 1])
+    set(ax1,'XTick', [])
+    set(ax1,'YTick', [])
+    xlabel('x', 'FontSize', lafs)
+    ylabel('A', 'FontSize', lafs) 
 
     mu_temp = mu_x0 + mu_time_0t + mu_diss*mu_xdiss + mu_c*xgll + mu_time_ct*xgll + mu_a*mu_xabs + mu_time_at*mu_xabs + mu_time_p*(xgll-pitch_x0);
-    plot(ax2,xgll,mu_temp, '--r', 'MarkerSize', 16);
-    set(ax2,'XAxisLocation', 'Top')
-    set(ax2,'YAxisLocation', 'Right')
-%    set(ax2,'XDir', 'reverse')  
-    set(ax2,'Color', 'none')
-    ylabel(ax1,'A')
-    ylabel(ax2,'\mu') 
-%    ylim(ax2,[3 4.5])
-    axes(ax2)
-    set(ax2,'YGrid', 'on')
-    set(ax2,'XGrid', 'on')
-    pause(0.1)
+%    plot(ax2,xgll,mu_temp, '--r', 'MarkerSize', 16);
+%    set(ax2,'XAxisLocation', 'Top')
+%    set(ax2,'YAxisLocation', 'Right')
+%%    set(ax2,'XDir', 'reverse')  
+%    set(ax2,'Color', 'none')
+%    ylabel(ax1,'A')
+%    ylabel(ax2,'\mu') 
+%%    ylim(ax2,[3 4.5])
+%    axes(ax2)
+%    set(ax2,'YGrid', 'on')
+%    set(ax2,'XGrid', 'on')
+    pause(0.01)
   end
 
   if (mod(istep,isave)==0)

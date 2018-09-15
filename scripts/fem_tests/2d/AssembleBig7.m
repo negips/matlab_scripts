@@ -1,4 +1,4 @@
-function [bigmass bigconv bigconvd bigconvxd bigforc bigconvxd_new bigconvyd_new bigconvd_new biglapl velvec gno nreps El] = AssembleBig6(El,Nx,Ny,nelx,nely,nelv,ifplots)
+function [bigmass bigconv bigconvd bigconvxd bighpf bigconvxd_new bigconvyd_new bigconvd_new biglapl velvec gno nreps El] = AssembleBig6(El,Nx,Ny,nelx,nely,nelv,ifplots)
 
 %%   Build combined matricies
 
@@ -60,7 +60,7 @@ function [bigmass bigconv bigconvd bigconvxd bigforc bigconvxd_new bigconvyd_new
      bigconv = zeros(nn,nn);
      bigconvd = zeros(nn,nn);
      bigconvxd = zeros(nn,nn);
-     bigforc = zeros(nn,nn);
+     bighpf = zeros(nn,nn);
      bigconvxd_new = zeros(nn,nn);
      bigconvyd_new = zeros(nn,nn);
      bigconvd_new = zeros(nn,nn);
@@ -83,8 +83,8 @@ function [bigmass bigconv bigconvd bigconvxd bigforc bigconvxd_new bigconvyd_new
                     entry = El(elno).mass(ii,jj);
                     bigmass(ix,iy) = bigmass(ix,iy)+entry;
 
-                    entry = El(elno).forc(ii,jj);
-                    bigforc(ix,iy) = bigforc(ix,iy)+entry;
+                    entry = El(elno).hpf(ii,jj);
+                    bighpf(ix,iy) = bighpf(ix,iy)+entry;
 
                     entry = El(elno).convxd_new(ii,jj);
                     bigconvxd_new(ix,iy) = bigconvxd_new(ix,iy)+entry;
@@ -102,4 +102,4 @@ function [bigmass bigconv bigconvd bigconvxd bigforc bigconvxd_new bigconvyd_new
      end
 
 
-     return
+return
