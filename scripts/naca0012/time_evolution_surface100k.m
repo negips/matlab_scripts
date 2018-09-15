@@ -301,13 +301,22 @@ for i = 1:nfiles
   end
 end  % end of files 
 
+splot_100k
 
-if ifdatasave
-  save('re100k_surface.mat')
-end
+save('re100k_surface.mat')
+% ncontours = 2;
+% cont_vec = linspace(min(surf_v(:)),0,ncontours);
+% cplot=contour(surf_x,surf_t,surf_v,cont_vec);
 
-%splot_100k
-
+%mov2 = mov(1:nplots); 
+%movie2avi(mov2, 'cp_movie.avi', 'compression', 'None', 'fps', 15, 'quality', 75);
+%      for ies=1:selt
+%      %     scatter(x(:,i),sdata(1).data(:,i,1), '.')
+%      %     scatter(x(:,i),sdata(1).data(:,i,maxtsaves), 'd')
+%           scatter(sdata(1).data(:,ies,maxtsaves),sdata(3).data(:,ies,maxtsaves), 'd')
+%      
+%      end
+%      set(gca,'Ydir','reverse')
      
 
 

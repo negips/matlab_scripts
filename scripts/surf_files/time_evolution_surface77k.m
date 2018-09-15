@@ -7,7 +7,7 @@ close all
 addpath '/home/prabal/workstation/git_kth/matlabscripts/scripts/'
 % addpath '/scratch/negi/git_repos/matlabscripts/scripts/'
 
-fol = 're100k';
+fol = 'naca0012_re77k/';
 ifhdr = 1;
 fs = 16;                % fontsize
 lfs = 16;               % legend fontsize
@@ -18,10 +18,10 @@ tlast = 19.05;
 tstart0 = tlast; 
 destn = 'plots/';
 ifcontour=0;
-iftr=1;                 % Plot transition location contour
+iftr=0;                 % Plot transition location contour
 iftrabs=0;              % plot point of absolute instability
-iftrgrey=1;             % Plot transition location contour
-ifsave = 1;             % if save figures
+iftrgrey=0;             % Plot transition location contour
+ifsave = 0;             % if save figures
 ifdatasave=1;           % if save mat file
 axfs=15;                % axis font size
 
@@ -37,65 +37,65 @@ end
 %mov(1:maxframes) = struct('cdata', [],'colormap', []);            % Just allocating
 %mov = VideoWriter('cp_movie.avi');
 
-% Load mean aoa normals for polynomial order 5
-snormals = importdata('surf_normals.67.N5');
-
-x_imp5 = snormals.data(:,1);
-[x_imp5 I] = sort(x_imp5);
-y_imp5 = snormals.data(I,2);
-
-snx5 = -snormals.data(I,4);
-sny5 = -snormals.data(I,5);
-
-ind = sny5>0;
-snx_top5 = snx5(find(ind));
-sny_top5 = sny5(find(ind));
-xt_imp5  = x_imp5(find(ind));
-yt_imp5  = y_imp5(find(ind));
-
-snx_bot5 = snx5(find(~ind));
-sny_bot5 = sny5(find(~ind));
-xb_imp5  = x_imp5(find(~ind));
-yb_imp5  = y_imp5(find(~ind));
-
-for i=1:length(snx_top5)
-  stx_top5(i) = sny_top5(i);
-  sty_top5(i) = -snx_top5(i);
-end
-
-for i=1:length(snx_bot5)
-  stx_bot5(i) = -sny_bot5(i);
-  sty_bot5(i) = snx_bot5(i);
-end
+% Load mean aoa normals for polynomial order 9
+%snormals = importdata('surf_normals.67.N5');
+%
+%x_imp5 = snormals.data(:,1);
+%[x_imp5 I] = sort(x_imp5);
+%y_imp5 = snormals.data(I,2);
+%
+%snx5 = -snormals.data(I,4);
+%sny5 = -snormals.data(I,5);
+%
+%ind = sny5>0;
+%snx_top5 = snx5(find(ind));
+%sny_top5 = sny5(find(ind));
+%xt_imp5  = x_imp5(find(ind));
+%yt_imp5  = y_imp5(find(ind));
+%
+%snx_bot5 = snx5(find(~ind));
+%sny_bot5 = sny5(find(~ind));
+%xb_imp5  = x_imp5(find(~ind));
+%yb_imp5  = y_imp5(find(~ind));
+%
+%for i=1:length(snx_top5)
+%  stx_top5(i) = sny_top5(i);
+%  sty_top5(i) = -snx_top5(i);
+%end
+%
+%for i=1:length(snx_bot5)
+%  stx_bot5(i) = -sny_bot5(i);
+%  sty_bot5(i) = snx_bot5(i);
+%end
 %---------------------------------------- 
-snormals = importdata('surf_normals.67');
+snormals = importdata('surf_normals.0012.N9');
 
-x_imp11 = snormals.data(:,1);
-[x_imp11 I] = sort(x_imp11);
-y_imp11 = snormals.data(I,2);
+x_imp9 = snormals.data(:,1);
+[x_imp9 I] = sort(x_imp9);
+y_imp9 = snormals.data(I,2);
 
-snx11 = -snormals.data(I,4);
-sny11 = -snormals.data(I,5);
+snx9 = -snormals.data(I,4);
+sny9 = -snormals.data(I,5);
 
-ind = sny11>0;
-snx_top11 = snx11(find(ind));
-sny_top11 = sny11(find(ind));
-xt_imp11  = x_imp11(find(ind));
-yt_imp11  = y_imp11(find(ind));
+ind = sny9>0;
+snx_top9 = snx9(find(ind));
+sny_top9 = sny9(find(ind));
+xt_imp9  = x_imp9(find(ind));
+yt_imp9  = y_imp9(find(ind));
 
-snx_bot11 = snx11(find(~ind));
-sny_bot11 = sny11(find(~ind));
-xb_imp11  = x_imp11(find(~ind));
-yb_imp11  = y_imp11(find(~ind));
+snx_bot9 = snx9(find(~ind));
+sny_bot9 = sny9(find(~ind));
+xb_imp9  = x_imp9(find(~ind));
+yb_imp9  = y_imp9(find(~ind));
 
-for i=1:length(snx_top11)
-  stx_top11(i) = sny_top11(i);
-  sty_top11(i) = -snx_top11(i);
+for i=1:length(snx_top9)
+  stx_top9(i) = sny_top9(i);
+  sty_top9(i) = -snx_top9(i);
 end
 
-for i=1:length(snx_bot11)
-  stx_bot11(i) = -sny_bot11(i);
-  sty_bot11(i) = snx_bot11(i);
+for i=1:length(snx_bot9)
+  stx_bot9(i) = -sny_bot9(i);
+  sty_bot9(i) = snx_bot9(i);
 end
 %% 
 
@@ -107,8 +107,8 @@ omega=kred*U0/semichord;
 Tosc=2*pi/omega;
 ptch_amp = 1.3;
 ptch_start = 0.;
-axis_x0 = 0.35;
-axis_y0 = 0.034;
+axis_x0 = 0.18;
+axis_y0 = 0.0;
 phase=0;
 
 nplots = 0;
@@ -120,12 +120,15 @@ surf_c5 = [];
 surf_p5 = [];
 npts5 = 0;
 
-surf_x11 = [];
-surf_t11 = [];
-surf_v11 = [];
-surf_c11 = [];
-surf_p11 = [];
-npts11 = 0;
+surf_x9 = [];
+surf_t9 = [];
+surf_v9 = [];
+surf_c9 = [];
+surf_p9 = [];
+npts9 = 0;
+
+fsi_io1 = importdata('fsi_io.108');
+fsi_io2 = importdata('fsi_io.120');
 
 icalld = 0;
 for i = 1:nfiles
@@ -139,11 +142,11 @@ for i = 1:nfiles
       stx_top = stx_top5;
       xt_imp = xt_imp5;
       yt_imp = yt_imp5;
-    elseif (lx1(1)==12)    
-      sty_top = sty_top11;
-      stx_top = stx_top11;
-      xt_imp = xt_imp11;
-      yt_imp = yt_imp11;
+    elseif (lx1(1)==10)    
+      sty_top = sty_top9;
+      stx_top = stx_top9;
+      xt_imp = xt_imp9;
+      yt_imp = yt_imp9;
     end  
 
     xmax = max(x(:));
@@ -175,7 +178,7 @@ for i = 1:nfiles
 %   Remove a few leading edge elements  
     if (icalld==0)
 
-      for i=1:5   % 5 leading elements
+      for i=1:2   % 2 leading elements
         xtels_mean = mean(sdata(1).data(:,t_els,1));
         [val ind] = min(xtels_mean);
         t_els(ind)=[];                  % remove leading edge element
@@ -215,7 +218,12 @@ for i = 1:nfiles
 
          % Rotate imported values according to simulation time   
          t_sim = tstamps(it);
-         dtheta = ptch_amp*pi/180*sin(omega*(t_sim-ptch_start)+phase)-ptch_amp*pi/180*sin(phase);
+%         dtheta = ptch_amp*pi/180*sin(omega*(t_sim-ptch_start)+phase)-ptch_amp*pi/180*sin(phase);
+         if (t_sim<108.00028)   
+           dtheta = interp1(fsi_io1.data(:,2),fsi_io1.data(:,4),t_sim);
+         else
+           dtheta = interp1(fsi_io2.data(:,2),fsi_io2.data(:,4),t_sim);              
+         end   
          theta = atan2(sty_top,stx_top);
          theta_new = theta-dtheta;        % emperically decided sign
          sty_new = sin(theta_new);
@@ -251,14 +259,14 @@ for i = 1:nfiles
            grid on
 %           xlim([0.05 .30])    
 %           set(gca,'Ydir', 'reverse')
-           ylim([-0.005 0.006]);
+           ylim([-0.005 0.015]);
 %           grid on   
 %           hold on
            lgs{1} =  ['T=' num2str(tstamps(it))]; 
            lg = legend(pvar,lgs, 'FontSize', lfs, 'Location', 'SouthWest', 'Fontsize', lfs, 'Box', 'off');
 %           if nplots == 0 
-             ylabel('C_{f}', 'Interpreter', 'tex', 'Fontsize', fs);
-             xlabel('x/C', 'Interpreter', 'tex', 'Fontsize', fs);
+             ylabel('$\tau_{w}$', 'Interpreter', 'latex', 'Fontsize', fs);
+             xlabel('$x/C$', 'Interpreter', 'latex', 'Fontsize', fs);
 %           end   
 
 %          surf_x = [surf_x; dtmpx(:)'/Chord];
@@ -273,13 +281,13 @@ for i = 1:nfiles
            surf_c5 = [surf_c5; sign(cf)'];
            surf_p5 = [surf_p5; cp'];
            npts5=npts5+1;
-         elseif(lx1(1)==12)    
-           surf_x11 = [surf_x11; xsort'/Chord];
-           surf_t11 = [surf_t11; tstamps(it)*ones(1,length(xsort))];
-           surf_v11 = [surf_v11; cf'];
-           surf_c11 = [surf_c11; sign(cf)'];
-           surf_p11 = [surf_p11; cp'];
-           npts11=npts11+1;
+         elseif(lx1(1)==10)    
+           surf_x9 = [surf_x9; xsort'/Chord];
+           surf_t9 = [surf_t9; tstamps(it)*ones(1,length(xsort))];
+           surf_v9 = [surf_v9; cf'];
+           surf_c9 = [surf_c9; sign(cf)'];
+           surf_p9 = [surf_p9; cp'];
+           npts9=npts9+1;
          end   
 
          ind2 = find(cf<0,1);
@@ -303,7 +311,7 @@ end  % end of files
 
 
 if ifdatasave
-  save('re100k_surface.mat')
+  save('re77k_surface.mat')
 end
 
 %splot_100k

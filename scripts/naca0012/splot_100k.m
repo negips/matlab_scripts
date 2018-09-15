@@ -1,6 +1,6 @@
 % Just plotting
 
-load('re100k_surface.mat');
+%load('re100k_surface.mat');
 
 
 % Flags/parameters
@@ -11,32 +11,25 @@ load('re100k_surface.mat');
 % ifplot = 0;
 % tlast = 19.05;
 % tstart0 = tlast; 
-destn = 'plots_test/';
+% destn = 'plots/';
 % ifcontour=0;
-iftr=1;                 % Plot transition location contour
+% iftr=1;                 % Plot transition location contour
 % iftrabs=0;              % plot point of absolute instability
-iftrgrey=1;                 % Plot transition location contour
-ifsave = 1;
-axfs=24;                % axis font size
-lafs=36;
-figpos = [0.10 0.10 0.30 0.8];
-
-plotaspect = [1.0 1.7 1.0];
+% iftrgrey=1;                 % Plot transition location contour
+% ifsave = 1;
+axfs=15;                % axis font size
+lafs=18;
 
 close all
 
 figure(2)
-set(gcf, 'Units', 'normalized')
-set(gcf, 'OuterPosition', figpos)
-set(gcf,'Renderer', 'opengl')
-
 i=0;
 ax1=axes;
 if (npts5>0)
   i=i+1;
   splot(i)=surf(ax1,surf_x5,(surf_t5-ptch_start)/Tosc-0.0,surf_v5,'EdgeColor', 'none', 'LineStyle', 'none', 'FaceColor', 'interp');
   view(2)
-  ylabel(ax1,'$\frac{t}{T_{osc}}$', 'Interpreter','Latex', 'rot', 0, 'FontSize', lafs+6)
+  ylabel(ax1,'$\frac{t}{T_{osc}}$', 'Interpreter','Latex', 'rot', 0, 'FontSize', lafs+4)
   xlabel(ax1,'$x/c$', 'FontSize', lafs)
   xlim([0 1])
   hold on
@@ -50,7 +43,7 @@ if (npts11>0)
   i=i+1;
   splot(i)=surf(ax1,surf_x11,(surf_t11-ptch_start)/Tosc-0.0,surf_v11,'EdgeColor', 'none', 'LineStyle', 'none', 'FaceColor', 'interp');
   view(2)
-  ylabel(ax1,'$\frac{t}{T_{osc}}$', 'Interpreter','Latex', 'rot', 0, 'FontSize', lafs+6)
+  ylabel(ax1,'$\frac{t}{T_{osc}}$', 'Interpreter','Latex', 'rot', 0, 'FontSize', lafs+4)
   xlabel(ax1,'$x/c$', 'FontSize', lafs)
   xlim([0 1])
   hold on
@@ -68,27 +61,14 @@ yticks = [0:20]*0.25;
 set(ax1, 'YTick', yticks);
 set(ax1, 'FontSize', axfs)
 %set(ax1, 'PlotBoxAspectRatio', [1 1.5 1])
-pbaspect(ax1,plotaspect)
+pbaspect(ax1,[1 1.5 1])
 
 ylbl = get(ax1,'YLabel');
 ylblpos = get(ylbl,'Position');
-set(ylbl, 'Position', ylblpos + [-0.02 0 0])
-
-ylbl=get(ax1,'Ylabel');
-set(ylbl,'FontSize', lafs+12)
-xlabel(ax1,'$x/c$')
-xlbl=get(ax1,'Xlabel');
-set(xlbl,'FontSize', lafs)
-
-f2pos = get(gcf,'OuterPosition');
-%axpos=get(ax1,'Position');
-%axpos(2)=axpos(2)-0.10;
-%axpos(4)=axpos(4)+0.08;
-%set(ax1,'Position', axpos);
-
+set(ylbl, 'Position', ylblpos + [-0.01 0 0])
 
 svfname = ['cf_time_surf100k.eps'];
-%destn = 'plots/';   
+destn = 'plots/';   
 if (ifsave)
   SaveFig(gcf, svfname, destn, 1)
 end
@@ -108,9 +88,9 @@ if (iftr)
     svfname = ['cf_time_surf100k_trabs.eps'];
   end 
 
-  pbaspect(ax1,plotaspect)
+  pbaspect(ax1,[1 1.5 1])
   
-%  destn = 'plots/';   
+  destn = 'plots/';   
   if (ifsave)
     SaveFig(gcf, svfname, destn, 1)
   end
@@ -125,9 +105,6 @@ end
 %SaveFig(gcf, svfname, destn, 1)
 
 figure(3)
-set(gcf, 'Units', 'normalized')
-set(gcf, 'OuterPosition', figpos)
-set(gcf,'Renderer', 'opengl')
 ax3=axes;
 ax4=axes;
 axes(ax3);
@@ -196,35 +173,26 @@ set(ax4, 'Color', 'none')
 set(ax4, 'YTickMode', 'manual')
 yticks = 3 + [0:nlines]*0.25;
 set(ax4, 'YTick', yticks);
-%ylbl = {'0', 'p/2', 'p', '3p/2'};
-%set(ax4, 'YTickLabel', ylbl, 'FontName', 'symbol', 'FontSize', axfs);
+ylbl = {'0', 'p/2', 'p', '3p/2'};
+set(ax4, 'YTickLabel', ylbl, 'FontName', 'symbol', 'FontSize', axfs);
 %ylbl = {'$0$', '$\pi/2$', '$\pi$', '$3\pi/2$'};
 %set(ax4, 'YTickLabel', ylbl, 'FontName', 'Latex', 'FontSize', axfs);
 
 %ylabel('Oscillation phase', 'Font','Helvetica', 'FontSize', 16)
 %set(ax4, 'PlotBoxAspectRatio', [1 1.5 1])
 
-ylbl = {'$0$', '$\pi/2$', '$\pi$', '$3\pi/2$'};
-set(ax4, 'YTickLabel', ylbl, 'TickLabelInterpreter', 'latex', 'FontSize', axfs+4);
-
-
 %colorbar
-colormap(ax4,'gray');
+set(ax3,'OuterPosition', get(ax1,'OuterPosition'));
+set(ax4,'OuterPosition', get(ax1,'OuterPosition'));
 
-%set(ax3,'OuterPosition', get(ax1,'OuterPosition'));
-%set(ax4,'OuterPosition', get(ax1,'OuterPosition'));
-
-ax1pos=get(ax1,'Position');
-
-%set(ax3,'Position', ax1pos+[0.15 0 -0.29 0]);
-%set(ax4,'Position', ax1pos+[0.15 0 -0.29 0]);
-set(gcf,'OuterPosition',figpos)
-pbaspect(ax3,plotaspect)
-pbaspect(ax4,plotaspect)
+set(ax3,'Position', get(ax1,'Position'));
+set(ax4,'Position', get(ax1,'Position'));
+pbaspect(ax3,[1 1.5 1])
+pbaspect(ax4,[1 1.5 1])
 
 svfname = ['cf_time_surf_grey100k.eps'];
 figure(3)
-%destn = 'plots/';   
+destn = 'plots/';   
 if (ifsave)
   SaveFig(gcf, svfname, destn, 1)
 end
@@ -241,7 +209,7 @@ if (iftrgrey)
     set(iln(i),'Visible','off')
   end    
   figure(3)
-%  destn = 'plots/';   
+  destn = 'plots/';   
   if (ifsave)
     SaveFig(gcf, svfname, destn, 1)
   end

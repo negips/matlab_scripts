@@ -4,10 +4,10 @@ clear
 clc
 close all
 
-% addpath '/home/prabal/workstation/git_kth/matlabscripts/scripts/'
-addpath '/scratch/negi/git_repos/matlabscripts/scripts/'
+addpath '/home/prabal/workstation/git_kth/matlabscripts/scripts/'
+% addpath '/scratch/negi/git_repos/matlabscripts/scripts/'
 
-fol = 'naca0012/forc_a3k01';
+fol = 'aoa00';
 ifhdr = 1;
 fs = 16;                % fontsize
 lfs = 16;               % legend fontsize
@@ -18,8 +18,8 @@ destn = 'plots/';
 [sfiles tout] = LoadSurfFiles(fol);
 
 nfiles = length(sfiles);
-tlast = 0.00;
-tmax = 500.00001;
+tlast = 0.0;
+tmax = 29.00001;
 maxframes = nfiles*100;
 
 h1=figure('units','normalized','outerposition',[0 0 0.4 0.6]);
@@ -31,8 +31,8 @@ cfavg = [];
 cfavgx = [];
 cfavgy = [];
 ncf_pts = 0;
-cf_start=531.25;
-cf_end = 538.04;
+cf_start=31.25;
+cf_end = 38.04;
 ifcfplot = 0;
 nplots = 0;
 for i = 1:nfiles
@@ -43,7 +43,7 @@ for i = 1:nfiles
 
     if (tstamps(1)>tmax)
        break
-    end     
+    end         
 
 %   trying to find top and bottom elements        
     [val ind] = max(sdata(1).data(:,:,1));
@@ -63,10 +63,11 @@ for i = 1:nfiles
       b_els=n12;
     end
 
+
     xmin=min(x(:));
     xmax=max(x(:));
     Chord=xmax-xmin;
-%    Chord=1; 
+%    Chord=1;  
 
     for it = 1:length(tstamps)
       if (tstamps(it)>=tlast)
@@ -89,9 +90,7 @@ for i = 1:nfiles
          ysort = dtmpy(:);
          ysort = ysort(ind);
          cf = cf(:);
-         cf = cf(ind);
-         cp = cp(:);
-         cp = cp(ind); 
+         cf = cf(ind);           
 
 %%        Average cf   
          if tstamps(it)>cf_start && tstamps(it)<cf_end
@@ -120,15 +119,11 @@ for i = 1:nfiles
          
          figure(h1)      
 %         pvar = plot(x(:)/Chord,dtmp_v(:), 'b.', 'MarkerSize', 10);
-%         pvar = plot(xsort/Chord,cp, 'b.', 'MarkerSize', 10);
-         pvar = plot(xsort/Chord,cf, 'b.', 'MarkerSize', 10);
-%         pvar = plot(xsort,ysort, 'b.', 'MarkerSize', 10);
-        
+         pvar = plot(xsort/Chord,cf, 'b.', 'MarkerSize', 15);
 %         set(gca,'Ydir', 'reverse')
-%         ylim([-1.1 1.1]);
-         xlim ([0. 1]);
-%         xlim([-0.01 1.000])
-         ylim([-0.010 0.0100])    
+%         ylim([-3.5 1.1]);
+         xlim([-0.01 1.000])
+         ylim([-0.003 0.0080])    
          grid on   
          hold on
          lgs{1} =  ['T=' num2str(tstamps(it))]; 
