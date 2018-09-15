@@ -8,7 +8,7 @@ Uinf = 1.0;
 c = 1.0;
 rho = 1.0;
 
-U_star = 7.5;
+U_star = 12.0;
 
 
 I_n = 2.07;
@@ -19,6 +19,7 @@ k_theta = (2*pi*fn)^2*I;
 k_theta_n = 2*k_theta/(rho*Uinf^2*c^2);
 b_theta_n = 0.3*sqrt(I_n*k_theta_n);
 
+disp(['Reduced Frequency:      ',num2str(U_star,5)])
 disp(['Normalized Inertia:     ',num2str(I_n,5)])
 disp(['Normalized Stiffness:   ',num2str(k_theta_n,5)])
 disp(['Normalized Damping:     ',num2str(b_theta_n,5)])
