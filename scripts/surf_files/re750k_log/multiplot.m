@@ -39,7 +39,7 @@ alpha_0=3.4;
 dalpha=1.0;
 Tosc=2*pi/omega;
 
-ax1=axes;
+ax2=axes;
 nfigs=0;
 
 for ii=1:nfiles
@@ -51,19 +51,26 @@ for ii=1:nfiles
   ind = find(pvar.data(:,2)<6.0,1,'last');  % Only plotting for after pitching start
   pvar.data(1:ind,:) = [];
 
-  ind = find(pvar.data(:,2)>50.0);  % Only plotting for after pitching start
+  ind = find(pvar.data(:,2)>60.0);  % Only plotting for after pitching start
   pvar.data(ind,:) = [];
 
   nfigs=nfigs+1;
   figure(nfigs); 
-  plot((pvar.data(:,2) -ptch_start)/Tosc,pvar.data(:,pcol)/norm,'b', 'LineWidth', 2,'Parent', ax1);
-  %set(ax1, 'YLim', [1.1 1.6])
-  set(ax1, 'Xlim', [min(pvar.data(:,2))-ptch_start max(pvar.data(:,2))-ptch_start]/Tosc)
-%  set(ax1, 'Ylim', [1.1 1.45])
+  plot((pvar.data(:,2) -ptch_start)/Tosc,pvar.data(:,pcol)/norm,'b', 'LineWidth', 2,'Parent', ax2); hold on
+  %set(ax2, 'YLim', [1.1 1.6])
 
-  ylabel(ylbl{ii}, 'FontSize', lafs, 'Parent', ax1)
-  xlabel('$(t-t_{0})/T_{osc}$', 'FontSize', lafs, 'Parent', ax1)
-  %set(ax1,'YColor', [0 0 1])
+  ind3=find(pvar.data(:,2)>31.5);
+  plot((pvar.data(ind3,2)-ptch_start)/Tosc,pvar.data(ind3,pcol)/norm, 'r', 'LineWidth', 2, 'Parent',ax2)
+
+  ind4=find(pvar.data(:,2)>44.85);
+  plot((pvar.data(ind4,2)-ptch_start)/Tosc,pvar.data(ind4,pcol)/norm, 'g', 'LineWidth', 2, 'Parent',ax2)
+
+  set(ax2, 'Xlim', [min(pvar.data(:,2))-ptch_start max(pvar.data(:,2))-ptch_start]/Tosc)
+  set(ax2, 'Ylim', [1.1 1.42])
+
+  ylabel(ylbl{ii}, 'FontSize', lafs, 'Parent', ax2)
+  xlabel('$(t-t_{0})/T_{osc}$', 'FontSize', lafs, 'Parent', ax2)
+  %set(ax2,'YColor', [0 0 1])
 
 %ax2=axes;
   phi = omega*(pvar.data(:,2)-ptch_start);
@@ -94,7 +101,7 @@ for ii=1:nfiles
     span=100;
     smoothpvar = smooth(smoothpvar,span);
   end
-  ph = arrowh(alpha2,smoothpvar,'k',[300,90],[2 10 20 70]);
+  ph = arrowh(alpha2,smoothpvar,'k',[300,60],[2 10 21 70]);
   xlabel(ax3,'$\alpha[^{\circ}]$', 'FontSize', lafs)
   ylabel(ax3,ylbl{ii}, 'FontSize', lafs)
   hold on    
@@ -103,7 +110,13 @@ for ii=1:nfiles
   pvar3=pvar.data(ind3,pcol);
   alpha3=alpha(ind3);
   plot(alpha3,pvar3/norm, 'r', 'LineWidth', 2, 'Parent',ax3)
-%  set(ax3, 'Ylim', [1.1 1.45])
+
+  ind4=find(pvar.data(:,2)>44.85);
+  pvar4=pvar.data(ind4,pcol);
+  alpha4=alpha(ind4);
+  plot(alpha4,pvar4/norm, 'g', 'LineWidth', 2, 'Parent',ax3)
+
+  set(ax3, 'Ylim', [1.1 1.42])
 
   axpos = get(gca,'Position');    
 %  set(gca,'Position', axpos + [0.02 0 -0.02 -0.02])

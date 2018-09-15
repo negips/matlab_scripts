@@ -1,6 +1,6 @@
 % Just plotting
 
-load('re750k_surface.mat');
+%load('re750k_surface.mat');
 
 
 % Flags/parameters
@@ -19,7 +19,7 @@ ifcontour=0;            % make contour plot for zero shear stress.
 iftr = 0;               % overlay transition points on shear stress space-time plot
 iftrportrait=0;         % Plot transition phase portrait
 ifxfoil=0;                    % plot xfoil transition location data
-ifsave = 1;             % Save space-time plots
+ifsave = 0;             % Save space-time plots
 ifczplot = 0;           % plot normal force variation
 ifczsave = 0;
 

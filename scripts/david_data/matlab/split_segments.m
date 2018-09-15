@@ -83,6 +83,9 @@ function [segments] = split_segments(hfile, uoo, deltacase, dt)
     if deltacase == 14 || deltacase == 24
         itaps(27) = false;
     end
+    btaps = [1:26 28:31];
+    ttaps = 32:62;  
+
     xtaps = xytaps(itaps,1);
     ytaps = xytaps(itaps,2);
     
@@ -104,6 +107,12 @@ function [segments] = split_segments(hfile, uoo, deltacase, dt)
       segments(1).ytaps = ytaps;
       segments(1).itaps = itaps;
       segments(1).xytaps = xytaps;
+      segments(1).pa = p(:,ttaps);
+      segments(1).pb = p(:,btaps);
+      segments(1).xa = xytaps(ttaps,1);
+      segments(1).ya = xytaps(ttaps,2);
+      segments(1).xb = xytaps(btaps,1);
+      segments(1).yb = xytaps(btaps,2);
 
     else      
       for ki = 1:nseg
@@ -112,12 +121,18 @@ function [segments] = split_segments(hfile, uoo, deltacase, dt)
           segments(ki).ptime = tp(it1:it2) + tshift;
           segments(ki).pressure = p(it1:it2, :);
           segments(ki).Cz = trapz(xtaps, p(it1:it2, itaps),2) / qoo;
+          segments(ki).pa = p(it1:it2,ttaps);
+          segments(ki).pb = p(it1:it2,btaps);
           dxt = ones(it2-it1+1,1) * (0.25 - xtaps)';
           segments(ki).Cm = trapz(xtaps, (p(it1:it2, itaps).*dxt), 2) / qoo;
           segments(ki).xtaps = xtaps;
           segments(ki).ytaps = ytaps;
           segments(ki).itaps = itaps;
           segments(ki).xytaps = xytaps;
+          segments(ki).xa = xytaps(ttaps,1);
+          segments(ki).ya = xytaps(ttaps,2);
+          segments(ki).xb = xytaps(btaps,1);
+          segments(ki).yb = xytaps(btaps,2);
       end
     end
     
