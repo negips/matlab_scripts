@@ -46,14 +46,17 @@ gl_lpbc = zeros(dof,dof);
 mu_x = zeros(npts,nels);
 
 % Parameters
-U0    = 4;
-mu0   = 0.75;          %3/4;  % Constant
+U0    = 4.00;
+%mu0   = 0.75;          %3/4;  % Constant
+mu0   = 0.75;          % convective = 0.75
+%mu0   = 0.1;          % absolute = 0.1
 mut_0 = 0.0;        % time dependent spatially constant
 dmu_max  = 0.0;     % maximum deviation of mu from mu0
 pitch_x0 = 50.;     % pitch axis
 dx_max = max(abs([(d_end-pitch_x0) (pitch_x0-d_start)]));
 mu_pitch = 0*1/dx_max*dmu_max;        % slope of pitching mu
-mu1 = -8.7e-3;       % spatially varying mu
+mu1 = -8.7e-3;       % spatially varying mu (convective)
+%mu1 = 0;            % absolute    
 mut_conv = 0.0e-3;  % Temporal strength for spatially varying mu
 mu_abs = 0.0;        % Constant strength for unstable region    
 mut_abs = 0.0;      % Temporal strength for unstable region
@@ -66,8 +69,8 @@ diss_xrise=20;
 diss_xfall=20;
 
 % Step for unstable region
-step_xs=10;
-step_xe=20;
+step_xs=5;
+step_xe=15;
 step_xrise=2;
 step_xfall=2;
 

@@ -7,7 +7,11 @@ close all
 % addpath '/home/prabal/workstation/git_kth/matlabscripts/scripts/'
 addpath '/scratch/negi/git_repos/matlabscripts/scripts/'
 
+<<<<<<< HEAD
+fol = 'sfd67';
+=======
 fol = 'naca0012/forc_a3k01';
+>>>>>>> 3f9c9688590b462c2c3b186974966261f3966e5f
 ifhdr = 1;
 fs = 16;                % fontsize
 lfs = 16;               % legend fontsize
@@ -18,8 +22,13 @@ destn = 'plots/';
 [sfiles tout] = LoadSurfFiles(fol);
 
 nfiles = length(sfiles);
+<<<<<<< HEAD
+tlast = 6.0;
+tmax = 329.00001;
+=======
 tlast = 0.00;
 tmax = 500.00001;
+>>>>>>> 3f9c9688590b462c2c3b186974966261f3966e5f
 maxframes = nfiles*100;
 
 h1=figure('units','normalized','outerposition',[0 0 0.4 0.6]);

@@ -4,6 +4,8 @@ clear
 clc
 close all
 
+lafs=20;
+
 
 alphas=1.0;
 N=10;
@@ -25,7 +27,7 @@ En_2 = 1/(2*(N-2)+1);
 %ylabel('U_{N-2}')
 
 ratio = linspace(-5,5,500);         % ratio (Un-2/Un)
-alphas = linspace(0,1.00,500);
+alphas = linspace(1e-6,1.00,500);
 
 [a r] = meshgrid(alphas,ratio);
 
@@ -43,8 +45,8 @@ hold on
 view(2)
 %line([0 max(alpha)], [0 0], [10 10], 'LineStyle', '--', 'LineWidth', 1.5)
 %ylabel('$\hat{U}_{N-2}/\hat{U}_{N}$', 'Interpreter', 'Latex')
-ylabel('r', 'FontSize', 20)
-xlabel('\alpha')
+ylabel('$r$', 'FontSize', lafs)
+xlabel('$\alpha$', 'FontSize', lafs)
 
 dim = [0.4 0.5 0.20 0.3];
 str = 'Energy Source';
@@ -61,6 +63,6 @@ set(an2,'Margin', 10)
 % set(an2, 'LineWidth', 0)
 
 
-%SaveFig(gcf, 'filter_delta_energy.eps', 'plots/', 1)
+SaveFig(gcf, 'filter_delta_energy.eps', 'plots/', 1)
 
 
