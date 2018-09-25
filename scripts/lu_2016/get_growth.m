@@ -27,69 +27,70 @@ i=i+1; % 4
 file{i}='fsi_lu_nl.out';
 legen{i}='NL';
 
-% Re=45
+% Re=50
 i=i+1; % 5
 file{i}='fsi_lu_re45_pert.out';
-legen{i}='Re45; Pert';
+legen{i}='Re50; Pert';
 
 i=i+1; % 6
 file{i}='fsi_lu_re45_base_pert.out';
-legen{i}='Re45; Base+Pert';
+legen{i}='Re50; Base+Pert';
 
 i=i+1; % 7
 file{i}='fsi_lu_re45_nl.out';
-legen{i}='Re45; NL';
+legen{i}='Re50; NL';
 
 % After pressure bug change
 i=i+1; % 8
 file{i}='fsi_lu_re45_pert_2.out';
-legen{i}='Re45; Pert 2';
+legen{i}='Re50; Pert 2';
 
 i=i+1; % 9
 file{i}='fsi_lu_re45_base_pert_2.out';
-legen{i}='Re45; Base+Pert 2';
+legen{i}='Re50; Base+Pert 2';
 
 % Non-linear amplitudes
 
 i=i+1; % 10
 file{i}='fsi_lu_re45_nl_amp2.out';
-legen{i}='Re45; NL; AMP2';
+legen{i}='Re50; NL; AMP2';
 
 i=i+1; % 11
 file{i}='fsi_lu_re45_nl_amp3.out';
-legen{i}='Re45; NL; AMP3';
+legen{i}='Re50; NL; AMP3';
 
 i=i+1; % 12
 file{i}='fsi_lu_re45_nl_amp4.out';
-legen{i}='Re45; NL; AMP4';
+legen{i}='Re50; NL; AMP4';
 
 % Including grad(U).eta terms in forces
 i=i+1; % 13
 file{i}='fsi_lu_re45_all_npert2.out';
-legen{i}='Re45; All; npert=2';
+legen{i}='Re50; All; npert=2';
 
 i=i+1; % 14
 file{i}='fsi_lu_re45_all_npert1.out';
-legen{i}='Re45; All; npert=1';
+legen{i}='Re50; All; npert=1';
 
 
-ind=[8, 14, 7];
+ind=[5, 7];
 
 file=file(ind);
 legen=legen(ind);
 
 cols = ['b','r','k','m','c','g','y'];
 
-iskip=11;          % no of initial peaks to skip
+iskip=6;          % no of initial peaks to skip
 eskip=0;          % no of end peaks to skip
 tstart=700;
 tend  =920;
 
 %re45
 tstart=950;
-tend=1400;
+tend=1550;
 
 nfiles=length(ind);
+growth_all = [];
 
 for i=1:nfiles
 
@@ -159,6 +160,8 @@ for i=1:nfiles
   disp(fname)
   disp(['Mean Angular frequency:', num2str(Omega,10)])
   disp(['Mean Growth rate      :', num2str(Growth,10)])
+
+  growth_all{i} = growth;
 
 end
 

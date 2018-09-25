@@ -10,15 +10,21 @@ if ~isempty(strfind(lower(filename), '.eps'))
   else
        print( h, reso, '-deps2', filename)
   end
-  movefile([filename],destn)
+  if ~isempty(destn) 
+    movefile([filename],destn)
+  end  
 
 elseif ~isempty(strfind(lower(filename), '.pdf'))
   print( h, reso, '-dpdf', filename)
-  movefile([filename],destn)
+  if ~isempty(destn) 
+    movefile([filename],destn)
+  end  
 
 elseif ~isempty(strfind(lower(filename), '.png'))
   print( h, reso, '-dpng', filename)
-  movefile([filename],destn)
+  if ~isempty(destn) 
+    movefile([filename],destn)
+  end  
 
 else
   if col
@@ -27,7 +33,10 @@ else
        print( h, reso, '-deps2', filename)
   end
 
-  movefile([filename '.eps'],destn)
+  if ~isempty(destn) 
+    movefile([filename '.eps'],destn)
+  end  
+ 
 end
 
 
