@@ -1,13 +1,13 @@
 % Just plotting
 
-%load('re750k_surface.mat');
+load('re750k_surface.mat');
 
 
 % Flags/parameters
 
 %fol = 're750k_pitch';
 %ifhdr = 1;
-axfs = 16;               % axis fontsize
+axfs = 9;               % axis fontsize
 %lfs = 16;               % legend fontsize
 %ifcols = 1;
 %ifplot = 0;             % plot individual wall profiles
@@ -16,17 +16,17 @@ axfs = 16;               % axis fontsize
 %tend = 100;             % stop at this time
 destn = 'plots_test/';
 ifcontour=0;            % make contour plot for zero shear stress.
-iftr = 0;               % overlay transition points on shear stress space-time plot
-iftrportrait=0;         % Plot transition phase portrait
-ifxfoil=0;                    % plot xfoil transition location data
-ifsave = 0;             % Save space-time plots
+iftr = 1;               % overlay transition points on shear stress space-time plot
+iftrportrait=1;         % Plot transition phase portrait
+ifxfoil=1;                    % plot xfoil transition location data
+ifsave = 1;             % Save space-time plots
 ifczplot = 0;           % plot normal force variation
 ifczsave = 0;
 
 
 %ifcp = 0;
-lafs=30;                % Latex font size
-ifflip=0;
+lafs=14;                % Latex font size
+ifflip=1;
 cbloc='Northoutside';
 cbheight = 0.75;
 %Tosc=1;                 % temporary
@@ -34,16 +34,11 @@ cbheight = 0.75;
 %phase=0;
 
 
-%npts8=0;                % remove higher order results
+npts8=0;                % remove higher order results
 
 close all
 
 figure(2)
-figpos=[0.25 0.25 0.24 0.50];
-set(gcf, 'Units', 'normalized');
-%set(gcf, 'Renderer', 'Painters')
-set(gcf, 'Position', figpos)
-
 i=0;
 %ax1=axes('Position', [0.25 0.1548 0.6589 0.7702]);
 ax1=axes;
@@ -82,7 +77,7 @@ set(ax1, 'YTickMode', 'manual')
 yticks = [0:20]*0.5;
 set(ax1, 'YTick', yticks);
 set(ax1, 'FontSize', axfs)
-%set(ax1, 'PlotBoxAspectRatio', [1 2.0 1])
+set(ax1, 'PlotBoxAspectRatio', [1 2.0 1])
 
 if ~ifflip
   ylbl = get(ax1,'YLabel');
@@ -107,17 +102,15 @@ if (ifsave)
     cb1=colorbar('FontSize', axfs);  
   end
   ylbl=get(ax1,'Ylabel');
-  set(ylbl,'FontSize', lafs+6)
+  set(ylbl,'FontSize', lafs)
   xlabel(ax1,'$x/c$')
   xlbl=get(ax1,'Xlabel');
   set(xlbl,'FontSize', lafs)
 
-  if ifflip    
-    axpos=get(ax1,'Position');
-    axpos(2)=axpos(2)-0.10;
-    axpos(4)=axpos(4)+0.08;
-    set(ax1,'Position', axpos);
-  end
+  axpos=get(ax1,'Position');
+  axpos(2)=axpos(2)-0.10;
+  axpos(4)=axpos(4)+0.08;
+  set(ax1,'Position', axpos);
 
   pause(2)   
   SaveFig(gcf, svfname, destn, 1)
@@ -241,14 +234,10 @@ set(ax4, 'Color', 'none')
 set(ax4, 'YTickMode', 'manual')
 yticks = [0:nlines]*0.25;
 set(ax4, 'YTick', yticks);
-%ylbl = {'3p/2', '0', 'p/2', 'p'};
-%set(ax4, 'YTickLabel', ylbl, 'FontName', 'symbol', 'FontSize', axfs);
+ylbl = {'3p/2', '0', 'p/2', 'p'};
+set(ax4, 'YTickLabel', ylbl, 'FontName', 'symbol', 'FontSize', axfs);
 %ylabel('Oscillation phase', 'Font','Helvetica', 'FontSize', 16)
 %set(ax4, 'PlotBoxAspectRatio', [1 1.5 1])
-
-ylbl = {'$3\pi/2$', '$0$', '$\pi/2$', '$\pi$'};
-set(ax4, 'YTickLabel', ylbl, 'TickLabelInterpreter', 'latex', 'FontSize', axfs);
-
 
 %colorbar
 set(ax3,'OuterPosition', get(ax1,'OuterPosition'));
@@ -351,29 +340,19 @@ if ifczplot
 end
 
 if iftrportrait
-  figpos=[0.25 0.25 0.18 0.24];
   figure(7)
-  set(gcf, 'Units', 'normalized');
-  set(gcf, 'Position', figpos)
-  set(gcf, 'Renderer', 'Painters')
-%  ax1=axes;
-%  axpos=[0.1400 0.1500 0.7650 0.7950];
-%  set(ax1,'Position',axpos)
-%  set(ax1,'FontSize',axfs)
-
-  plot(tr.alpha, tr.trx_uv, 'b', 'LineWidth', 1.5); hold on
-%  plot(tr.alpha, tr.trx_ww, 'r', 'LineWidth', 1.5);
+  plot(tr.alpha, tr.trx_uv, 'b', 'LineWidth', 2); hold on
+  plot(tr.alpha, tr.trx_ww, 'r', 'LineWidth', 2);
   smoothpvar=tr.trx_ww;
   for jj=1:5
     span=10;
     smoothpvar = smooth(smoothpvar,span);
   end
-%  ph = arrowh(tr.alpha,smoothpvar,'k',[600,90],[8 15 20 28]);
+  ph = arrowh(tr.alpha,smoothpvar,'k',[600,90],[8 15 20 28]);
   xlabel('$\alpha[^{\circ}]$')    
   ylabel('$x/c$')
   set(gca,'FontSize', axfs)
-  xlim([2.2 4.6])
-%  legend({'$\overline{u''v''}$', '$\overline{w''w''}$'}, 'Interpreter', 'latex','FontSize', 22, 'Location', 'Best')
+  legend({'$\overline{u''v''}$', '$\overline{w''w''}$'}, 'Interpreter', 'latex','FontSize', 22, 'Location', 'Best')
 
   set(gca,'FontSize', axfs)
   ylbl=get(gca,'Ylabel');
@@ -381,8 +360,6 @@ if iftrportrait
   xlbl=get(gca,'Xlabel');
   set(xlbl,'FontSize', lafs)
 
-  set(gcf,'Position',figpos)
-  pause(2)
 
   svfname = ['750k_transition_alpha.eps'];
   SaveFig(gcf, svfname, destn, 1)
@@ -392,9 +369,6 @@ if iftrportrait
   tr.alpha2 = alpha_0 + dalpha*sin(omega*(tr.tr_time-ptch_start) + phase + phase_lag);
 
   figure(8)
-  set(gcf, 'Units', 'normalized');
-  set(gcf, 'Position', figpos)
-  set(gcf, 'Renderer', 'Painters')
   plot(tr.alpha2, tr.trx_uv, 'b', 'LineWidth', 2); hold on
 %  plot(tr.alpha2, tr.trx_ww, 'r', 'LineWidth', 2);
   smoothpvar=tr.trx_ww;
@@ -425,10 +399,10 @@ if iftrportrait
     figure(8)
     plot(re750.data(ind3,1),re750.data(ind3,7), '--k', 'LineWidth', 3); hold on
   end
-  set(gcf,'Position',figpos)
-
   svfname = ['750k_transition_alpha_e.eps'];
   SaveFig(gcf, svfname, destn, 1)
+
+
 
 end
 

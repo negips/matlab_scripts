@@ -4,22 +4,22 @@ clear
 clc
 close all
 
-addpath '/home/prabal/workstation/git_kth/matlabscripts/scripts/'
+% addpath '/home/prabal/workstation/git_kth/matlabscripts/scripts/'
 % addpath '/scratch/negi/git_repos/matlabscripts/scripts/'
 
-fol = '750k_pitch';
+fol = 're750k_aoa44/';
 ifhdr = 1;
 fs = 16;                % fontsize
 lfs = 16;               % legend fontsize
 ifcols = 1;
 ifplot = 1;             % plot individual wall profiles
-tlast = 6.00;           % start from this time
+tlast = 40.95;          % start from this time
 tstart0 = tlast;
 tend = 100;             % stop at this time
 destn = 'plots/';
 ifcp = 0;               % plot pressure instead of cf
 ifdatasave=1;           % save data into a mat file
-  datafile='re750k_surface.mat';
+  datafile='re750k_aoa44.mat';
 lafs = 22;              % Latex font size
 
 U0=1.;
@@ -35,6 +35,8 @@ axis_x0 = 0.35;
 axis_y0 = 0.034;
 phase=-pi/2;
 
+pitch_end=4.5*Tosc + ptch_start;
+Tosc=10.0;
 
 [sfiles tout] = LoadSurfFiles(fol);
 
@@ -257,7 +259,13 @@ for i = 1:nfiles
 
          % Rotate imported values according to simulation time   
          t_sim = tstamps(it);
-         dtheta = ptch_amp*pi/180*sin(omega*(t_sim-ptch_start)+phase)-ptch_amp*pi/180*sin(phase);
+         t_rot = t_sim;
+
+         if t_rot>=pitch_end
+           t_rot=pitch_end;
+         end  
+
+         dtheta = ptch_amp*pi/180*sin(omega*(t_rot-ptch_start)+phase)-ptch_amp*pi/180*sin(phase);
          theta = atan2(sty_top,stx_top);
          theta_new = theta-dtheta;        % emperically decided sign
          sty_new = sin(theta_new);

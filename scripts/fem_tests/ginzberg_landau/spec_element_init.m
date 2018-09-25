@@ -50,7 +50,6 @@ U0    = 4.00;
 %mu0   = 0.75;          %3/4;  % Constant
 mu0   = 0.75;          % convective = 0.75
 %mu0   = 0.1;          % absolute = 0.1
-
 mut_0 = 0.0;        % time dependent spatially constant
 dmu_max  = 0.0;     % maximum deviation of mu from mu0
 pitch_x0 = 50.;     % pitch axis

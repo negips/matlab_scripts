@@ -25,7 +25,7 @@ nu = 0;
 sigma = 1.0;
 xofst = 5;
 u0 = 2*normpdf(xgll-xofst,nu,sigma);
-%u0 = 0.01*u0/max(max(u0));
+u0 = 1e-10*u0/max(max(u0));
 %u0_int = normpdf(x2,mu,sigma);
 %u0_int = u0_int/max(u0_int);
 

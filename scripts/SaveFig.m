@@ -1,7 +1,7 @@
 function SaveFig(h, filename, destn, col)
 % Save and move the figure
 
-reso='-r300';
+reso='-r100';
 
 renderer='-opengl';
 %renderer='-painters';

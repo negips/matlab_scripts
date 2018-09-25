@@ -9,13 +9,14 @@ close all
 %base = '/scratch/negi/git_repos/matlabscripts/scripts/david_data/';
 base = '/home/prabal/workstation/git_kth/matlabscripts/scripts/david_data/';
 
+
 fol = 'delta+14/';
 folder = [base fol];
 % fname = 'u24_a3_d14_fsteps.h5';
 lfol = length(fol);
 
 fs = 18;    % fontsize
-lfs = 12;    % legend font size
+lfs = 14;    % legend font size
 lw = 1;     % linewidth
 
 [status,result] = system(['ls ' folder '*alphasweep*']);
@@ -88,24 +89,23 @@ for i=2:nfiles
      ifturb = 'Turb';
   end    
 
-
-  if defl(i)~=-99 && U0(i) == 24
+  if defl(i)~=-99 && (U0(i) == 24 || U0(i) == 30)
     uoo = U0(i);
     deltacase=defl(1);
     Re=uoo*c/nu;
     if (Re<600000)
       re_leg = '565k';
     elseif (Re>600000 && Re < 900000)
-      re_leg = '765k';
+      re_leg = '7.5\times10^{5}';
     else
-      re_leg = '950k';
+      re_leg = '1.0\times10^{6}';
     end        
 
     hfile = [folder filenames{i}];
 
     [segments] = split_segments(hfile, uoo, deltacase);
     allcount = allcount+1;
-    legs{allcount} = ['Re=' re_leg '; \delta=', num2str(deltacase) '; ' ifturb];
+    legs{allcount} = ['$Re_{c}=' re_leg '$']; %; \delta=', num2str(deltacase) '; ' ifturb];
 
     nsegs = length(segments);
     for iseg=1:nsegs
@@ -146,15 +146,15 @@ for i=2:nfiles
       figure(3)
       plot_cq(allcount) = plot(alpha3,q_cz, '.', 'Color', col1(i,:));
 %      plot_cq(allcount) = plot(alpha3,q_cm, '.', 'Color', col1(i,:));
-      ylabel('C_{z}', 'Interpreter', 'tex', 'FontSize', fs)
-      xlabel('\alpha^{\circ}', 'Interpreter', 'tex', 'FontSize', fs)
+      ylabel('$C_{z}$', 'Interpreter', 'latex', 'FontSize', fs)
+      xlabel('$\alpha[^{\circ}]$', 'Interpreter', 'latex', 'FontSize', fs)
       hold on
       xlim([-1 11])
 
       figure(4)
       plot_cq2(allcount) = plot(alpha3,q_cm, '.', 'Color', col1(i,:));
-      ylabel('C_{m}', 'Interpreter', 'tex', 'FontSize', fs)
-      xlabel('\alpha', 'Interpreter', 'tex', 'FontSize', fs)
+      ylabel('$C_{m}$', 'Interpreter', 'latex', 'FontSize', fs)
+      xlabel('$\alpha[^{\circ}]$', 'Interpreter', 'latex', 'FontSize', fs)
       hold on
       xlim([-1 11])
 
@@ -166,17 +166,17 @@ destn = 'plots/';
 ifcols = 1;
 
 figure(1)
-legend(plot_aoa,legs,'Interpreter', 'tex', 'FontSize', lfs)
+legend(plot_aoa,legs,'Interpreter', 'latex', 'FontSize', lfs)
 
 figure(3)
-legend(plot_cq, legs,'Interpreter', 'tex', 'FontSize', lfs, 'Location', 'SouthEast')
+legend(plot_cq, legs,'Interpreter', 'latex', 'FontSize', lfs, 'Location', 'SouthEast')
 grid on
-filename=['cz_alpha_steady.eps'];
+filename=['cz_alpha_steady.png'];
 filename = [num2str(deltacase) '_' filename];
-%SaveFig(gcf,filename, destn, ifcols)
+SaveFig(gcf,filename, destn, ifcols)
 
 figure(4)
-legend(plot_cq2, legs,'Interpreter', 'tex', 'FontSize', lfs, 'Location', 'SouthEast')
+legend(plot_cq2, legs,'Interpreter', 'latex', 'FontSize', lfs, 'Location', 'SouthEast')
 grid on
 filename=['cm_alpha_steady.eps'];
 filename = [num2str(deltacase) '_' filename];

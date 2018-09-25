@@ -7,34 +7,22 @@ close all
 addpath '/home/prabal/workstation/git_kth/matlabscripts/scripts/'
 % addpath '/scratch/negi/git_repos/matlabscripts/scripts/'
 
-fol = '750k_pitch';
+fol = 're750k_aoa44';
 ifhdr = 1;
 fs = 16;                % fontsize
 lfs = 16;               % legend fontsize
 ifcols = 1;
 ifplot = 1;             % plot individual wall profiles
-tlast = 6.00;           % start from this time
+tlast = 0.00;          % start from this time
 tstart0 = tlast;
 tend = 100;             % stop at this time
 destn = 'plots/';
-ifcp = 0;               % plot pressure instead of cf
-ifdatasave=1;           % save data into a mat file
-  datafile='re750k_surface.mat';
-lafs = 22;              % Latex font size
-
-U0=1.;
-kred=0.4;
-chord=1.0;
-semichord=chord/2;
-omega=kred*U0/semichord;
-Tosc=2*pi/omega;
-%Tosc=1;
-ptch_amp = 1.0;
-ptch_start = 6.;
-axis_x0 = 0.35;
-axis_y0 = 0.034;
-phase=-pi/2;
-
+ifcontour=1;            % make contour plot for zero shear stress.
+iftr = 0;               % overlay transition points on shear stress space-time plot
+ifsave = 0;             % Save space-time plots
+ifczplot = 1;           % plot normal force variation
+ifczsave = 0;
+ifcp = 1;
 
 [sfiles tout] = LoadSurfFiles(fol);
 
@@ -79,36 +67,6 @@ for i=1:length(snx_bot5)
   sty_bot5(i) = snx_bot5(i);
 end
 %---------------------------------------- 
-snormals = importdata('surf_normals.24.N6');
-
-x_imp6 = snormals.data(:,1);
-[x_imp6 I] = sort(x_imp6);
-y_imp6 = snormals.data(I,2);
-
-snx6 = -snormals.data(I,4);
-sny6 = -snormals.data(I,5);
-
-ind = sny6>0;
-snx_top6 = snx6(find(ind));
-sny_top6 = sny6(find(ind));
-xt_imp6  = x_imp6(find(ind));
-yt_imp6  = y_imp6(find(ind));
-
-snx_bot6 = snx6(find(~ind));
-sny_bot6 = sny6(find(~ind));
-xb_imp6  = x_imp6(find(~ind));
-yb_imp6  = y_imp6(find(~ind));
-
-for i=1:length(snx_top6)
-  stx_top6(i) = sny_top6(i);
-  sty_top6(i) = -snx_top6(i);
-end
-
-for i=1:length(snx_bot6)
-  stx_bot6(i) = -sny_bot6(i);
-  sty_bot6(i) = snx_bot6(i);
-end
-%---------------------------------------- 
 snormals = importdata('surf_normals.24.N8');
 
 x_imp8 = snormals.data(:,1);
@@ -140,6 +98,17 @@ for i=1:length(snx_bot8)
 end
 %% 
 
+U0=1.;
+kred=0.4;
+chord=1.0;
+semichord=chord/2;
+omega=kred*U0/semichord;
+Tosc=2*pi/omega;
+ptch_amp = 1.0;
+ptch_start = 0.;
+axis_x0 = 0.35;
+axis_y0 = 0.034;
+phase=-pi/2;
 
 nplots = 0;
 bcnt = 0;
@@ -173,11 +142,6 @@ for i = 1:nfiles
       stx_top = stx_top5;
       xt_imp = xt_imp5;
       yt_imp = yt_imp5;
-    elseif (lx1(1)==7)    
-      sty_top = sty_top6;
-      stx_top = stx_top6;
-      xt_imp = xt_imp6;
-      yt_imp = yt_imp6;
     elseif (lx1(1)==9)    
       sty_top = sty_top8;
       stx_top = stx_top8;
@@ -253,11 +217,14 @@ for i = 1:nfiles
          cfx = dtmp_cfx(ind);
          cfy = dtmp_cfy(ind); 
 
-         cp = dtmp_cp(ind);
+         cp = dtmp_cp(ind) - pmax;
 
          % Rotate imported values according to simulation time   
-         t_sim = tstamps(it);
-         dtheta = ptch_amp*pi/180*sin(omega*(t_sim-ptch_start)+phase)-ptch_amp*pi/180*sin(phase);
+%         t_sim = tstamps(it);
+%         dtheta = ptch_amp*pi/180*sin(omega*(t_sim-ptch_start)+phase)-ptch_amp*pi/180*sin(phase)
+
+         % Static rotation. 
+         dtheta = 2*ptch_amp*pi/180;
          theta = atan2(sty_top,stx_top);
          theta_new = theta-dtheta;        % emperically decided sign
          sty_new = sin(theta_new);
@@ -294,20 +261,22 @@ for i = 1:nfiles
              pvar = plot(xsort,cp, 'b.', 'MarkerSize', 6);
              grid on
              set(gca,'Ydir', 'reverse')
-             ylim([-1.1 0.1]);
+             xlim([0 0.2])
+%             ylim([-1.1 0.1]);
              ylabel('C_{p}', 'Interpreter', 'tex', 'Fontsize', fs);
              xlabel('x/C', 'Interpreter', 'tex', 'Fontsize', fs);
            else        
              pvar = plot(xsort,cf, 'b.', 'MarkerSize', 6);
              grid on
-             ylim([-0.0035 0.005]);
+             xlim([0 0.2])
+%             ylim([-0.0035 0.005]);
 %             if nplots == 0 
                ylabel('C_{f}', 'Interpreter', 'tex', 'Fontsize', fs);
                xlabel('x/C', 'Interpreter', 'tex', 'Fontsize', fs);
 %             end   
            end 
            lgs{1} =  ['T=' num2str(tstamps(it))]; 
-           lg = legend(pvar,lgs, 'FontSize', lafs, 'Location', 'SouthWest', 'Box', 'off');
+           lg = legend(pvar,lgs, 'FontSize', lfs, 'Location', 'SouthWest', 'Fontsize', lfs, 'Box', 'off');
 
          end      % ifplot 
 
@@ -318,13 +287,6 @@ for i = 1:nfiles
            surf_c5 = [surf_c5; sign(cf)'];
            surf_p5 = [surf_p5; cp'];
            npts5=npts5+1;
-         elseif(lx1(1)==7)    
-           surf_x8 = [surf_x8; xsort'/Chord];
-           surf_t8 = [surf_t8; tstamps(it)*ones(1,length(xsort))];
-           surf_v8 = [surf_v8; cf'];
-           surf_c8 = [surf_c8; sign(cf)'];
-           surf_p8 = [surf_p8; cp'];
-           npts8=npts8+1;
          elseif(lx1(1)==9)    
            surf_x8 = [surf_x8; xsort'/Chord];
            surf_t8 = [surf_t8; tstamps(it)*ones(1,length(xsort))];
@@ -340,17 +302,6 @@ for i = 1:nfiles
          ind2 = find(cf<0,1);
          xbub_st = xsort(ind2);
 
-%         if xbub_st<0.18                  % arbitrarily set aposteriory
-%           bcnt = bcnt+1; 
-%           bubble_start(bcnt) = xbub_st; 
-%
-%           tmp_x = xsort(ind2:end);
-%           tmp_cf = cf(ind2:end);
-%           ind3 = find(tmp_cf>0,1);           % first time cf goes positive
-%           bubble_end(bcnt) = tmp_x(ind3);
-%           bubble_time(bcnt) = tstamps(it);
-%         end    
-
          nplots = nplots+1;   
 %         mov(nplots) = getframe(gcf);
 
@@ -361,19 +312,16 @@ for i = 1:nfiles
       end
       tlast = tstamps(it);
       if (ifplot)
-        pause(0.01)
+         pause(0.01)
       end
     end
   end
 end           
 
 
-if ifdatasave
-  save(datafile)
-end
-
 splot_750k
 
+save('re750k_aoa44.mat')
 
 % ncontours = 2;
 % cont_vec = linspace(min(surf_v(:)),0,ncontours);
