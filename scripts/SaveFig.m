@@ -3,12 +3,15 @@ function SaveFig(h, filename, destn, col)
 
 reso='-r300';
 
+renderer='-opengl';
+%renderer='-painters';
+
 
 if ~isempty(strfind(lower(filename), '.eps'))
   if col
-       print( h, reso, '-depsc2', filename)
+       print( h, renderer, reso, '-depsc2', '-tiff', filename)
   else
-       print( h, reso, '-deps2', filename)
+       print( h, renderer, reso, '-deps2', '-tiff', filename)
   end
   movefile([filename],destn)
 
@@ -22,9 +25,9 @@ elseif ~isempty(strfind(lower(filename), '.png'))
 
 else
   if col
-       print( h, reso, '-depsc2', filename)
+       print( h, renderer, reso, '-depsc2', filename)
   else
-       print( h, reso, '-deps2', filename)
+       print( h, renderer, reso, '-deps2', filename)
   end
 
   movefile([filename '.eps'],destn)

@@ -7,7 +7,7 @@ close all
 addpath '/home/prabal/workstation/git_kth/matlabscripts/scripts/'
 % addpath '/scratch/negi/git_repos/matlabscripts/scripts/'
 
-fol = 're750k_aoa44_testing';
+fol = 'sfd67';
 ifhdr = 1;
 fs = 16;                % fontsize
 lfs = 16;               % legend fontsize
@@ -19,7 +19,7 @@ destn = 'plots/';
 
 nfiles = length(sfiles);
 tlast = 6.0;
-tmax = 29.00001;
+tmax = 329.00001;
 maxframes = nfiles*100;
 
 h1=figure('units','normalized','outerposition',[0 0 0.4 0.6]);
@@ -31,8 +31,8 @@ cfavg = [];
 cfavgx = [];
 cfavgy = [];
 ncf_pts = 0;
-cf_start=31.25;
-cf_end = 38.04;
+cf_start=531.25;
+cf_end = 538.04;
 ifcfplot = 0;
 nplots = 0;
 for i = 1:nfiles

@@ -66,8 +66,8 @@ end
 
 h1=figure;  
 plot(filter_func, 'LineWidth', 2)
-ylabel('$\hat{\mathcal{H}}$', 'Interpreter', 'Latex', 'FontSize', 24)
-xlabel('N')
+ylabel('$\mathcal{H}$', 'Interpreter', 'Latex', 'FontSize', 18)
+xlabel('$N$', 'FontSize', 18)
 %title('Filter Function shape')
 xlim([1 N+1])
 filename='filter_shape';
