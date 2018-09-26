@@ -301,7 +301,7 @@ deltaz_gll = deltaz*min_gll/2;
 
 disp('----------------------------------------')
 display(['delta z (Element Size) throughout the domain = ' num2str(deltaz)])
-display(['No of Elements in Z = ' num2str(nelz) ' for Lz =' num2str(lz)])
+display(['No of Elements in Z is ' num2str(nelz) ' for Lz =' num2str(lz)])
 
 if ifzavg
   display(['Average delta z (gll_pts) throughout the domain = ' num2str(deltaz_gll)])
