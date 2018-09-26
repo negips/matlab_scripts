@@ -45,14 +45,14 @@ for i=1:nelg
 
 end
 
-EL.Nelg = nelg;
-EL.Ndim = ndim;
-EL.GLobalNo = GlElNo;
-EL.GroupNo  = GroupNo;
-EL.XC = XC;
-EL.YC = YC;
+EL.nelg     = nelg;
+EL.ndim     = ndim;
+EL.globalno = GlElNo;
+EL.groupno  = GroupNo;
+EL.xc       = XC;
+EL.yc       = YC;
 if (ndim==3)
-  EL.ZC = ZC;
+  EL.zc = ZC;
 end  
 
 
@@ -88,11 +88,11 @@ for i=1:NCurve
 
 end
 
-EL.NCurve = NCurve;
-EL.CurveEdeges = iedge;
-EL.CurveIEG  = ieg;
-EL.CurveParams = CurveParams;
-EL.CurveType = CurveType;
+EL.ncurve         = NCurve;
+EL.curveface      = iedge;
+EL.curveieg       = ieg;
+EL.curveparams    = CurveParams;
+EL.curvetype      = CurveType;
 
 %% Boundary Conditions
 disp('Reading Boundary Conditions')
@@ -158,12 +158,12 @@ for i=1:nbcs
           cell=textscan(tline(14:end),rdfmt);
         end   % nelg<
 
-        CBC(I2,I1).BC = cbc;
-        CBC(I2,I1).ConnectsTo = cell{1};
-        CBC(I2,I1).OnFace = cell{2};
-        CBC(I2,I1).PARAM3 = cell{3};
-        CBC(I2,I1).PARAM4 = cell{4};
-        CBC(I2,I1).PARAM5 = cell{5};
+        CBC(I2,I1).bc         = cbc;
+        CBC(I2,I1).connectsto = cell{1};
+        CBC(I2,I1).onface     = cell{2};
+        CBC(I2,I1).param3     = cell{3};
+        CBC(I2,I1).param4     = cell{4};
+        CBC(I2,I1).param5     = cell{5};
 
       end     % iside=1:nfaces
     end       % ieg=1:nelg    
@@ -177,7 +177,7 @@ if (nbcs==1)
   tline = fgetl(fid);    % ***** NO THERMAL BOUNDARY CONDITIONS *****
 end  
 
-EL.CBC = CBC;
+EL.cbc = CBC;
 
 %% Restart conditions
 tline = fgetl(fid);  %  1 PRESOLVE/RESTART OPTIONS  *****
@@ -190,8 +190,8 @@ for i=1:Nrestart
   rstOptions{i}=cell{2}{1};
 end
 
-EL.rstFiles = rstFiles;
-EL.rstOptions = rstOptions;
+EL.rstfiles       = rstFiles;
+EL.rstoptions     = rstOptions;
 
 
 

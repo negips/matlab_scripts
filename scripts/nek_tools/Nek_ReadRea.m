@@ -99,12 +99,12 @@ else
   EL = Nek_ReadReaMesh(fid,Nelgv,Ndim,IFHEAT,NPSCAL,NekVer);
 end  
 
-EL.Xfac  = Xfac;
-EL.Yfac  = Yfac;
-EL.Xzero = Xzero;
-EL.Yzero = Yzero;
-EL.IFRE2 = IFRE2;
-EL.IFGTP = IFGTP;
+EL.xfac  = Xfac;
+EL.yfac  = Yfac;
+EL.xzero = Xzero;
+EL.yzero = Yzero;
+EL.ifre2 = IFRE2;
+EL.ifgtp = IFGTP;
 
 REA.casename = casename;
 REA.nekver   = NekVer;
