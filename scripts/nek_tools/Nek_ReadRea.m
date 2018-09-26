@@ -1,9 +1,7 @@
+function [REA] = Nek_ReadRea(casename)
+
 % Function to read rea files (Mostly for the mesh right now)
 % Maybe I should directly write a reader for re2
-
-clear
-clc
-close all
 
 casename = 'lu';
 reafile = [casename '.rea'];
@@ -70,8 +68,7 @@ for i=1:nLogic
     end
   end  
 
-
-end
+end % i=1:nLogic
 
 tline = fgetl(fid); cell=textscan(tline, '%f');                  % Mesh parameter
 % These are basicly for pretex (I think)
@@ -99,10 +96,27 @@ end
 if (IFRE2)
   EL = re2_mesh_read(casename,Nelgv,Ndim,IFHEAT,NPSCAL);
 else
-  EL = rea_mesh_read(fid,Nelgv,Ndim,IFHEAT,NPSCAL,NekVer);
+  EL = Nek_ReadReaMesh(fid,Nelgv,Ndim,IFHEAT,NPSCAL,NekVer);
 end  
 
+EL.Xfac  = Xfac;
+EL.Yfac  = Yfac;
+EL.Xzero = Xzero;
+EL.Yzero = Yzero;
+EL.IFRE2 = IFRE2;
+EL.IFGTP = IFGTP;
+
+REA.casename = casename;
+REA.nekver   = NekVer;
+REA.nparams  = nparams;
+REA.nlogical = nLogic;
+REA.npscal   = NPSCAL;
+REA.ifflow   = IFFLOW;
+REA.ifheat   = IFHEAT;
+REA.param    = PARAM;
+REA.logical  = Logical;
+REA.mesh     = EL;
 
 fclose(fid);
 
-
+return

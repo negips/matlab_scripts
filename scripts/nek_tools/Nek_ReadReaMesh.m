@@ -1,4 +1,4 @@
-function [EL] = rea_mesh_read(fid,nelg,ndim,ifheat,npscal,nekver)
+function [EL] = Nek_ReadReaMesh(fid,nelg,ndim,ifheat,npscal,nekver)
 
 % INPUT: already open file handle for the rea file
 
