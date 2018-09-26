@@ -1,10 +1,6 @@
 % Parameters for the Poirel (2008) Self-sustained aeroelastic oscillations of a NACA0012 
 %     airfoil at low-to-moderate Reynolds numbers
 
-
-
-
-
 x_theta = 0.15;               % Distance between Elastic axis and centre of mass
 a_h     = -0.63;              % Non-dimensional location of elastic axis from the mid-chord (Non-dimensionalized by half-chord)
 I_s     = 0.00135;            % Mass moment of Inertial of rotating parts (Kg-m^2)
