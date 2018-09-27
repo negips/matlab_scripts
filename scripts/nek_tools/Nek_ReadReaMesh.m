@@ -190,9 +190,10 @@ for i=1:Nrestart
   rstOptions{i}=cell{2}{1};
 end
 
-EL.rstfiles       = rstFiles;
-EL.rstoptions     = rstOptions;
-
+if (Nrestart>0)
+  EL.rstfiles       = rstFiles;
+  EL.rstoptions     = rstOptions;
+end
 
 
 

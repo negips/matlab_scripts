@@ -3,7 +3,6 @@ function [REA] = Nek_ReadRea(casename)
 % Function to read rea files (Mostly for the mesh right now)
 % Maybe I should directly write a reader for re2
 
-casename = 'lu';
 reafile = [casename '.rea'];
 
 fid=fopen(reafile,'r');
