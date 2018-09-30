@@ -5,6 +5,7 @@ clc
 close all
 
 casename = 'saab_wing2d';
+svfname  = [casename '.mat'];
 
 rea = Nek_ReadRea(casename);
 
@@ -265,8 +266,8 @@ while (~finished_layers)
 
 end   % ~finished_layers 
 
-clearvars -except nlayers LayersEl LayersFopO LayersFopV rea n ndim
-save('saab_mesh.mat')
+clearvars -except nlayers LayersEl LayersFopO LayersFopV rea n ndim svfname
+save(svfname)
 
 
 
