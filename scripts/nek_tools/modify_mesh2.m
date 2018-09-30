@@ -1,0 +1,272 @@
+%     First attempts at modifying the mesh
+
+clear
+clc
+close all
+
+casename = 'saab_wing2d';
+
+rea = Nek_ReadRea(casename);
+
+n=rea.mesh.nelg;
+ndim=rea.mesh.ndim;
+cmap = jet(n);
+
+%figure(1);
+%for i=1:n
+%  fill(rea.mesh.xc(:,i),rea.mesh.yc(:,i),cmap(i,:)); hold on
+%end
+%colorbar
+
+% Calculate element mid points.
+% Just for plotting for now
+xmid=zeros(n,1);
+ymid=zeros(n,1);
+GLNO=zeros(n,1);
+for i=1:n
+  xmid(i) = mean(rea.mesh.xc(:,i));
+  ymid(i) = mean(rea.mesh.yc(:,i));
+  GLNO(i) = rea.mesh.globalno(i);
+end  
+
+
+% Find element with bc='v  ' as well as 'O  '
+nfaces=2*ndim;
+bcels=0;
+Elno  = [];
+Vface = [];
+Oface = [];
+for i=1:n
+
+   ifV=0;
+   ifO=0;
+   for j=1:nfaces
+     bc=rea.mesh.cbc(j,i).bc;
+     if strcmpi(bc,'v  ')
+        ifV=1;
+        vface=j;
+     end   
+     if strcmpi(bc,'o  ')
+        ifO=1;
+        oface=j;
+     end
+   end   
+    
+   if (ifV && ifO)
+     bcels = bcels+1;
+     Elno = [Elno i];
+     Vface= [Vface vface];
+     Oface= [Oface oface];
+   end  
+
+end
+
+% There should only be 2 elements
+
+l1=bcels;
+cmap = jet(l1);
+for i=1:bcels
+  glno=Elno(i);
+  xt = rea.mesh.xc(:,glno);
+  yt = rea.mesh.yc(:,glno);  
+  fill(xt,yt,cmap(i,:)); hold on
+end
+
+% Lets take bottom element as starting element
+gl1 = Elno(1);
+yt1=mean(rea.mesh.yc(:,gl1));
+gl2 = Elno(2);
+yt2=mean(rea.mesh.yc(:,gl2));
+
+ly_el    = [];       % Element number in the layer
+ly_fopO  = [];       % Face no opposite the 'O  ' face
+ly_fopV  = [];       % Face no opposite the 'v  ' face
+
+if yt1<yt2
+  ly_el(1) = Elno(1);
+  of = Oface(1)+2;
+  if of>4
+    of=of-4;
+  end
+  vf = Vface(1)+2;
+  if(vf>4)
+    vf=vf-4;
+  end  
+  ly_fopO=of;
+  ly_fopV=vf;
+else
+  ly_el(1) = Elno(2); 
+  of = Oface(2)+2;
+  if of>4
+    of=of-4;
+  end
+  vf = Vface(2)+2;
+  if(vf>4)
+    vf=vf-4;
+  end  
+  ly_fopO=of;
+  ly_fopV=vf;
+end  
+ 
+
+
+% Build the first layer
+done=0;
+e=1;
+while (~done)
+  e1  = ly_el(e);       % current element no
+  vf1 = ly_fopV(e);     % face opposite 'v  '
+  of1 = ly_fopO(e);     % face opposite 'o  '
+
+  e2  = rea.mesh.cbc(of1,e1).connectsto;        % Next element no.
+  of  = rea.mesh.cbc(of1,e1).onface;            % on this face 
+  of2 = of+2;
+  if (of2>4)
+    of2=of2-4;
+  end
+  vf=0;
+  for j=1:nfaces
+    bc=rea.mesh.cbc(j,e2).bc;
+    if strcmpi(bc,'v  ')
+       ifV=1;
+       vf=j;
+    end
+  end
+  vf2=vf+2;
+  if (vf2>4)
+    vf2=vf2-4;
+  end      
+
+  e=e+1;
+  ly_el(e)   = e2;
+  ly_fopV(e) = vf2;
+  ly_fopO(e) = of2;
+
+  bc = rea.mesh.cbc(of2,e2).bc;
+  if ~strcmpi(bc,'E  ')
+    done=1;
+  end  
+
+end
+
+% Plotting
+l1=e;
+cmap = jet(l1);
+for i=1:l1
+  glno=ly_el(i);
+  xt = rea.mesh.xc(:,glno);
+  yt = rea.mesh.yc(:,glno);  
+  fill(xt,yt,cmap(i,:)); hold on
+end
+
+LayersEl{1}=ly_el;
+LayersFopV{1}=ly_fopV;
+LayersFopO{1}=ly_fopO;
+
+% Done building first layer
+
+
+% Build the rest of the layers
+finished_layers=0;
+nlayers = 1;
+while (~finished_layers)
+  ply_el   = LayersEl{nlayers};         % Previous Layer's Element number
+  ply_fopO = LayersFopO{nlayers};       % Previous Layer's Face opposite the 'O  '
+  ply_fopV = LayersFopV{nlayers};       % Previous Layer's Face opposite the 'v  '
+
+
+  e1  = ply_el(1);      % element no in the previous layer
+  vf1 = ply_fopV(1);    % face opposite 'v  '
+  e2  = rea.mesh.cbc(vf1,e1).connectsto;
+  vf  = rea.mesh.cbc(vf1,e1).onface;
+  vf2=vf+2;
+  if (vf2>4)
+    vf2=vf2-4;
+  end  
+
+  of=0;
+  for j=1:nfaces
+    bc=rea.mesh.cbc(j,e2).bc;
+    if strcmpi(bc,'o  ')
+      of=j;
+    end
+  end
+  of2=of+2;
+  if (of2>4)
+    of2=of2-4;
+  end  
+
+  ly_el    = e2;
+  ly_fopO  = of2;
+  ly_fopV  = vf2;
+
+  done=0;
+
+  e=1;
+  while (~done)
+    e1  = ly_el(e);
+    of1 = ly_fopO(e);
+    vf1 = ly_fopV(e);  
+
+    e2  = rea.mesh.cbc(of1,e1).connectsto;        % Next element no.
+    of  = rea.mesh.cbc(of1,e1).onface;            % on this face 
+    of2 = of+2;
+    if (of2>4)
+      of2=of2-4;
+    end
+
+    plel   = ply_el(e+1);
+    plfopv = ply_fopV(e+1); 
+    e3 = rea.mesh.cbc(plfopv,plel).connectsto;
+    if e3 ~= e2
+      disp(['In consistent elements: ', num2str(nlayers), '; e: ',num2str(e)])
+      disp(['e2:',num2str(e2), ';  e3:',num2str(e3)])
+      vf2=0;
+    else
+      vf = rea.mesh.cbc(plfopv,plel).onface;
+      vf2=vf+2;
+      if vf2>4
+        vf2=vf2-4;
+      end
+    end  
+  
+    e=e+1;
+    ly_el(e)   = e2;
+    ly_fopV(e) = vf2;
+    ly_fopO(e) = of2;
+  
+    bc = rea.mesh.cbc(of2,e2).bc;
+    if ~strcmpi(bc,'E  ')
+      done=1;
+    end
+
+%   Should work for now but should use something more general     
+    if strcmpi(bc,'mv ') || strcmpi(bc,'W  ')
+      finished_layers=1;
+    end  
+  
+  end       % ~done
+ 
+  nlayers = nlayers+1;
+  LayersEl{nlayers}   = ly_el;         % New Layer's Element numbers
+  LayersFopO{nlayers} = ly_fopO;       % New Layer's Face opposite the 'O  '
+  LayersFopV{nlayers} = ly_fopV;       % New Layer's Face opposite the 'v  '
+
+  % Plotting
+  l1=e;
+  cmap = jet(l1);
+  for i=1:l1
+    glno=ly_el(i);
+    xt = rea.mesh.xc(:,glno);
+    yt = rea.mesh.yc(:,glno);  
+    fill(xt,yt,cmap(i,:)); hold on
+  end
+
+
+end   % ~finished_layers 
+
+clearvars -except nlayers LayersEl LayersFopO LayersFopV rea n ndim
+save('saab_mesh.mat')
+
+
+

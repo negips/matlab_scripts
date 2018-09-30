@@ -89,7 +89,7 @@ end
 wall_el = [];
 wall_f  = [];
 offwall_el = [];        % Element no of adjoining non-wall element.
-ofwall_f   = [];        % face joining this element with wall element
+offwall_f   = [];       % face joining this element with wall element
 nfaces=2*ndim;
 nwall = 0;
 for i=1:n
@@ -112,7 +112,7 @@ for i=1:n
 %      end  
 
       j2=[j+1 j-1];
-      if j2(1)>2^ndim
+      if j2(1)>4
         j2(1)=1;
       end
       if (j2(2)==0)
@@ -120,7 +120,7 @@ for i=1:n
       end  
 %      offwall_el(nwall) = rea.mesh.cbc(j2,i).connectsto;
 
-      for jj=j2      
+      for jj=j2 
         elc = rea.mesh.cbc(jj,i).connectsto;
         haswall = 0;
         for j3=1:nfaces
@@ -129,15 +129,15 @@ for i=1:n
              haswall=1;
           end
         end
+
         if (~haswall)  
           offwall_el = [offwall_el elc];
-        end  
-      end   %
-
-    end
-
-  end
-end  
+          offwall_f  = [offwall_f rea.mesh.cbc(jj,i).onface];
+        end % ~haswall 
+      end   % jj=j2
+    end     % if cb=='W  '
+  end       % j=1:nfaces
+end         % i=1:n
 
 cmap = hot(nwall);
 figure(2)
@@ -148,7 +148,12 @@ for i=1:nwall
   fill(xt,yt,cmap(i,:)); hold on
 end
 
-offwall_el = unique(offwall_el);
+offwall_el
+offwall_f
+
+[offwall_el,ia,ic]= unique(offwall_el);
+%offwall_f = offwall_f(ia);
+offwall_f = offwall_f([1 4]);       % manual
 l1 = length(offwall_el);
 cmap2 = parula(l1);
 for i=1:l1
@@ -158,9 +163,157 @@ for i=1:l1
   fill(xt,yt,cmap2(i,:)); hold on
 end
 
+%xt = rea.mesh.xc(:,1);
+%yt = rea.mesh.yc(:,1);
+%figure(3)
+%plot(xt,yt); hold on
+%plot(xt(1),yt(1), 'o ')
 
+% Build Layers
+for i=1:l1
+  outflow=0;
+  layer1 = offwall_el(i);
+  layerf = offwall_f(i);
+  face   = offwall_f(i);
+  nl = 1;
+  while (~outflow)
+    el = layer1(nl);
+    face=layerf(nl)+2;
+    if face==5
+      face=1;
+    elseif face==6
+      face=2;
+    end
+    cb = rea.mesh.cbc(face,el).bc;
+    if strcmpi(cb,'O  ') || strcmpi(cb,'o  ')
+      outflow=1;
+    else
+      el2   = rea.mesh.cbc(face,el).connectsto;
+      face2 = rea.mesh.cbc(face,el).onface;
+      nl = nl+1;
+      layer1(nl) = el2;
+      layerf(nl) = face2;
 
+      gno = el2;  
+      xt=rea.mesh.xc(:,gno);
+      yt=rea.mesh.yc(:,gno);
+      plot(xt,yt); hold on
+    end  
+  end
+  layers_el{i} = layer1;
+  layers_f{i}  = layerf;  
 
+  l2=length(layer1);
+  cmap2 = colorcube(l2);
+  for j=1:l2
+    gno = layer1(j);  
+    xt=rea.mesh.xc(:,gno);
+    yt=rea.mesh.yc(:,gno);
+    fill(xt,yt,cmap2(j,:)); hold on
+  end
+
+end
+
+% Layer 1 is the bottom Layer.
+% layer 2 is the top Layer.
+%
+
+% For Layer 1 find bottom facing face.
+% For Layer 2 find top facing face.
+  
+layerf=layers_f{1};
+layerel=layers_el{1};
+l1=length(layerf);
+
+topf = [];
+onf  = [];
+for i=1:l1
+  e1=layerel(i);
+  f1=layerf(i);
+  ymean = mean(rea.mesh.yc(:,e1));
+
+  f2=f1+1;
+  if f2==5
+    f2=1;
+  end
+  e2 = rea.mesh.cbc(f2,e1).connectsto;
+  e2f= rea.mesh.cbc(f2,el).onface;
+  ymean2 = mean(rea.mesh.yc(:,e2));
+  
+  f3=f1-1;
+  if f3==0
+    f3=4;
+  end
+  e3 = rea.mesh.cbc(f3,e1).connectsto;
+  e3f= rea.mesh.cbc(f2,el).onface;
+  ymean3 = mean(rea.mesh.yc(:,e3));
+
+  if (ymean2<ymean)
+    fnew=f2;
+    enew=e2;
+    efnew=e2f;
+  else
+    fnew=f3;
+    enew=e3;
+    efnew=e3f;
+  end  
+   
+  topf = [topf fnew];
+  onf  = [onf efnew];
+
+end
+
+toplayers_f{1}=topf;          % top face number
+toplayers_onf{1}=onf;         % face no of connecting element
+
+nlayers=3;
+toplayers_el{1} = layers_el{1};
+
+for il=1:nlayers
+
+  layel  = toplayers_el{il};
+  layf   = toplayers_f{il};
+  layonf = toplayers_onf{il}; 
+  
+  topel= [];
+  topf = [];
+  onf  = [];
+
+  l1=length(layf);
+  for i=1:l1
+
+    e1=layel(i);
+    f1=layonf(i);
+
+    f2=f1+2;
+    if f2>4
+     f2=f1-2;
+    end 
+
+    el2=rea.mesh.cbc(f2,e1).connectsto;
+    e2f=rea.mesh.cbc(f2,e1).onface;
+
+    topel = [topel el2];
+    topf  = [topf f2];  
+    onf   = [onf e2f];  
+
+  end
+
+  toplayers_el{il+1}=topel;
+  toplayers_f{il+1}=topf;
+  toplayers_onf{il+1}=onf;
+
+% plot
+  l2=length(topel);
+  cmap2 = colorcube(l2);
+  for j=1:l2
+    gno = topel(j);  
+    xt=rea.mesh.xc(:,gno);
+    yt=rea.mesh.yc(:,gno);
+    fill(xt,yt,cmap2(j,:)); hold on
+  end
+
+end
 
 
 
