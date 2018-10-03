@@ -4,8 +4,9 @@ clear
 clc
 close all
 
-%casename = 'saab_wing2d';
-casename = 'saab750k';
+casename = 'saab_wing2d';
+%casename = 'saab750k';
+%casename = 'lu';             % Doesn't work
 svfname  = [casename '.mat'];
 
 rea = Nek_ReadRea(casename);

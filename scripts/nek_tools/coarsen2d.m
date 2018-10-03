@@ -4,10 +4,28 @@ clear
 clc
 close all
 
-%load saab_wing2d.mat
-load saab750k.mat
 
-skiplayers = 1;         % Need to skip first layer since its smaller than the others
+%           Element arrangement
+%
+%
+%                 f2
+%           x3-----------x2      
+%           |            |
+%           |            |
+%         f3|            |f1 'O  '
+%           |            |
+%           |            |
+%           x4-----------x1
+%                 f4
+%               'v  '
+
+
+
+
+load saab_wing2d.mat
+%load saab750k.mat
+
+skiplayers = 2;         % Need to skip first layer since its smaller than the others
 
 disp(['Total Number of Elements: ', num2str(rea.mesh.nelg)])
 
@@ -102,7 +120,7 @@ disp(['Total Number of Elements: ', num2str(new_nelg)])
 function ifc = CoarsenCriteria(LX,LY,j,i,iflocked)
 
     ARcut = 2;             % Coarsen if Aspect ratio is larger than this.
-    start_layer = 15;
+    start_layer = 5;
 
 %   Find aspect ratio of elements 
 
@@ -142,18 +160,18 @@ function ifc = CoarsenCriteria(LX,LY,j,i,iflocked)
     end
 
 %   For the radially emerging elements I refine by number of layers
-    if xmid<0.25 && i==start_layer;
-      theta = atan(abs(ymid/(xmid-0.3)))*180/pi;  
-      
-%      if theta<60  
-%       Refine only 1 layer.
-        if i<=start_layer;
-          ifc=1;
-        else
-          ifc=0;
-        end
-%      end  
-
+    if i==start_layer
+      if xmid<1.0 
+        ifc=1;
+      end
+    elseif i<=start_layer+2
+      if xmid<0.2 
+        ifc=0;
+      end
+    else
+      if xmid<0.0 
+        ifc=0;
+      end
     end
 
     
@@ -263,9 +281,11 @@ function [NewE, NewX, NewY, NewBC, iflocked]=CreateNewLayers(NewE,NewX,NewY,NewB
     LE=NewE{i};
     LX=NewX{i};
     LY=NewY{i};
+    LBC=NewBC{i};
     
     LX2=LX;
     LY2=LY;
+    LBC2=LBC;
     l1=length(LE);
 
     if il==1
@@ -295,12 +315,17 @@ function [NewE, NewX, NewY, NewBC, iflocked]=CreateNewLayers(NewE,NewX,NewY,NewB
         LY2(3,k-1)=LY(3,j-1); 
         LY2(4,k-1)=LY(4,j);
 
+        LBC2{k-1}(1,:) = LBC{j-1}(1,:);
+        LBC2{k-1}(2,:) = LBC{j-1}(2,:);
+        LBC2{k-1}(3,:) = LBC{j}(2,:);
+        LBC2{k-1}(4,:) = LBC{j-1}(4,:);
+       
         iflocked(k-1)=1;
         if k>2
           iflocked(k-2)=1;
         end  
 
-%       Enlarg K+2th element        
+%       Enlarge K+2th element        
         LX2(1,k+2)=LX(1,j+1); 
         LX2(2,k+2)=LX(3,j+1); 
         LX2(3,k+2)=LX(3,j+2); 
@@ -311,12 +336,19 @@ function [NewE, NewX, NewY, NewBC, iflocked]=CreateNewLayers(NewE,NewX,NewY,NewB
         LY2(3,k+2)=LY(3,j+2); 
         LY2(4,k+2)=LY(4,j+2);
 
+        LBC2{k+2}(1,:) = LBC{j+1}(2,:);
+        LBC2{k+2}(2,:) = LBC{j+2}(2,:);
+        LBC2{k+2}(3,:) = LBC{j+2}(3,:);
+        LBC2{k+2}(4,:) = LBC{j+2}(4,:);
+
+
         iflocked(k+2)=1;
 
 %       Delete K and K+1th element
         LX2(:,[k k+1]) = [];
         LY2(:,[k k+1]) = [];
-        
+        LBC2([k k+1])  = [];
+       
         iflocked([k k+1]) = [];
 
       else 
@@ -332,6 +364,11 @@ function [NewE, NewX, NewY, NewBC, iflocked]=CreateNewLayers(NewE,NewX,NewY,NewB
         LY2(3,k-1)=LY(3,j); 
         LY2(4,k-1)=LY(4,j);
 
+        LBC2{k-1}(1,:) = LBC{j-1}(1,:);
+        LBC2{k-1}(2,:) = LBC{j-1}(2,:);
+        LBC2{k-1}(3,:) = LBC{j}(3,:);
+        LBC2{k-1}(4,:) = LBC{j-1}(4,:);
+
 %       Enlarg K+2th element        
         LX2(1,k+2)=LX(1,j+1); 
         LX2(2,k+2)=LX(2,j+1); 
@@ -343,9 +380,16 @@ function [NewE, NewX, NewY, NewBC, iflocked]=CreateNewLayers(NewE,NewX,NewY,NewB
         LY2(3,k+2)=LY(3,j+2); 
         LY2(4,k+2)=LY(4,j+2);
 
+        LBC2{k+2}(1,:) = LBC{j+1}(1,:);
+        LBC2{k+2}(2,:) = LBC{j+2}(2,:);
+        LBC2{k+2}(3,:) = LBC{j+2}(3,:);
+        LBC2{k+2}(4,:) = LBC{j+2}(4,:);
+
+
 %       Delete K and K+1th element
         LX2(:,[k k+1]) = [];
         LY2(:,[k k+1]) = [];
+        LBC2([k k+1])  = [];
 
       end
 
@@ -355,6 +399,7 @@ function [NewE, NewX, NewY, NewBC, iflocked]=CreateNewLayers(NewE,NewX,NewY,NewB
 
     NewX{i}=LX2;
     NewY{i}=LY2;
+    NewBC{i}=LBC2;
 
 %    l1=length(LX2);
 %    cmap=jet(l1);

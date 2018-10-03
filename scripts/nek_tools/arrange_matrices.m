@@ -6,6 +6,19 @@
 %
 %load saab_wing2d.mat
 
+
+%                 f2
+%           x3-----------x2      
+%           |            |
+%           |            |
+%         f3|            |f1 'O  '
+%           |            |
+%           |            |
+%           x4-----------x1
+%                 f4
+%               'v  '
+
+
 % Create new Structures
 % Simpler structure otherwise we end up with a very complicated code
 
@@ -32,7 +45,7 @@ for i=1:nlayers
     LX = [LX xcs];
     LY = [LY ycs];
     LE = [LE e];
-    LBC= [LBC bcs];
+    LBC{j}= bcs;
 
   end
 
@@ -136,7 +149,6 @@ function [xcs ycs bcs] = GetFirstEl(rea,e,fo,fv)
     xcs = [x1; x2; x3; x4];
     ycs = [y1; y2; y3; y4];
     bcs = [bc1; bc2; bc3; bc4]; 
-
 
 end
 
