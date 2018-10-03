@@ -7,9 +7,8 @@ close all
 load saab_wing2d.mat
 
 skiplayers = 10;         % No of layers to skip when coarsening
-lmax = 0.1;              % Maximum length of a side. If the length is larger. Don't coarsen
-ARcut = 2.0;             % Coarsen if Aspect ratio is larger than this.
 
+disp(['Total Number of Elements: ', num2str(rea.mesh.nelg)])
 
 for i=1:nlayers
   j=nlayers-i+1;
@@ -29,22 +28,79 @@ end
 % Coarsen Layer by Layer
 % Define aspect ratio as 'O' face lengths to 'V' face lengths
 layer_start = skiplayers+1;
+new_nelg = 0;
+fig2=figure(2);
 for i=1:nlayers
-
-  if (i<layer_start)
-    continue
-  end  
 
   LE=NewE{i};
   LX=NewX{i};
-  LY=NewY{i};
+  LY=NewY{i};    
+
+  if (i<layer_start)
+    nels_layer = length(LX);    
+    cmap = jet(nels_layer);
+    for j=1:nels_layer 
+      xt = LX(:,j);
+      yt = LY(:,j);
+
+      figure(2)
+      fill(xt,yt,cmap(j,:)); hold on
+    end 
+    
+    new_nelg = new_nelg+nels_layer; 
+    continue
+  end  
 
   l1 =length(LX);
   if i==layer_start
     iflocked=zeros(l1,1);
   end  
-  cmap = jet(l1); 
+  cmap = jet(l1);
+  l2 = length(OldX{i});
+  ifc = zeros(l2,1); 
   for j=1:l1
+      
+    ifc(j) = CoarsenCriteria(LX,LY,j,i,iflocked);
+        
+    xt = LX(:,j);
+    yt = LY(:,j);
+
+%    figure(1)
+%    fill(xt,yt,cmap(j,:)); hold on
+  end
+
+  if i==nlayers
+    ifc(:)=0;
+  end  
+
+  c_ind = find(ifc);
+  nc = length(c_ind);
+  disp(['Coarsen ' num2str(nc) ' Elements in layer ' num2str(i)])
+%  for j=1:nc
+%    k=c_ind(j);
+%    xmid=mean(LX(:,k));
+%    ymid=mean(LY(:,k));
+%    zmid=2;
+%    figure(1);
+%    plot3(xmid,ymid,zmid, '. ', 'MarkerSize', 12);
+%  end
+
+%   Coarsen layer in consecutive pairs
+    figure(2);    
+    [LX,LY,ifc,NewX,NewY] = CoarsenLayer(LE,LX,LY,ifc,NewX,NewY,i,fig2);
+%   Modify all subsequent Layers
+    if3skip=1;  
+    [NewE, NewX, NewY, NewBC, iflocked]=CreateNewLayers(NewE,NewX,NewY,NewBC,i,ifc,if3skip,fig2);
+    nels_layer = length(NewX{i});
+    new_nelg = new_nelg+nels_layer;
+end
+disp(['Total Number of Elements: ', num2str(new_nelg)])
+
+%---------------------------------------------------------------------- 
+
+function ifc = CoarsenCriteria(LX,LY,j,i,iflocked)
+
+    ARcut = 2;             % Coarsen if Aspect ratio is larger than this.
 
 %   Find aspect ratio of elements 
 
@@ -58,45 +114,31 @@ for i=1:nlayers
     l2 = sqrt( (LX(4,j)-LX(1,j))^2 + (LY(4,j) - LY(1,j))^2);
     dlv = mean([l1 l2]);
 
-    l_ar(j) = dlo/dlv;
+    l_ar = dlo/dlv;
 
-    xt = LX(:,j);
-    yt = LY(:,j);
+    ifc=0;
+    if l_ar>ARcut
+      ifc=1; 
+    end
 
-    figure(1)
-    fill(xt,yt,cmap(j,:)); hold on
+    xmid = mean(LX(:,j));
+    if (xmid<0.25)
+      ifc=0;
+    end
 
-    ifc(j)=0;
-    if l_ar(j)>ARcut && ~iflocked(j)
-      ifc(j)=1; 
-    end  
-  end
+    if xmid>1 && l_ar>1.25
+      ifc=1;
+    end
 
-  if i==nlayers
-    ifc(:)=0;
-  end  
+    [pts nels]=size(LX);  
+%   End condition           
+    if (iflocked(j) || j==1 || j>=nels-1)
+      ifc=0;
+    end
+     
 
-  c_ind = find(ifc);
-  nc = length(c_ind);
-  disp(['Coarsen ' num2str(nc) ' Elements in layer ' num2str(i)])
-  for j=1:nc
-    k=c_ind(j);
-    xmid=mean(LX(:,k));
-    ymid=mean(LY(:,k));
-    zmid=2;
-    figure(1);
-    plot3(xmid,ymid,zmid, '. ', 'MarkerSize', 12);
-  end
 
-% Coarsen layer in consecutive pairs
-    fig2=figure(2);    
-    [LX,LY,ifc,NewX,NewY] = CoarsenLayer(LE,LX,LY,ifc,NewX,NewY,i,fig2);
-%   Modify all subsequent Layers
-    if3skip=1;  
-    [NewE, NewX, NewY, NewBC, iflocked]=CreateNewLayers(NewE,NewX,NewY,NewBC,i,ifc,if3skip,fig2);
-
-end
-
+end % function
 %---------------------------------------------------------------------- 
 
 function [LX,LY,ifc,NewX,NewY] = CoarsenLayer(LE,LX,LY,ifc,NewX,NewY,i,fig2)
@@ -210,7 +252,7 @@ function [NewE, NewX, NewY, NewBC, iflocked]=CreateNewLayers(NewE,NewX,NewY,NewB
 
       if (il==1)  % First layer. Needs slightly different treatment
 
-%       Enlarge K-1th element            
+%       Enlarge K-1th element
         LX2(1,k-1)=LX(1,j-1); 
         LX2(2,k-1)=LX(2,j-1); 
         LX2(3,k-1)=LX(3,j-1); 
