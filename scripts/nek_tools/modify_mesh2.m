@@ -241,6 +241,7 @@ while (~finished_layers)
       done=1;
     end
 
+%   Criteria to stop getting layers  
 %   Should work for now but should use something more general     
     if strcmpi(bc,'mv ') || strcmpi(bc,'W  ')
       finished_layers=1;
@@ -266,7 +267,9 @@ while (~finished_layers)
 
 end   % ~finished_layers 
 
-clearvars -except nlayers LayersEl LayersFopO LayersFopV rea n ndim svfname
+arrange_matrices
+
+clearvars -except nlayers LayersEl LayersFopO LayersFopV LayerX LayerY LayerE LayerBC rea n ndim svfname
 save(svfname)
 
 

@@ -6,7 +6,7 @@ close all
 
 load saab_wing2d.mat
 
-skiplayers = 5;         % No of layers to skip when coarsening
+skiplayers = 10;         % No of layers to skip when coarsening
 lmax = 0.1;             % Maximum length of a side. If the length is larger. Don't coarsen
 ARcut = 2.5;            % Coarsen if Aspect ratio is larger than this.
 
@@ -15,9 +15,14 @@ ARcut = 2.5;            % Coarsen if Aspect ratio is larger than this.
 
 for i=1:nlayers
   j=nlayers-i+1;
-  NewEl{i}=LayersEl{j};
-  NewFV{i}=LayersFopV{j};
-  NewFO{i}=LayersFopO{j};
+  OldEl{i}=LayersEl{j};
+  OldFV{i}=LayersFopV{j};
+  OldFO{i}=LayersFopO{j};
+
+  NewEl{i}=OldEl{i};
+  NewFV{i}=OldFV{i};
+  NewFO{i}=OldFO{i};
+ 
 end
 
 
@@ -25,11 +30,15 @@ end
 % Coarsen Layer by Layer
 % Define aspect ratio as 'O' face lengths to 'V' face lengths
 layer_start = skiplayers+1;
-for i=layer_start:layer_start  %nlayers
+for i=1:layer_start  %nlayers
 
-  Lel=NewEl{i};
-  LV =NewFV{i};
-  LO =NewFO{i};  
+  if (i<layer_start)
+    continue
+  end  
+
+  Lel=OldEl{i};
+  LV =OldFV{i};
+  LO =OldFO{i};  
   l1 =length(Lel);
 
   cmap = jet(l1); 
@@ -99,11 +108,26 @@ for i=layer_start:layer_start  %nlayers
     yt = rea.mesh.yc(:,e);
     fill(xt,yt,cmap(j,:)); hold on
 
+    ifc(j)=0;
+    if l_ar(j)>ARcut
+      ifc(j)=1; 
+    end  
   end 
+  c_ind = find(ifc);
+  nc = length(c_ind);
+  disp(['Coarsen ' num2str(nc) ' Elements in layer ' num2str(i)])
+  for j=1:nc
+    le=c_ind(j);
+    e=Lel(le);
+    xmid=mean(rea.mesh.xc(:,e));
+    ymid=mean(rea.mesh.yc(:,e));
+    zmid=2;
+    plot3(xmid,ymid,zmid, '. ', 'MarkerSize', 12);
+  end
 
-  
-
-
+% Coarsen layer in consecutive pairs
+  coarsen_layer 
+    
 
 end
 
