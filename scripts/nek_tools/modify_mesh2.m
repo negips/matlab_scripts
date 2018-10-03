@@ -4,7 +4,8 @@ clear
 clc
 close all
 
-casename = 'saab_wing2d';
+%casename = 'saab_wing2d';
+casename = 'saab750k';
 svfname  = [casename '.mat'];
 
 rea = Nek_ReadRea(casename);
@@ -243,9 +244,9 @@ while (~finished_layers)
 
 %   Criteria to stop getting layers  
 %   Should work for now but should use something more general     
-    if strcmpi(bc,'mv ') || strcmpi(bc,'W  ')
-      finished_layers=1;
-    end  
+%    if strcmpi(bc,'mv ') || strcmpi(bc,'W  ')
+%      finished_layers=1;
+%    end  
   
   end       % ~done
  
@@ -253,6 +254,25 @@ while (~finished_layers)
   LayersEl{nlayers}   = ly_el;         % New Layer's Element numbers
   LayersFopO{nlayers} = ly_fopO;       % New Layer's Face opposite the 'O  '
   LayersFopV{nlayers} = ly_fopV;       % New Layer's Face opposite the 'v  '
+
+% Test for end of layers
+  el2=ly_el(1);
+  fv2=ly_fopV(1);
+  bc2=rea.mesh.cbc(fv2,el2).bc;
+  if ~strcmpi(bc2,'E  ')
+    finished_layers=1;
+  else
+    el3=rea.mesh.cbc(fv2,el2).connectsto;
+    % Check all layers
+    for kk=nlayers-1:-1:1
+      tmp = find(LayersEl{kk}==el3);
+      if ~isempty(tmp)
+        finished_layers=1;
+        break
+      end
+    end  
+  end  
+    
 
   % Plotting
   l1=e;
