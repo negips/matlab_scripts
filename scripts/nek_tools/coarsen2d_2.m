@@ -29,7 +29,7 @@ end
 % Coarsen Layer by Layer
 % Define aspect ratio as 'O' face lengths to 'V' face lengths
 layer_start = skiplayers+1;
-for i=1:layer_start  %nlayers
+for i=1:nlayers
 
   if (i<layer_start)
     continue
@@ -39,7 +39,10 @@ for i=1:layer_start  %nlayers
   LX=NewX{i};
   LY=NewY{i};
 
-  l1 =length(LE);
+  l1 =length(LX);
+  if i==layer_start
+    iflocked=zeros(l1,1);
+  end  
   cmap = jet(l1); 
   for j=1:l1
 
@@ -64,10 +67,14 @@ for i=1:layer_start  %nlayers
     fill(xt,yt,cmap(j,:)); hold on
 
     ifc(j)=0;
-    if l_ar(j)>ARcut
+    if l_ar(j)>ARcut && ~iflocked(j)
       ifc(j)=1; 
     end  
-  end 
+  end
+
+  if i==nlayers
+    ifc(:)=0;
+  end  
 
   c_ind = find(ifc);
   nc = length(c_ind);
@@ -82,14 +89,11 @@ for i=1:layer_start  %nlayers
   end
 
 % Coarsen layer in consecutive pairs
-%  coarsen_layer
-  if nc>0
     fig2=figure(2);    
     [LX,LY,ifc,NewX,NewY] = CoarsenLayer(LE,LX,LY,ifc,NewX,NewY,i,fig2);
 %   Modify all subsequent Layers
     if3skip=1;  
-    [NewE, NewX, NewY, NewBC]=CreateNewLayers(NewE,NewX,NewY,NewBC,i,ifc,if3skip,fig2);
-  end
+    [NewE, NewX, NewY, NewBC, iflocked]=CreateNewLayers(NewE,NewX,NewY,NewBC,i,ifc,if3skip,fig2);
 
 end
 
@@ -97,7 +101,7 @@ end
 
 function [LX,LY,ifc,NewX,NewY] = CoarsenLayer(LE,LX,LY,ifc,NewX,NewY,i,fig2)
 
-  l1 =length(LE);
+  l1 =length(LX);
   cmap = jet(l1);
   skipnext=0;
   skipnext2=0;
@@ -174,8 +178,10 @@ end   % end function
 
 %---------------------------------------------------------------------- 
 
-function [NewE, NewX, NewY, NewBC]=CreateNewLayers(NewE,NewX,NewY,NewBC,cr_layer,ifc,if3skip,fig2)
- 
+function [NewE, NewX, NewY, NewBC, iflocked]=CreateNewLayers(NewE,NewX,NewY,NewBC,cr_layer,ifc,if3skip,fig2)
+
+  iflocked = [];
+
   nlayers=length(NewX);
   il=0;
   for i=cr_layer+1:nlayers
@@ -188,6 +194,9 @@ function [NewE, NewX, NewY, NewBC]=CreateNewLayers(NewE,NewX,NewY,NewBC,cr_layer
     LY2=LY;
     l1=length(LE);
 
+    if il==1
+      iflocked=zeros(l1,1);
+    end  
 
     ifcontinue=0;
     k=0;          % Index for LX2, LY2
@@ -205,13 +214,15 @@ function [NewE, NewX, NewY, NewBC]=CreateNewLayers(NewE,NewX,NewY,NewBC,cr_layer
         LX2(1,k-1)=LX(1,j-1); 
         LX2(2,k-1)=LX(2,j-1); 
         LX2(3,k-1)=LX(3,j-1); 
-        LX2(4,k-1)=LX(4,j); 
-   
+        LX2(4,k-1)=LX(4,j);
+        
         LY2(1,k-1)=LY(1,j-1); 
         LY2(2,k-1)=LY(2,j-1); 
         LY2(3,k-1)=LY(3,j-1); 
         LY2(4,k-1)=LY(4,j);
 
+        iflocked(k-1)=1;
+ 
 %       Enlarg K+2th element        
         LX2(1,k+2)=LX(1,j+1); 
         LX2(2,k+2)=LX(3,j+1); 
@@ -223,9 +234,14 @@ function [NewE, NewX, NewY, NewBC]=CreateNewLayers(NewE,NewX,NewY,NewBC,cr_layer
         LY2(3,k+2)=LY(3,j+2); 
         LY2(4,k+2)=LY(4,j+2);
 
+        iflocked(k+2)=1;
+
 %       Delete K and K+1th element
         LX2(:,[k k+1]) = [];
         LY2(:,[k k+1]) = [];
+        
+        iflocked([k k+1]) = [];
+
       else 
 
 %       Enlarge K-1th element            
@@ -263,14 +279,14 @@ function [NewE, NewX, NewY, NewBC]=CreateNewLayers(NewE,NewX,NewY,NewBC,cr_layer
     NewX{i}=LX2;
     NewY{i}=LY2;
 
-    l1=length(LX2);
-    cmap=jet(l1);
-    for j=1:l1
-      xt=LX2(:,j);
-      yt=LY2(:,j);
-      figure(fig2);
-      fill(xt,yt,cmap(j,:)); hold on
-    end
+%    l1=length(LX2);
+%    cmap=jet(l1);
+%    for j=1:l1
+%      xt=LX2(:,j);
+%      yt=LY2(:,j);
+%      figure(fig2);
+%      fill(xt,yt,cmap(j,:)); hold on
+%    end
   end  
 
 end   % end function
