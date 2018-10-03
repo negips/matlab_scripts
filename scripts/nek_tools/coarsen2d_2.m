@@ -6,7 +6,7 @@ close all
 
 load saab_wing2d.mat
 
-skiplayers = 10;         % No of layers to skip when coarsening
+skiplayers = 1;         % No of layers to skip when coarsening
 
 disp(['Total Number of Elements: ', num2str(rea.mesh.nelg)])
 
@@ -105,16 +105,17 @@ function ifc = CoarsenCriteria(LX,LY,j,i,iflocked)
 %   Find aspect ratio of elements 
 
 %   Length of sides 1 and 3   % Facing 'O'
-    l1 = sqrt( (LX(1,j)-LX(2,j))^2 + (LY(1,j) - LY(2,j))^2);
-    l2 = sqrt( (LX(3,j)-LX(4,j))^2 + (LY(3,j) - LY(4,j))^2);
-    dlo = mean([l1 l2]);
+    l1o = sqrt( (LX(1,j)-LX(2,j))^2 + (LY(1,j) - LY(2,j))^2);
+    l2o = sqrt( (LX(3,j)-LX(4,j))^2 + (LY(3,j) - LY(4,j))^2);
+    dlo = mean([l1o l2o]);
      
 %   Length of sides 2 and 4   % Facing 'V'
-    l1 = sqrt( (LX(2,j)-LX(3,j))^2 + (LY(2,j) - LY(3,j))^2);
-    l2 = sqrt( (LX(4,j)-LX(1,j))^2 + (LY(4,j) - LY(1,j))^2);
-    dlv = mean([l1 l2]);
+    l1v = sqrt( (LX(2,j)-LX(3,j))^2 + (LY(2,j) - LY(3,j))^2);
+    l2v = sqrt( (LX(4,j)-LX(1,j))^2 + (LY(4,j) - LY(1,j))^2);
+    dlv = mean([l1v l2v]);
 
     l_ar = dlo/dlv;
+    lmax = max([l1o l2o l1v l2v]);
 
     ifc=0;
     if l_ar>ARcut
@@ -122,13 +123,26 @@ function ifc = CoarsenCriteria(LX,LY,j,i,iflocked)
     end
 
     xmid = mean(LX(:,j));
-    if (xmid<0.25)
+    ymid = mean(LY(:,j));
+    rad = sqrt(xmid^2 + ymid^2);  
+
+    if (xmid<0.0 && rad>0.1 )
       ifc=0;
     end
 
     if xmid>1 && l_ar>1.25
       ifc=1;
     end
+
+%   Maximum length  
+    if dlv>0.2
+      ifc=0;
+    end  
+
+%   Skip 5 layers      
+    if i<10
+      ifc=0;
+    end  
 
     [pts nels]=size(LX);  
 %   End condition           
@@ -264,7 +278,10 @@ function [NewE, NewX, NewY, NewBC, iflocked]=CreateNewLayers(NewE,NewX,NewY,NewB
         LY2(4,k-1)=LY(4,j);
 
         iflocked(k-1)=1;
- 
+        if k>2
+          iflocked(k-2)=1;
+        end  
+
 %       Enlarg K+2th element        
         LX2(1,k+2)=LX(1,j+1); 
         LX2(2,k+2)=LX(3,j+1); 
