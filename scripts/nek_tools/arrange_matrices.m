@@ -28,10 +28,11 @@ for i=1:nlayers
   thisfaceo = LayersFopO{i};
   thisfacev = LayersFopV{i};
 
-  LX = [];
-  LY = [];
-  LE = [];
-  LBC= [];
+  LX   = [];  % x1,x2,x3,x4
+  LY   = [];  % y1,y2,y3,y4
+  LE   = [];  % Current element no
+  LBC  = [];  % bc1,bc2,bc3,bc4 on faces 1,2,3,4
+  LCE  = [];  % Connects to El Nos on faces 1,2,3,4
 
   nel = length(thislayer);
   for j=1:nel
@@ -41,11 +42,12 @@ for i=1:nlayers
     fo=thisfaceo(j);
     fv=thisfacev(j);
 
-    [xcs ycs bcs] = GetFirstEl(rea,e,fo,fv);
+    [xcs ycs bcs ces] = GetFirstEl(rea,e,fo,fv);
     LX = [LX xcs];
     LY = [LY ycs];
     LE = [LE e];
     LBC{j}= bcs;
+    LCE= [LCE ces];
 
   end
 
@@ -53,41 +55,50 @@ for i=1:nlayers
   LayerY{i}=LY;
   LayerE{i}=LE;
   LayerBC{i}=LBC;
- 
+  LayerCEl{i}=LCE;
+
 end
 
 
-function [xcs ycs bcs] = GetFirstEl(rea,e,fo,fv)
+function [xcs ycs bcs ces] = GetFirstEl(rea,e,fo,fv)
 
     dtol=1.0e-12;     % Distance tolerance
-      
+
+%   Face opposite 'O  '
     fop = fo;  
-    bc3 = rea.mesh.cbc(fop,e).bc;  
+    bc3 = rea.mesh.cbc(fop,e).bc;
+    c_el3 = rea.mesh.cbc(fop,e).connectsto; 
 
     iop = [fop fop+1];
     if (iop(2)>4)
       iop(2)=1;
     end
 
+%   'O  ' Face    
     fo=fo+2;
     if fo>4
       fo=fo-4;
     end
     bc1 = rea.mesh.cbc(fo,e).bc;  
+    c_el1 = rea.mesh.cbc(fo,e).connectsto; 
 
     io = [fo fo+1];
     if (io(2)>4)
       io(2)=1;
     end  
 
+%   Face opposite 'v  '    
     fov=fv;  
     bc2 = rea.mesh.cbc(fov,e).bc;  
+    c_el2 = rea.mesh.cbc(fov,e).connectsto; 
 
+%   'v  ' Face
     fv=fv+2;
     if fv>4
       fv=fv-4;
     end  
     bc4 = rea.mesh.cbc(fv,e).bc;  
+    c_el4 = rea.mesh.cbc(fv,e).connectsto; 
 
     iv = [fv fv+1];
     if (iv(2)>4)
@@ -149,6 +160,7 @@ function [xcs ycs bcs] = GetFirstEl(rea,e,fo,fv)
     xcs = [x1; x2; x3; x4];
     ycs = [y1; y2; y3; y4];
     bcs = [bc1; bc2; bc3; bc4]; 
+    ces = [c_el1; c_el2; c_el3; c_el4]; 
 
 end
 

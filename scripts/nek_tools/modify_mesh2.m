@@ -4,10 +4,13 @@ clear
 clc
 close all
 
-casename = 'saab_wing2d';
+%casename = 'saab_wing2d';
 %casename = 'saab750k';
 %casename = 'lu';             % Doesn't work
+casename = 'fluent_plus2';
 svfname  = [casename '.mat'];
+
+disp(['CaseName: ' casename])
 
 rea = Nek_ReadRea(casename);
 
@@ -76,17 +79,49 @@ for i=1:bcels
 end
 
 % Lets take bottom element as starting element
-gl1 = Elno(1);
-yt1=mean(rea.mesh.yc(:,gl1));
-gl2 = Elno(2);
-yt2=mean(rea.mesh.yc(:,gl2));
-
-ly_el    = [];       % Element number in the layer
-ly_fopO  = [];       % Face no opposite the 'O  ' face
-ly_fopV  = [];       % Face no opposite the 'v  ' face
-
-if yt1<yt2
-  ly_el(1) = Elno(1);
+if length(Elno)>1
+  gl1 = Elno(1);
+  yt1=mean(rea.mesh.yc(:,gl1));
+  gl2 = Elno(2);
+  yt2=mean(rea.mesh.yc(:,gl2));
+  
+  ly_el    = [];       % Element number in the layer
+  ly_fopO  = [];       % Face no opposite the 'O  ' face
+  ly_fopV  = [];       % Face no opposite the 'v  ' face
+  
+  if yt1<yt2
+    ly_el(1) = Elno(1);
+    of = Oface(1)+2;
+    if of>4
+      of=of-4;
+    end
+    vf = Vface(1)+2;
+    if(vf>4)
+      vf=vf-4;
+    end  
+    ly_fopO=of;
+    ly_fopV=vf;
+  else
+    ly_el(1) = Elno(2); 
+    of = Oface(2)+2;
+    if of>4
+      of=of-4;
+    end
+    vf = Vface(2)+2;
+    if(vf>4)
+      vf=vf-4;
+    end  
+    ly_fopO=of;
+    ly_fopV=vf;
+  end  
+elseif (length(Elno)==1)
+  gl1 = Elno;
+  
+  ly_el    = [];       % Element number in the layer
+  ly_fopO  = [];       % Face no opposite the 'O  ' face
+  ly_fopV  = [];       % Face no opposite the 'v  ' face
+  
+  ly_el(1) = Elno;
   of = Oface(1)+2;
   if of>4
     of=of-4;
@@ -97,21 +132,8 @@ if yt1<yt2
   end  
   ly_fopO=of;
   ly_fopV=vf;
-else
-  ly_el(1) = Elno(2); 
-  of = Oface(2)+2;
-  if of>4
-    of=of-4;
-  end
-  vf = Vface(2)+2;
-  if(vf>4)
-    vf=vf-4;
-  end  
-  ly_fopO=of;
-  ly_fopV=vf;
-end  
- 
 
+end      
 
 % Build the first layer
 done=0;
@@ -130,9 +152,9 @@ while (~done)
   vf=0;
   for j=1:nfaces
     bc=rea.mesh.cbc(j,e2).bc;
-    if strcmpi(bc,'v  ')
-       ifV=1;
-       vf=j;
+    if strcmpi(bc,'v  ') || strcmpi(bc, 'on ')
+      ifV=1;
+      vf=j;
     end
   end
   vf2=vf+2;
@@ -167,7 +189,6 @@ LayersFopV{1}=ly_fopV;
 LayersFopO{1}=ly_fopO;
 
 % Done building first layer
-
 
 % Build the rest of the layers
 finished_layers=0;
@@ -260,6 +281,7 @@ while (~finished_layers)
   el2=ly_el(1);
   fv2=ly_fopV(1);
   bc2=rea.mesh.cbc(fv2,el2).bc;
+
   if ~strcmpi(bc2,'E  ')
     finished_layers=1;
   else
@@ -273,7 +295,8 @@ while (~finished_layers)
       end
     end  
   end  
-    
+
+
 
   % Plotting
   l1=e;
@@ -290,7 +313,7 @@ end   % ~finished_layers
 
 arrange_matrices
 
-clearvars -except nlayers LayersEl LayersFopO LayersFopV LayerX LayerY LayerE LayerBC rea n ndim svfname
+clearvars -except nlayers LayersEl LayersFopO LayersFopV LayerX LayerY LayerE LayerBC LayerCEl rea n ndim svfname
 save(svfname)
 
 
