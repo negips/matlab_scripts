@@ -101,7 +101,7 @@ for i=1:nlayers
 
 % Coarsen layer in consecutive pairs
   figure(2);    
-  [LX,LY,ifc,NewX,NewY,NewCoF] = CoarsenLayer(LE,LX,LY,ifc,NewX,NewY,NewCoF,i,fig2);
+  [LX,LY,ifc,NewX,NewY,NewCEl,NewCoF] = CoarsenLayer(LE,LX,LY,ifc,NewX,NewY,NewCEl,NewCoF,i,fig2);
 % Modify all subsequent Layers
   if3skip=1;  
   [NewE, NewX, NewY, NewBC, NewCEl, NewCoF, iflocked]=CreateNewLayers(NewE,NewX,NewY,NewBC,NewCEl,NewCoF,i,ifc,if3skip,fig2);
@@ -112,7 +112,7 @@ disp(['Total Number of Elements: ', num2str(new_nelg)])
 
 % Not done for multiple definitions right now
 curvedef= 'mv ';
-Mesh2 = ReOrderElements(NewE,NewX,NewY,NewBC,NewCEl,rea.mesh,curvedef); 
+Mesh2 = ReOrderElements(NewE,NewX,NewY,NewBC,NewCEl,NewCoF,rea.mesh,curvedef); 
 
 %nz0=5;
 %Lz=1.0;
@@ -225,7 +225,7 @@ function ifc = CoarsenCriteria(LX,LY,j,i,iflocked)
 end % function
 %---------------------------------------------------------------------- 
 
-function [LX,LY,ifc,NewX,NewY,NewCoF] = CoarsenLayer(LE,LX,LY,ifc,NewX,NewY,NewCoF,i,fig2)
+function [LX,LY,ifc,NewX,NewY,NewCEl,NewCoF] = CoarsenLayer(LE,LX,LY,ifc,NewX,NewY,NewCEl,NewCoF,i,fig2)
 
   l1 =length(LX);
   cmap = jet(l1);
@@ -268,16 +268,19 @@ function [LX,LY,ifc,NewX,NewY,NewCoF] = CoarsenLayer(LE,LX,LY,ifc,NewX,NewY,NewC
       continue
     end   
 
-%   Coarsen Elements  
-
+%   Coarsen Element j
     LX(4,j)=NewX{i+1}(4,j);
     LY(4,j)=NewY{i+1}(4,j);
+%   Connecting Element no changes  
+    NewCEl{i}(4,j)=NewCEl{i}(4,j-1);  
 %   onFace of connecting element changes
-    NewCoF{i}(4,j)=3;  
+    NewCoF{i}(4,j)=3;
 
-%   Next Element
+%   Coarsen Element j+1
     LX(1,j+1)=LX(4,j);
     LY(1,j+1)=LY(4,j);
+%   Connecting Element no changes  
+    NewCEl{i}(4,j+1)=NewCEl{i}(4,j+2); 
 %   onFace of connecting element changes
     NewCoF{i}(4,j+1)=1;  
 
