@@ -24,6 +24,7 @@ load saab_wing2d.mat
 %load saab750k.mat
 
 skiplayers = 2;         % Need to skip first layer since its smaller than the others
+ifplot = 0;
 
 disp(['Total Number of Elements: ', num2str(rea.mesh.nelg)])
 
@@ -50,8 +51,6 @@ for i=1:nlayers
 end
 
 
-
-
 % Test coarsening algorithm 1
 % Coarsen Layer by Layer
 % Define aspect ratio as 'O' face lengths to 'V' face lengths
@@ -67,16 +66,19 @@ for i=1:nlayers
 
   if (i<layer_start)
     nels_layer = length(LX);    
-    cmap = jet(nels_layer);
-    for j=1:nels_layer 
-      xt = LX(:,j);
-      yt = LY(:,j);
-
-      figure(2)
-      fill(xt,yt,cmap(j,:)); hold on
-    end 
-    
     new_nelg = new_nelg+nels_layer; 
+
+    if (ifplot)
+      cmap = jet(nels_layer);
+      for j=1:nels_layer 
+        xt = LX(:,j);
+        yt = LY(:,j);
+
+        figure(2)
+        fill(xt,yt,cmap(j,:)); hold on
+      end 
+    end
+
     continue
   end  
 
