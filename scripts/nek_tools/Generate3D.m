@@ -1,4 +1,4 @@
-function [mesh3d] = Generate3D(mesh2d,nlayers,nz0,Lz);
+function [mesh3d] = Generate3D(mesh2d,nlayers,nz0,Lz,ifperiodic);
 
 % Generate Layers in 3rd dimension
 %---------------------------------------------------------------------- 
@@ -44,7 +44,7 @@ function [mesh3d] = Generate3D(mesh2d,nlayers,nz0,Lz);
 % f5: (x1, x2, x3, x4)
 % f6: (x5, x6, x7, x8)
 
-% Same order for y
+% Same order for y,z
 
 
 % Test 1.
@@ -73,46 +73,41 @@ while il<=3 %nlayers
   maxdlv  = MaxDLV(LX,LY,nel_lay);
 
   ifcl = 0;       % if coarsen layer
-  if maxdlo/dz>2 || maxdlv/dz>2 && il>Zskip
+%  if maxdlo/dz>2 || maxdlv/dz>2 && il>Zskip
+  if il>Zskip
 %   Coarsen entire layer
-    ifcl = 0;
+    ifcl = 1;
   end
 
   if il==nlayers
     ifcl = 0;
   end  
 
+  [il ifcl]    
+
   if ~ifcl
 %   No z coarsening
     dz = Lz/nz;
-    lz = 0;  
     for j=1:nel_lay
+      lz = 0;  
       for k=1:nz
-        xt  = [LX(:,j); LX(:,j)];
-        XC  = [XC xt];
-        yt  = [LY(:,j); LY(:,j)];
-        YC  = [YC yt];
-        zt1 = zeros(4,1) + lz;
-        lz  = lz + dz;
-        zt2 = zeros(4,1) + lz;
-        zt  = [zt1; zt2];
-        ZC  = [ZC zt]; 
+%        xt  = [LX(:,j); LX(:,j)];
+%        XC  = [XC xt];
+%        yt  = [LY(:,j); LY(:,j)];
+%        YC  = [YC yt];
+%        zt1 = zeros(4,1) + lz;
+%        lz  = lz + dz;
+%        zt2 = zeros(4,1) + lz;
+%        zt  = [zt1; zt2];
+%        ZC  = [ZC zt]; 
       end
     end
 
     il=il+1;
 
-
   else
 
 %   Coarsen along z
-    il2   = il+1;  
-    ind2  = mesh2d.layerindex{il2}; 
-    LE2   = mesh2d.globalno(ind2); 
-    LX2   = mesh2d.xc(:,ind2);
-    LY2   = mesh2d.yc(:,ind2);
-    cbc2  = mesh2d.cbc(:,ind2);
-
     ifodd = mod(nz,2);
     ifquad = 0;
     if ~ifodd
@@ -122,12 +117,20 @@ while il<=3 %nlayers
       else
         ifquad = 0;
       end
-    end 
+    end
 
+    if ifquad
+      [XC1,YC1,ZC1,XC2,YC2,ZC2] = QuadExpansion(mesh2d,il,nz,Lz);
+      il=il+1;
+      XC = [XC XC1];
+      YC = [YC YC1];
+      ZC = [ZC ZC1];
 
+      continue
+    end  
+
+    il=il+1;      % temp
   end % ~ifcl
-
-  il=il+1;
 
 end   % while il<=nlayers
 
@@ -168,6 +171,170 @@ function maxdlv = MaxDLV(LX,LY,nel)
 
 end % function
 %---------------------------------------------------------------------- 
+
+function [XC1,YC1,ZC1,XC2,YC2,ZC2] = QuadExpansion(mesh2d,il,nz,Lz);
+
+% Coarsen along z
+  il1   = il;  
+  ind1  = mesh2d.layerindex{il1}; 
+  LE1   = mesh2d.globalno(ind1); 
+  LX1   = mesh2d.xc(:,ind1);
+  LY1   = mesh2d.yc(:,ind1);
+  cbc1  = mesh2d.cbc(:,ind1);
+
+  XC1   = [];
+  YC1   = [];
+  ZC1   = [];
+
+  XC2   = [];
+  YC2   = [];
+  ZC2   = [];
+
+  xt1   = zeros(4,1);
+  xt2   = zeros(4,1);
+  yt1   = zeros(4,1);
+  yt2   = zeros(4,1);
+  zt1   = zeros(4,1);
+  zt2   = zeros(4,1);
+
+  dz = Lz/nz;
+  for j=1:6 %nel_lay
+
+    elf1 = cbc1(1,j).connectsto;    % Element no connecting face 1
+    elf3 = cbc1(1,j).connectsto;    % Element no connecting face 3
+    elf4 = cbc1(4,j).connectsto;    % Element no connecting face 4
+%   Element types
+    if elf1~=0
+      f1t  = mesh2d.EType{elf1};
+    else
+      f1t  = 'B';                   % boundary
+    end
+    if elf3~=0
+      f3t  = mesh2d.EType{elf3};
+    else
+      f3t  = 'B';
+    end
+    if elf4~=0
+      f4t  = mesh2d.EType{elf4};
+    else
+      f4t  = 'B';
+    end  
+
+%   Build the first layer 
+    lz = 0;  
+    for k=1:nz
+
+      if mod(k,4)==1
+        xt  = [LX1(:,j); LX1(:,j)];
+        XC1  = [XC1 xt];
+        yt  = [LY1(:,j); LY1(:,j)];
+        YC1  = [YC1 yt];
+        zt1 = zeros(4,1) + lz;
+        lz  = lz + dz;
+        zt2 = zeros(4,1) + lz;
+        zt  = [zt1; zt2];
+        ZC1  = [ZC1 zt];
+
+      elseif mod(k,4)==2
+        xt1   = LX1(:,j);
+        yt1   = LY1(:,j);
+
+        xt2(1) = mesh2d.xc(1,elf4);
+        yt2(1) = mesh2d.yc(1,elf4);
+        if strcmpi(f1t,'e4')
+          xt2(2) = mesh2d.xc(2,elf1);
+          yt2(2) = mesh2d.yc(2,elf1);
+        else
+          xt2(2) = LX1(2,j);
+          yt2(2) = LY1(2,j);
+        end
+
+        if strcmpi(f3t,'e4')
+          xt2(3) = mesh2d.xc(3,elf3);
+          yt2(3) = mesh2d.yc(3,elf3);
+        else
+          xt2(3) = LX1(3,j);
+          yt2(3) = LY1(3,j);
+        end
+        xt2(4) = mesh2d.xc(4,elf4);
+        yt2(4) = mesh2d.yc(4,elf4);
+        
+        xt    = [xt1; xt2];
+        yt    = [yt1; yt2];
+        XC1    = [XC1 xt];
+        YC1    = [YC1 yt];
+
+        zt1 = zeros(4,1) + lz;
+        lz  = lz + dz;
+        zt2 = zeros(4,1) + lz;
+        zt  = [zt1; zt2];
+        ZC1  = [ZC1 zt];
+
+      elseif mod(k,4)==3
+
+%       face 5            
+        xt1(1) = mesh2d.xc(1,elf4);
+        yt1(1) = mesh2d.yc(1,elf4);
+        if strcmpi(f1t,'e4')
+          xt1(2) = mesh2d.xc(2,elf1);
+          yt1(2) = mesh2d.yc(2,elf1);
+        else
+          xt1(2) = LX1(2,j);
+          yt1(2) = LY1(2,j);
+        end
+
+        if strcmpi(f3t,'e4')
+          xt1(3) = mesh2d.xc(3,elf3);
+          yt1(3) = mesh2d.yc(3,elf3);
+        else
+          xt1(3) = LX1(3,j);
+          yt1(3) = LY1(3,j);
+        end
+        xt1(4) = mesh2d.xc(4,elf4);
+        yt1(4) = mesh2d.yc(4,elf4);
+
+%       face 6        
+        xt2   = LX1(:,j);
+        yt2   = LY1(:,j);
+
+        xt    = [xt1; xt2];
+        yt    = [yt1; yt2];
+        XC1    = [XC1 xt];
+        YC1    = [YC1 yt];
+
+        zt1 = zeros(4,1) + lz;
+        lz  = lz + dz;
+        zt2 = zeros(4,1) + lz;
+        zt  = [zt1; zt2];
+        ZC1  = [ZC1 zt];
+
+      elseif mod(k,4)==0
+        xt  = [LX1(:,j); LX1(:,j)];
+        XC1  = [XC1 xt];
+        yt  = [LY1(:,j); LY1(:,j)];
+        YC1  = [YC1 yt];
+        zt1 = zeros(4,1) + lz;
+        lz  = lz + dz;
+        zt2 = zeros(4,1) + lz;
+        zt  = [zt1; zt2];
+        ZC1  = [ZC1 zt];
+
+      end         % mod(k,4)
+
+    end           % k=1:nz
+
+
+%   Build second layer
+
+
+  end             % nel_layer
+
+
+
+
+end
+%---------------------------------------------------------------------- 
+
 
 
 

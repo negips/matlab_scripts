@@ -42,7 +42,14 @@ for i=1:nlayers
   NewCEl{i}=OldCEl{i};
   NewCoF{i}=ConnectedOnFace(NewCEl{i});
 
+  l1=length(NewE{i});
+  for j=1:l1
+    NewET{i}{j}='s';
+  end  
+
 end
+
+
 
 
 % Test coarsening algorithm 1
@@ -99,12 +106,13 @@ for i=1:nlayers
   nc = length(c_ind);
   disp(['Coarsen ' num2str(nc) ' Elements in layer ' num2str(i)])
 
+  ifplot =0;
 % Coarsen layer in consecutive pairs
   figure(2);    
-  [LX,LY,ifc,NewX,NewY,NewCEl,NewCoF] = CoarsenLayer(LE,LX,LY,ifc,NewX,NewY,NewCEl,NewCoF,i,fig2);
+  [LX,LY,ifc,NewX,NewY,NewCEl,NewCoF,NewET] = CoarsenLayer(LE,LX,LY,ifc,NewX,NewY,NewCEl,NewCoF,NewET,i,fig2,ifplot);
 % Modify all subsequent Layers
-  if3skip=1;  
-  [NewE, NewX, NewY, NewBC, NewCEl, NewCoF, iflocked]=CreateNewLayers(NewE,NewX,NewY,NewBC,NewCEl,NewCoF,i,ifc,if3skip,fig2);
+  if3skip=1;
+  [NewE, NewX, NewY, NewBC, NewCEl, NewCoF, NewET, iflocked]=CreateNewLayers(NewE,NewX,NewY,NewBC,NewCEl,NewCoF,NewET,i,ifc,if3skip,fig2,ifplot);
   nels_layer = length(NewX{i});
   new_nelg = new_nelg+nels_layer;
 end
@@ -112,12 +120,13 @@ disp(['Total Number of Elements: ', num2str(new_nelg)])
 
 % Not done for multiple definitions right now
 curvedef= 'mv ';
-mesh2d = ReOrderElements(NewE,NewX,NewY,NewBC,NewCEl,NewCoF,rea.mesh,curvedef); 
+mesh2d = ReOrderElements(NewE,NewX,NewY,NewBC,NewCEl,NewCoF,NewET,rea.mesh,curvedef); 
 
-nz0=3;
+nz0=4;
 Lz=1.0;
-[mesh3d] = Generate3D(mesh2d,nlayers,nz0,Lz);
-
+ifperiodic=1;
+[mesh3d] = Generate3D(mesh2d,nlayers,nz0,Lz,ifperiodic);
+%
 fig3 = figure(3); hold on
 [~, nel]=size(mesh3d.XC)
 
@@ -141,6 +150,11 @@ function Plot3DElement(mesh3d,i,fig)
 
   ind=[4 8 7 3 4];
   plot3(mesh3d.XC(ind,i),mesh3d.YC(ind,i),mesh3d.ZC(ind,i), 'k'); hold on
+
+  xlabel('x')
+  ylabel('y')
+  zlabel('z')
+  view(3)
 
 end
 %---------------------------------------------------------------------- 
@@ -251,7 +265,7 @@ function ifc = CoarsenCriteria(LX,LY,j,i,iflocked)
 end % function
 %---------------------------------------------------------------------- 
 
-function [LX,LY,ifc,NewX,NewY,NewCEl,NewCoF] = CoarsenLayer(LE,LX,LY,ifc,NewX,NewY,NewCEl,NewCoF,i,fig2)
+function [LX,LY,ifc,NewX,NewY,NewCEl,NewCoF,NewET] = CoarsenLayer(LE,LX,LY,ifc,NewX,NewY,NewCEl,NewCoF,NewET,i,fig2,ifplot)
 
   l1 =length(LX);
   cmap = jet(l1);
@@ -284,11 +298,13 @@ function [LX,LY,ifc,NewX,NewY,NewCEl,NewCoF] = CoarsenLayer(LE,LX,LY,ifc,NewX,Ne
     end  
 
     if (ifcontinue)
-      figure(fig2)
-      xt = LX(:,j);
-      yt = LY(:,j);
-      figure(2)
-      fill(xt,yt,cmap(j,:)); hold on
+      if (ifplot)
+        figure(fig2)
+        xt = LX(:,j);
+        yt = LY(:,j);
+        figure(2)
+        fill(xt,yt,cmap(j,:)); hold on
+      end  
       
       ifcontinue=0;
       continue
@@ -301,6 +317,8 @@ function [LX,LY,ifc,NewX,NewY,NewCEl,NewCoF] = CoarsenLayer(LE,LX,LY,ifc,NewX,Ne
     NewCEl{i}(4,j)=NewCEl{i}(4,j-1);  
 %   onFace of connecting element changes
     NewCoF{i}(4,j)=3;
+%   Element type
+    NewET{i}{j}='e4';
 
 %   Coarsen Element j+1
     LX(1,j+1)=LX(4,j);
@@ -308,13 +326,17 @@ function [LX,LY,ifc,NewX,NewY,NewCEl,NewCoF] = CoarsenLayer(LE,LX,LY,ifc,NewX,Ne
 %   Connecting Element no changes  
     NewCEl{i}(4,j+1)=NewCEl{i}(4,j+2); 
 %   onFace of connecting element changes
-    NewCoF{i}(4,j+1)=1;  
+    NewCoF{i}(4,j+1)=1;
+%   Element type      
+    NewET{i}{j+1}='e4';
 
-    figure(fig2)
-    xt = LX(:,j);
-    yt = LY(:,j);
-    figure(2)
-    fill(xt,yt,cmap(j,:)); hold on
+    if (ifplot)
+      figure(fig2)
+      xt = LX(:,j);
+      yt = LY(:,j);
+      figure(2)
+      fill(xt,yt,cmap(j,:)); hold on
+    end  
 
 %   Skip next few elements
     skipnext=1;
@@ -339,7 +361,7 @@ end   % end function
 
 %---------------------------------------------------------------------- 
 
-function [NewE, NewX, NewY, NewBC, NewCEl, NewCoF, iflocked]=CreateNewLayers(NewE,NewX,NewY,NewBC,NewCEl,NewCoF,cr_layer,ifc,if3skip,fig2)
+function [NewE, NewX, NewY, NewBC, NewCEl, NewCoF, NewET, iflocked]=CreateNewLayers(NewE,NewX,NewY,NewBC,NewCEl,NewCoF,NewET,cr_layer,ifc,if3skip,fig2,ifplot)
 
   iflocked = [];
 
@@ -353,6 +375,7 @@ function [NewE, NewX, NewY, NewBC, NewCEl, NewCoF, iflocked]=CreateNewLayers(New
     LBC=NewBC{i};
     LCEl=NewCEl{i};
     LCoF=NewCoF{i};
+    LET=NewET{i};
  
     LE2=LE; 
     LX2=LX;
@@ -360,6 +383,7 @@ function [NewE, NewX, NewY, NewBC, NewCEl, NewCoF, iflocked]=CreateNewLayers(New
     LBC2=LBC;
     LCEl2=LCEl;
     LCoF2=LCoF;
+    LET2=LET;
     l1=length(LE);
 
     if il==1
@@ -404,6 +428,8 @@ function [NewE, NewX, NewY, NewBC, NewCEl, NewCoF, iflocked]=CreateNewLayers(New
         LCoF2(3,k-1) = 4;
         LCoF2(4,k-1) = LCoF(4,j-1);
 
+        LET2{k-1}    = 'e3';
+
         iflocked(k-1)=1;
         if k>2
           iflocked(k-2)=1;
@@ -435,6 +461,7 @@ function [NewE, NewX, NewY, NewBC, NewCEl, NewCoF, iflocked]=CreateNewLayers(New
         LCoF2(3,k+2) = LCoF(3,j+2);
         LCoF2(4,k+2) = LCoF(4,j+2);
 
+        LET2{k+2}    = 'e1';
 
         iflocked(k+2)=1;
 
@@ -445,7 +472,8 @@ function [NewE, NewX, NewY, NewBC, NewCEl, NewCoF, iflocked]=CreateNewLayers(New
         LBC2([k k+1])  = [];
         LCEl2(:,[k k+1])= [];
         LCoF2(:,[k k+1])= [];
-     
+        LET2([k k+1])   = [];
+    
         iflocked([k k+1]) = [];
 
       else 
@@ -476,6 +504,9 @@ function [NewE, NewX, NewY, NewBC, NewCEl, NewCoF, iflocked]=CreateNewLayers(New
         LCoF2(3,k-1) = LCoF(3,j);
         LCoF2(4,k-1) = LCoF(4,j-1);
 
+        LET2{k-1}    = 's';   % no change
+
+
 %       Enlarg K+2th element        
         LX2(1,k+2)=LX(1,j+1); 
         LX2(2,k+2)=LX(2,j+1); 
@@ -502,6 +533,9 @@ function [NewE, NewX, NewY, NewBC, NewCEl, NewCoF, iflocked]=CreateNewLayers(New
         LCoF2(3,k+2) = LCoF(3,j+2);
         LCoF2(4,k+2) = LCoF(4,j+2);
 
+        LET2{k+2}    = 's';   % no change
+
+
 %       Delete K and K+1th element
         LE2([k k+1])   = [];
         LX2(:,[k k+1]) = [];
@@ -509,6 +543,7 @@ function [NewE, NewX, NewY, NewBC, NewCEl, NewCoF, iflocked]=CreateNewLayers(New
         LBC2([k k+1])  = [];
         LCEl2(:,[k k+1])= [];
         LCoF2(:,[k k+1])= [];
+        LET2([k k+1])   = [];
 
       end
 
@@ -522,15 +557,18 @@ function [NewE, NewX, NewY, NewBC, NewCEl, NewCoF, iflocked]=CreateNewLayers(New
     NewBC{i}=LBC2;
     NewCEl{i}=LCEl2;
     NewCoF{i}=LCoF2;
+    NewET{i}=LET2;
 
-%    l1=length(LX2);
-%    cmap=jet(l1);
-%    for j=1:l1
-%      xt=LX2(:,j);
-%      yt=LY2(:,j);
-%      figure(fig2);
-%      fill(xt,yt,cmap(j,:)); hold on
-%    end
+    if (ifplot)
+      l1=length(LX2);
+      cmap=jet(l1);
+      for j=1:l1
+        xt=LX2(:,j);
+        yt=LY2(:,j);
+        figure(fig2);
+        fill(xt,yt,cmap(j,:)); hold on
+      end
+    end  
   end  
 
 end   % end function

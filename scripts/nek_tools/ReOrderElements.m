@@ -1,4 +1,4 @@
-function [Mesh2D] = ReOrderElements(NewE,NewX,NewY,NewBC,NewCEl,NewCoF,oldmesh,cdef);
+function [Mesh2D] = ReOrderElements(NewE,NewX,NewY,NewBC,NewCEl,NewCoF,NewET,oldmesh,cdef);
 
   nlayers = length(NewE);
   tnel=0;
@@ -6,12 +6,14 @@ function [Mesh2D] = ReOrderElements(NewE,NewX,NewY,NewBC,NewCEl,NewCoF,oldmesh,c
   OldGN = [];
   XC    = [];
   YC    = [];
+  EType = [];
   glno=0;
   LayerEnd = [];
   for il=1:nlayers
     EL = NewE{il};
     X  = NewX{il};
     Y  = NewY{il};
+    ET = NewET{il};
     nel = length(EL);
     tnel = tnel+nel;
     lindex = [];
@@ -22,12 +24,13 @@ function [Mesh2D] = ReOrderElements(NewE,NewX,NewY,NewBC,NewCEl,NewCoF,oldmesh,c
       NewGN = [NewGN glno];
       XC    = [XC X(:,j)];
       YC    = [YC Y(:,j)];
+      EType = [EType ET(j)];
     end
     LayerEnd = [LayerEnd glno];
     LayerIndex{il} = lindex; 
   
   end
-  
+   
   Mesh2D.nelg=tnel;
   Mesh2D.ndim=oldmesh.ndim;
   Mesh2D.globalno = NewGN;
@@ -35,6 +38,7 @@ function [Mesh2D] = ReOrderElements(NewE,NewX,NewY,NewBC,NewCEl,NewCoF,oldmesh,c
   Mesh2D.groupno = groupno;
   Mesh2D.xc = XC;
   Mesh2D.yc = YC;
+  Mesh2D.EType = EType;
   
   % Assuming I don't touch the curved faces
   Mesh2D.ncurve=oldmesh.ncurve;
