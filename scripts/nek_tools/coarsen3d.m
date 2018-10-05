@@ -112,11 +112,37 @@ disp(['Total Number of Elements: ', num2str(new_nelg)])
 
 % Not done for multiple definitions right now
 curvedef= 'mv ';
-Mesh2 = ReOrderElements(NewE,NewX,NewY,NewBC,NewCEl,NewCoF,rea.mesh,curvedef); 
+mesh2d = ReOrderElements(NewE,NewX,NewY,NewBC,NewCEl,NewCoF,rea.mesh,curvedef); 
 
-%nz0=5;
-%Lz=1.0;
-%[NewE3, NewX1, NewY1, NewX2, NewY2, NewBC3, NewCEl3] = Generate3D(NewE,NewX,NewY,NewBC,NewCEl,nlayers,nz0,Lz);
+nz0=3;
+Lz=1.0;
+[mesh3d] = Generate3D(mesh2d,nlayers,nz0,Lz);
+
+fig3 = figure(3); hold on
+[~, nel]=size(mesh3d.XC)
+
+for i=1:nel
+  Plot3DElement(mesh3d,i,fig3);
+end
+
+%---------------------------------------------------------------------- 
+function Plot3DElement(mesh3d,i,fig)
+
+  figure(fig)
+  
+  ind=[1 2 3 4 1];
+  plot3(mesh3d.XC(ind,i),mesh3d.YC(ind,i),mesh3d.ZC(ind,i), 'k'); hold on
+
+  ind=[5 6 7 8 5];
+  plot3(mesh3d.XC(ind,i),mesh3d.YC(ind,i),mesh3d.ZC(ind,i), 'k'); hold on
+
+  ind=[1 5 6 2 1];
+  plot3(mesh3d.XC(ind,i),mesh3d.YC(ind,i),mesh3d.ZC(ind,i), 'k'); hold on
+
+  ind=[4 8 7 3 4];
+  plot3(mesh3d.XC(ind,i),mesh3d.YC(ind,i),mesh3d.ZC(ind,i), 'k'); hold on
+
+end
 %---------------------------------------------------------------------- 
 
 function newcof = ConnectedOnFace(NewCEl)

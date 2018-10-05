@@ -1,4 +1,4 @@
-function [NewE3, NewX1, NewY1, NewX2, NewY2, NewBC3, NewCEl3] = Generate3D(NewE,NewX,NewY,NewBC,NewCEl,nlayers,nz0,Lz);
+function [mesh3d] = Generate3D(mesh2d,nlayers,nz0,Lz);
 
 % Generate Layers in 3rd dimension
 %---------------------------------------------------------------------- 
@@ -7,14 +7,14 @@ function [NewE3, NewX1, NewY1, NewX2, NewY2, NewBC3, NewCEl3] = Generate3D(NewE,
 %
 %                         
 %                           
-%                   x7----------------x6
+%                   x7-----------------x6
 %                  /|     f6(back)    /|   
 %                 /                  / | 
 %                /  |               /  |
 %               /                  /   |
 %     f3(left) /    |  f2(top)    /    |
 %             /                  /     |    f1(right) 
-%            /     x8- -  - -  -/ - - x5    
+%            /      x8- -  - - -/ - - -x5    
 %           x3-----------------x2     /  
 %           |     /            |     /
 %           |        f4(bottom)|    / 
@@ -48,58 +48,92 @@ function [NewE3, NewX1, NewY1, NewX2, NewY2, NewBC3, NewCEl3] = Generate3D(NewE,
 
 
 % Test 1.
-Zskip = 5;       % Start 'z' refinement after Zskip 2D layer.
-
-lez   = NewE;
-lxz   = NewX;
-lyz   = NewY;
-lbcz  = NewBC;
-lcelz = NewCEl;
+Zskip = 2;       % Start 'z' refinement after Zskip 2D layer.
 
 nz = nz0;        % No of elements in 'z' in the first layer.
+dz = Lz/nz;
 
-for il=1:nlayers
- 
-  LE   = lez{il}; 
-  LX   = lxz{il};
-  LY   = lyz{il};
-  LZ   = zeros(size(lxz{il}));
+XC = [];
+YC = [];
+ZC = [];
 
-  LBC  = lbcz{il};  
-  LCEl = lcelz{il};
+il=1;
+
+while il<=3 %nlayers
+  
+  ind  = mesh2d.layerindex{il}; 
+  LE   = mesh2d.globalno(ind); 
+  LX   = mesh2d.xc(:,ind);
+  LY   = mesh2d.yc(:,ind);
+  LZ   = zeros(size(LX));
+  cbc  = mesh2d.cbc(:,ind);
 
   nel_lay = length(LE);
   maxdlo  = MaxDLO(LX,LY,nel_lay);    
   maxdlv  = MaxDLV(LX,LY,nel_lay);
 
   ifcl = 0;       % if coarsen layer
-  if maxdlo/dz>2 || maxdlv/dz>2 && i>Zskip
+  if maxdlo/dz>2 || maxdlv/dz>2 && il>Zskip
 %   Coarsen entire layer
-    ifcl = 1;
-  end 
+    ifcl = 0;
+  end
+
+  if il==nlayers
+    ifcl = 0;
+  end  
 
   if ~ifcl
 %   No z coarsening
     dz = Lz/nz;
-
-    for j=1:nz
-      for i=1:nel_lay
-      
+    lz = 0;  
+    for j=1:nel_lay
+      for k=1:nz
+        xt  = [LX(:,j); LX(:,j)];
+        XC  = [XC xt];
+        yt  = [LY(:,j); LY(:,j)];
+        YC  = [YC yt];
+        zt1 = zeros(4,1) + lz;
+        lz  = lz + dz;
+        zt2 = zeros(4,1) + lz;
+        zt  = [zt1; zt2];
+        ZC  = [ZC zt]; 
       end
-    end       
+    end
 
-  end
-
-end
+    il=il+1;
 
 
-NewE3   = [];
-NewX1   = [];
-NewX2   = [];
-NewY1   = [];
-NewY2   = [];
-NewBC3  = [];
-NewCEl3 = [];
+  else
+
+%   Coarsen along z
+    il2   = il+1;  
+    ind2  = mesh2d.layerindex{il2}; 
+    LE2   = mesh2d.globalno(ind2); 
+    LX2   = mesh2d.xc(:,ind2);
+    LY2   = mesh2d.yc(:,ind2);
+    cbc2  = mesh2d.cbc(:,ind2);
+
+    ifodd = mod(nz,2);
+    ifquad = 0;
+    if ~ifodd
+      rem = mod(nz,4);
+      if rem==0
+        ifquad = 1;
+      else
+        ifquad = 0;
+      end
+    end 
+
+
+  end % ~ifcl
+
+  il=il+1;
+
+end   % while il<=nlayers
+
+mesh3d.XC = XC;
+mesh3d.YC = YC;
+mesh3d.ZC = ZC;
 
 
 end   % function

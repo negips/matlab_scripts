@@ -14,14 +14,17 @@ function [Mesh2D] = ReOrderElements(NewE,NewX,NewY,NewBC,NewCEl,NewCoF,oldmesh,c
     Y  = NewY{il};
     nel = length(EL);
     tnel = tnel+nel;
+    lindex = [];
     for j=1:nel
       glno = int32(glno+1);
+      lindex = [lindex glno];
       OldGN = [OldGN EL(j)];
       NewGN = [NewGN glno];
       XC    = [XC X(:,j)];
       YC    = [YC Y(:,j)];
     end
-    LayerEnd = [LayerEnd glno]; 
+    LayerEnd = [LayerEnd glno];
+    LayerIndex{il} = lindex; 
   
   end
   
@@ -169,6 +172,7 @@ function [Mesh2D] = ReOrderElements(NewE,NewX,NewY,NewBC,NewCEl,NewCoF,oldmesh,c
   Mesh2D.yzero=oldmesh.yzero;
   Mesh2D.ifre2=oldmesh.ifre2;
   Mesh2D.ifgtp=oldmesh.ifgtp;
+  Mesh2D.layerindex=LayerIndex;
 
 end   % end function
 
