@@ -163,7 +163,12 @@ function [Mesh2D] = ReOrderElements(NewE,NewX,NewY,NewBC,NewCEl,NewCoF,oldmesh,c
   end   % il=1:nlayers
 
   Mesh2D.cbc=cbc; 
-
+  Mesh2D.xfac=oldmesh.xfac;
+  Mesh2D.yfac=oldmesh.yfac;
+  Mesh2D.xzero=oldmesh.xzero;
+  Mesh2D.yzero=oldmesh.yzero;
+  Mesh2D.ifre2=oldmesh.ifre2;
+  Mesh2D.ifgtp=oldmesh.ifgtp;
 
 end   % end function
 
