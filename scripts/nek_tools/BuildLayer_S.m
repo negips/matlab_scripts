@@ -53,6 +53,7 @@ function [XC1,XC2,YC1,YC2,ZC1,ZC2,GL1,GL2]=BuildLayer_S(XC1,XC2,YC1,YC2,ZC1,ZC2,
 
        xt2(1) = mesh2d.xc(1,elf4);
        yt2(1) = mesh2d.yc(1,elf4);
+
        if strcmpi(f1t,'e4')
          xt2(2) = mesh2d.xc(2,elf1);
          yt2(2) = mesh2d.yc(2,elf1);
@@ -65,8 +66,8 @@ function [XC1,XC2,YC1,YC2,ZC1,ZC2,GL1,GL2]=BuildLayer_S(XC1,XC2,YC1,YC2,ZC1,ZC2,
          xt2(3) = mesh2d.xc(3,elf3);
          yt2(3) = mesh2d.yc(3,elf3);
        else
-         xt2(3) = mesh2d.xc(3,j);
-         yt2(3) = mesh2d.yc(3,j);
+         xt2(3) = mesh2d.xc(3,e);
+         yt2(3) = mesh2d.yc(3,e);
        end
        xt2(4) = mesh2d.xc(4,elf4);
        yt2(4) = mesh2d.yc(4,elf4);
@@ -87,7 +88,6 @@ function [XC1,XC2,YC1,YC2,ZC1,ZC2,GL1,GL2]=BuildLayer_S(XC1,XC2,YC1,YC2,ZC1,ZC2,
 
      elseif mod(k,4)==3
 
-%      face 5            
        xt1(1) = mesh2d.xc(1,elf4);
        yt1(1) = mesh2d.yc(1,elf4);
        if strcmpi(f1t,'e4')
@@ -108,7 +108,6 @@ function [XC1,XC2,YC1,YC2,ZC1,ZC2,GL1,GL2]=BuildLayer_S(XC1,XC2,YC1,YC2,ZC1,ZC2,
        xt1(4) = mesh2d.xc(4,elf4);
        yt1(4) = mesh2d.yc(4,elf4);
 
-%      face 6        
        xt2   = mesh2d.xc(:,e);
        yt2   = mesh2d.yc(:,e);
 
@@ -217,6 +216,7 @@ function [XC1,XC2,YC1,YC2,ZC1,ZC2,GL1,GL2]=BuildLayer_S(XC1,XC2,YC1,YC2,ZC1,ZC2,
        GL2 = [GL2 glno];
 
        lz=lz2;
+
 
      end
 

@@ -184,7 +184,7 @@ for i=1:nel
 
   p0 = (2^ndim)*(i-1);
 
-  f1 = [0 1 4 5] + 1 + p0;
+  f1 = [0 1 5 4] + 1 + p0;
   f2 = [1 5 6 2] + 1 + p0;
   f3 = [2 6 7 3] + 1 + p0;
   f4 = [3 7 4 0] + 1 + p0;
@@ -200,8 +200,12 @@ fname='test0.f00001';
 
 [status] = Nek_WriteFld(ndim,N,nel,xgll,ygll,zgll,U,V,W,P,T,nps,ifx,ifu,ifp,Glno,fname)
 
+xvtk=xgll(:);
+yvtk=ygll(:);
+zvtk=zgll(:);
+
 vfname = 'test.vtk';
-vtkwrite(vfname,'polydata','hexahedron',xgll,ygll,zgll,polydata)
+vtkwrite(vfname,'polydata','hexahedron',xvtk,yvtk,zvtk,polydata)
  
 %---------------------------------------------------------------------- 
 function Plot3DElement(mesh3d,i,fig)
