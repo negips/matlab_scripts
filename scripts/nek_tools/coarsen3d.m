@@ -20,11 +20,13 @@ close all
 %               'v  '
 
 
-load saab_wing2d.mat
+%load saab_wing2d.mat
 %load saab750k.mat
+load fluent_plus2.mat
 
 skiplayers = 2;         % Need to skip first layer since its smaller than the others
 ifplot = 0;
+if3dplot = 0;
 
 disp(['Total Number of Elements: ', num2str(rea.mesh.nelg)])
 
@@ -91,8 +93,9 @@ for i=1:nlayers
   ifc = zeros(l2,1); 
   for j=1:l1
       
-    ifc(j) = CoarsenCriteria(LX,LY,j,i,iflocked);
-        
+%    ifc(j) = CoarsenCriteria(LX,LY,j,i,iflocked);
+    ifc(j) = CoarsenKDJ(LX,LY,j,i,iflocked);
+       
     xt = LX(:,j);
     yt = LY(:,j);
 
@@ -121,21 +124,104 @@ end
 disp(['Total Number of Elements: ', num2str(new_nelg)])
 
 % Not done for multiple definitions right now
-curvedef= 'mv ';
+curvedef= 'W  ';
 mesh2d = ReOrderElements(NewE,NewX,NewY,NewBC,NewCEl,NewCoF,NewET,rea.mesh,curvedef); 
 
 nz0=4;
 Lz=1.0;
 ifperiodic=1;
 [mesh3d] = Generate3D(mesh2d,nlayers,nz0,Lz,ifperiodic);
-%
-fig3 = figure(3); hold on
 [~, nel]=size(mesh3d.XC)
 
-for i=1:nel
-  Plot3DElement(mesh3d,i,fig3);
-end
+if if3dplot
+  fig3 = figure(3); hold on
+  for i=1:nel
+    Plot3DElement(mesh3d,i,fig3);
+  end
+end  
 
+
+% Output as a Nek field file
+ndim=3;
+N=1;
+nel=nel;
+nps=0;
+ifx=1;
+ifu=1;
+ifp=0;
+Glno=mesh3d.GL3D;
+U = [];
+V = [];
+W = [];
+P = []; 
+T = []; %mesh3d.GL3D;
+
+P = zeros(2^ndim,nel);
+U = zeros(2^ndim,nel);
+V = zeros(2^ndim,nel);
+W = zeros(2^ndim,nel);
+xgll = zeros(2^ndim,nel);
+ygll = zeros(2^ndim,nel);
+zgll = zeros(2^ndim,nel);
+
+for i=1:nel
+  for j=1:2^ndim
+    P(j,i)=Glno(i);
+    U(j,i)=Glno(i);
+    V(j,i)=Glno(i);
+    W(j,i)=Glno(i);
+  end
+
+%  xgll(:,i) = [mesh3d.XC(1:4,i); mesh3d.XC(8:-1:5,i)]; 
+%  ygll(:,i) = [mesh3d.YC(1:4,i); mesh3d.YC(8:-1:5,i)];
+%  zgll(:,i) = [mesh3d.ZC(1:4,i); mesh3d.ZC(8:-1:5,i)];
+
+%  xgll(:,i) = [mesh3d.XC(8:-1:5,i); mesh3d.XC(1:4,i)]; 
+%  ygll(:,i) = [mesh3d.YC(8:-1:5,i); mesh3d.YC(1:4,i)];
+%  zgll(:,i) = [mesh3d.ZC(8:-1:5,i); mesh3d.ZC(1:4,i)];
+
+  xgll(:,i) = mesh3d.XC(:,i);
+  ygll(:,i) = mesh3d.YC(:,i);
+  zgll(:,i) = mesh3d.ZC(:,i);
+
+
+%  xgll(1,i)=mesh3d.XC(1,i);
+%  xgll(2,i)=mesh3d.XC(4,i);
+%  xgll(3,i)=mesh3d.XC(2,i);
+%  xgll(4,i)=mesh3d.XC(3,i);
+%
+%  xgll(5,i)=mesh3d.XC(5,i);
+%  xgll(6,i)=mesh3d.XC(8,i);
+%  xgll(7,i)=mesh3d.XC(6,i);
+%  xgll(8,i)=mesh3d.XC(7,i);
+%
+%  ygll(1,i)=mesh3d.YC(1,i);
+%  ygll(2,i)=mesh3d.YC(4,i);
+%  ygll(3,i)=mesh3d.YC(2,i);
+%  ygll(4,i)=mesh3d.YC(3,i);
+%
+%  ygll(5,i)=mesh3d.YC(5,i);
+%  ygll(6,i)=mesh3d.YC(8,i);
+%  ygll(7,i)=mesh3d.YC(6,i);
+%  ygll(8,i)=mesh3d.YC(7,i);
+%
+%  zgll(1,i)=mesh3d.ZC(1,i);
+%  zgll(2,i)=mesh3d.ZC(4,i);
+%  zgll(3,i)=mesh3d.ZC(2,i);
+%  zgll(4,i)=mesh3d.ZC(3,i);
+%
+%  zgll(5,i)=mesh3d.ZC(5,i);
+%  zgll(6,i)=mesh3d.ZC(8,i);
+%  zgll(7,i)=mesh3d.ZC(6,i);
+%  zgll(8,i)=mesh3d.ZC(7,i);
+
+end  
+
+fname='test0.f00001';
+
+[status] = Nek_WriteFld(ndim,N,nel,xgll,ygll,zgll,U,V,W,P,T,nps,ifx,ifu,ifp,Glno,fname)
+
+ 
 %---------------------------------------------------------------------- 
 function Plot3DElement(mesh3d,i,fig)
 
