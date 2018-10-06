@@ -7,7 +7,7 @@ function [XC1,XC2,YC1,YC2,ZC1,ZC2,GL1,GL2]=BuildLayer_S(XC1,XC2,YC1,YC2,ZC1,ZC2,
    xt4 = zeros(4,1); yt4 = zeros(4,1); zt4 = zeros(4,1);
 
    elf1 = mesh2d.cbc(1,e).connectsto;    % Element no connecting face 1
-   elf3 = mesh2d.cbc(1,e).connectsto;    % Element no connecting face 3
+   elf3 = mesh2d.cbc(3,e).connectsto;    % Element no connecting face 3
    elf4 = mesh2d.cbc(4,e).connectsto;    % Element no connecting face 4
 %  Element types
    if elf1~=0

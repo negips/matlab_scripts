@@ -9,7 +9,7 @@ function [XC,YC,ZC,GL] = QuadExpansion(mesh2d,il,nz0,Lz);
   XC  = []; YC  = []; ZC  = []; GL  = [];
 
   j=1;
-  while j<=nel_lay
+  while j<=5 %nel_lay
 
     XC1 =[]; YC1 =[]; ZC1 =[]; GL1 =[];
     XC2 =[]; YC2 =[]; ZC2 =[]; GL2 =[];

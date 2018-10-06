@@ -251,6 +251,10 @@ switch upper(dataType)
                 ntetra = length(varargin{5});
                 fprintf(fid,'\nPOLYGONS %d %d\n',ntetra,5*ntetra);
                 fprintf(fid,'4 %d %d %d %d\n',(varargin{5}-1)');
+            case 'HEXAHEDRON'
+                nhexa = length(varargin{5});
+                fprintf(fid,'\nPOLYGONS %d %d\n',nhexa,6*nhexa);
+                fprintf(fid,'4 %d %d %d %d\n',(varargin{5}-1)');
         end     
 end
 fclose(fid);

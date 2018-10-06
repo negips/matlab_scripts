@@ -58,7 +58,12 @@ end
 % Define aspect ratio as 'O' face lengths to 'V' face lengths
 layer_start = skiplayers+1;
 new_nelg = 0;
-fig2=figure(2);
+if ifplot
+  fig2=figure(2);
+else
+  fig2=[];
+end  
+
 for i=1:nlayers
 
   LE=NewE{i};
@@ -113,7 +118,6 @@ for i=1:nlayers
 
   ifplot =0;
 % Coarsen layer in consecutive pairs
-  figure(2);    
   [LX,LY,ifc,NewX,NewY,NewCEl,NewCoF,NewET] = CoarsenLayer(LE,LX,LY,ifc,NewX,NewY,NewCEl,NewCoF,NewET,i,fig2,ifplot);
 % Modify all subsequent Layers
   if3skip=1;
@@ -128,7 +132,7 @@ curvedef= 'W  ';
 mesh2d = ReOrderElements(NewE,NewX,NewY,NewBC,NewCEl,NewCoF,NewET,rea.mesh,curvedef); 
 
 nz0=4;
-Lz=1.0;
+Lz=0.01;
 ifperiodic=1;
 [mesh3d] = Generate3D(mesh2d,nlayers,nz0,Lz,ifperiodic);
 [~, nel]=size(mesh3d.XC)
@@ -164,6 +168,8 @@ xgll = zeros(2^ndim,nel);
 ygll = zeros(2^ndim,nel);
 zgll = zeros(2^ndim,nel);
 
+polydata = [];
+
 for i=1:nel
   for j=1:2^ndim
     P(j,i)=Glno(i);
@@ -172,48 +178,21 @@ for i=1:nel
     W(j,i)=Glno(i);
   end
 
-%  xgll(:,i) = [mesh3d.XC(1:4,i); mesh3d.XC(8:-1:5,i)]; 
-%  ygll(:,i) = [mesh3d.YC(1:4,i); mesh3d.YC(8:-1:5,i)];
-%  zgll(:,i) = [mesh3d.ZC(1:4,i); mesh3d.ZC(8:-1:5,i)];
-
-%  xgll(:,i) = [mesh3d.XC(8:-1:5,i); mesh3d.XC(1:4,i)]; 
-%  ygll(:,i) = [mesh3d.YC(8:-1:5,i); mesh3d.YC(1:4,i)];
-%  zgll(:,i) = [mesh3d.ZC(8:-1:5,i); mesh3d.ZC(1:4,i)];
-
   xgll(:,i) = mesh3d.XC(:,i);
   ygll(:,i) = mesh3d.YC(:,i);
   zgll(:,i) = mesh3d.ZC(:,i);
 
+  p0 = (2^ndim)*(i-1);
 
-%  xgll(1,i)=mesh3d.XC(1,i);
-%  xgll(2,i)=mesh3d.XC(4,i);
-%  xgll(3,i)=mesh3d.XC(2,i);
-%  xgll(4,i)=mesh3d.XC(3,i);
-%
-%  xgll(5,i)=mesh3d.XC(5,i);
-%  xgll(6,i)=mesh3d.XC(8,i);
-%  xgll(7,i)=mesh3d.XC(6,i);
-%  xgll(8,i)=mesh3d.XC(7,i);
-%
-%  ygll(1,i)=mesh3d.YC(1,i);
-%  ygll(2,i)=mesh3d.YC(4,i);
-%  ygll(3,i)=mesh3d.YC(2,i);
-%  ygll(4,i)=mesh3d.YC(3,i);
-%
-%  ygll(5,i)=mesh3d.YC(5,i);
-%  ygll(6,i)=mesh3d.YC(8,i);
-%  ygll(7,i)=mesh3d.YC(6,i);
-%  ygll(8,i)=mesh3d.YC(7,i);
-%
-%  zgll(1,i)=mesh3d.ZC(1,i);
-%  zgll(2,i)=mesh3d.ZC(4,i);
-%  zgll(3,i)=mesh3d.ZC(2,i);
-%  zgll(4,i)=mesh3d.ZC(3,i);
-%
-%  zgll(5,i)=mesh3d.ZC(5,i);
-%  zgll(6,i)=mesh3d.ZC(8,i);
-%  zgll(7,i)=mesh3d.ZC(6,i);
-%  zgll(8,i)=mesh3d.ZC(7,i);
+  f1 = [0 1 4 5] + 1 + p0;
+  f2 = [1 5 6 2] + 1 + p0;
+  f3 = [2 6 7 3] + 1 + p0;
+  f4 = [3 7 4 0] + 1 + p0;
+  f5 = [0 1 2 3] + 1 + p0;
+  f6 = [4 5 6 7] + 1 + p0;
+
+  polydata = [polydata; f1; f2; f3; f4; f5; f6];
+
 
 end  
 
@@ -221,6 +200,8 @@ fname='test0.f00001';
 
 [status] = Nek_WriteFld(ndim,N,nel,xgll,ygll,zgll,U,V,W,P,T,nps,ifx,ifu,ifp,Glno,fname)
 
+vfname = 'test.vtk';
+vtkwrite(vfname,'polydata','hexahedron',xgll,ygll,zgll,polydata)
  
 %---------------------------------------------------------------------- 
 function Plot3DElement(mesh3d,i,fig)

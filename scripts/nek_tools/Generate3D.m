@@ -48,7 +48,7 @@ function [mesh3d] = Generate3D(mesh2d,nlayers,nz0,Lz,ifperiodic);
 
 
   % Test 1.
-  Zskip = 10;       % Start 'z' refinement after Zskip 2D layer.
+  Zskip = 5;       % Start 'z' refinement after Zskip 2D layer.
   
   nz = nz0;        % No of elements in 'z' in the first layer.
   dz = Lz/nz;
@@ -61,7 +61,7 @@ function [mesh3d] = Generate3D(mesh2d,nlayers,nz0,Lz,ifperiodic);
   
   il=1;
   
-  while il<=nlayers
+  while il<=6 %nlayers
     
     ind  = mesh2d.layerindex{il}; 
     LE   = mesh2d.globalno(ind); 
@@ -87,25 +87,23 @@ function [mesh3d] = Generate3D(mesh2d,nlayers,nz0,Lz,ifperiodic);
   
     if ~ifcl
   %   No z coarsening
-  %    if il==5 || il==6 
-        dz = Lz/nz;
-        for j=1:nel_lay
-          lz = 0;  
-          for k=1:nz
-            xt  = [LX(:,j); LX(:,j)];
-            XC  = [XC xt];
-            yt  = [LY(:,j); LY(:,j)];
-            YC  = [YC yt];
-            zt1 = zeros(4,1) + lz;
-            lz  = lz + dz;
-            zt2 = zeros(4,1) + lz;
-            zt  = [zt1; zt2];
-            ZC  = [ZC zt];
-            glno = glno+1;
-            GL3D = [GL3D glno];
-          end       % k
-        end         % j
-  %    end           % il  
+  %    dz = Lz/nz;
+  %    for j=1:nel_lay
+  %      lz = 0;  
+  %      for k=1:nz
+  %        xt  = [LX(:,j); LX(:,j)];
+  %        XC  = [XC xt];
+  %        yt  = [LY(:,j); LY(:,j)];
+  %        YC  = [YC yt];
+  %        zt1 = zeros(4,1) + lz;
+  %        lz  = lz + dz;
+  %        zt2 = zeros(4,1) + lz;
+  %        zt  = [zt1; zt2];
+  %        ZC  = [ZC zt];
+  %        glno = glno+1;
+  %        GL3D = [GL3D glno];
+  %      end       % k
+  %    end         % j
       il=il+1;
   
     else
