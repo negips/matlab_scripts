@@ -1,4 +1,4 @@
-function [XC,YC,ZC,GL] = QuadExpansion(mesh2d,il,nz0,Lz);
+function [XC,YC,ZC,GL] = QuadExpansion(mesh2d,il,nz0,Lz,cz_pl);
 
   il1   = il;  
   ind1  = mesh2d.layerindex{il1}; 
@@ -9,6 +9,7 @@ function [XC,YC,ZC,GL] = QuadExpansion(mesh2d,il,nz0,Lz);
   XC  = []; YC  = []; ZC  = []; GL  = [];
 
   j=1;
+% Go through all the elements in the 2D layer 
   while j<=nel_lay
 
     XC1 =[]; YC1 =[]; ZC1 =[]; GL1 =[];
@@ -21,6 +22,7 @@ function [XC,YC,ZC,GL] = QuadExpansion(mesh2d,il,nz0,Lz);
 
     etype = mesh2d.EType{e};
     elf1 = mesh2d.cbc(1,e).connectsto;    % Element no connecting face 1
+    elf2 = mesh2d.cbc(2,e).connectsto;    % Element no connecting face 2
     elf3 = mesh2d.cbc(3,e).connectsto;    % Element no connecting face 3
     elf4 = mesh2d.cbc(4,e).connectsto;    % Element no connecting face 4
 %   Element types of neighbors
@@ -28,6 +30,11 @@ function [XC,YC,ZC,GL] = QuadExpansion(mesh2d,il,nz0,Lz);
       f1t  = mesh2d.EType{elf1};
     else
       f1t  = 'B';                   % boundary
+    end
+    if elf2~=0
+      f2t  = mesh2d.EType{elf2};
+    else
+      f2t  = 'B';
     end
     if elf3~=0
       f3t  = mesh2d.EType{elf3};
@@ -41,26 +48,26 @@ function [XC,YC,ZC,GL] = QuadExpansion(mesh2d,il,nz0,Lz);
     end  
 
     if strcmpi(etype,'s') 
-
       [XC1,XC2,YC1,YC2,ZC1,ZC2,GL1,GL2]=BuildLayer_S(XC1,XC2,YC1,YC2,ZC1,ZC2,GL1,GL2,e,j,il,nz,Lz,mesh2d);
 
-    elseif strcmpi(etype,'e3') && strcmpi(f3t,'e4')
-%     done in first if condition
-    elseif strcmpi(etype,'e1') && strcmpi(f1t,'e4')
-%     done in first if condition
+    elseif (strcmpi(etype,'e1') || strcmpi(etype,'e3'))
+      [XC1,YC1,ZC1,GL1]=BuildLayer_E13(XC1,YC1,ZC1,GL1,e,j,il,nz,Lz,mesh2d);
 
-    elseif strcmpi(etype,'e4') && strcmpi(f4t,'e4')       % Left elongated element 
+    elseif strcmpi(etype,'e4') && strcmpi(f3t,'e4')       % Left elongated element 
 
-      [XC1,YC1,ZC1,GL1,j]=BuildLayer_EL(XC1,YC1,ZC1,GL1,e,j,il,nz,Lz,mesh2d);
+      [XC1,YC1,ZC1,GL1]=BuildLayer_EL(XC1,YC1,ZC1,GL1,e,j,il,nz,Lz,mesh2d);
 
     elseif strcmpi(etype,'e4') && strcmpi(f4t,'e1')       % Right elongated element 
 
-      [XC1,YC1,ZC1,GL1,j]=BuildLayer_ER(XC1,YC1,ZC1,GL1,e,j,il,nz,Lz,mesh2d);
+      [XC1,YC1,ZC1,GL1]=BuildLayer_ER(XC1,YC1,ZC1,GL1,e,j,il,nz,Lz,mesh2d);
 
     else  
-       disp(['Some more elements need attention ', etype,' ', f1t,' ', f3t,' ', f4t])
+       disp(['Some more elements need attention ', etype,' ', f1t,' ', f2t, ' ', f3t,' ', f4t])
        figure(4);
-       plot(mesh2d.xc(:,e),mesh2d.yc(:,e)); hold on
+       xt=[mesh2d.xc(:,e); mesh2d.xc(1,e)]; 
+       yt=[mesh2d.yc(:,e); mesh2d.yc(1,e)]; 
+
+       plot(xt,yt); hold on
     end
 
     j=j+1;

@@ -60,6 +60,8 @@ function [mesh3d] = Generate3D(mesh2d,nlayers,nz0,Lz,ifperiodic);
   glno = 0;
   
   il=1;
+
+  cz_pl = 0;       % if previous layer was coarsened
   
   while il<=nlayers
     
@@ -121,15 +123,21 @@ function [mesh3d] = Generate3D(mesh2d,nlayers,nz0,Lz,ifperiodic);
       end
   
       if ifquad
-        [XC1,YC1,ZC1,GL1]= QuadExpansion(mesh2d,il,nz,Lz);
+        [XC1,YC1,ZC1,GL1]= QuadExpansion(mesh2d,il,nz,Lz,cz_pl);
   
-        il=il+2;
+        il=il+1;
         GL1=GL1+glno;
         glno=glno+length(GL1);
         XC   = [XC XC1];
         YC   = [YC YC1];
         ZC   = [ZC ZC1];
         GL3D = [GL3D GL1];
+
+        if ~isempty(GL1)
+          cz_pl=1;
+        else
+          cz_pl=0;
+        end  
   
         nz = nz/2;
   

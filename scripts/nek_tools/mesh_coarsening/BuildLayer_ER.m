@@ -1,4 +1,4 @@
-function [XC1,YC1,ZC1,GL1,j]=BuildLayer_ER(XC1,YC1,ZC1,GL1,e,j,il,nz,Lz,mesh2d)
+function [XC1,YC1,ZC1,GL1]=BuildLayer_ER(XC1,YC1,ZC1,GL1,e,j,il,nz,Lz,mesh2d)
 
 %  Only one layer needs to be built
    xt1 = zeros(4,1); yt1 = zeros(4,1); zt1 = zeros(4,1);
