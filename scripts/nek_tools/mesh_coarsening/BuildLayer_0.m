@@ -1,4 +1,4 @@
-function [XC1,YC1,ZC1,GL1,EF1]=BuildLayer_0(e,j,il,nz,Lz,mesh2d,zf1,zf2);
+function [XC1,YC1,ZC1,GL1,EF1]=BuildLayer_0(e,j,il,nz,dz,Lz,mesh2d,zf1,zf2);
 
    XC1 =[]; YC1 =[]; ZC1 =[]; GL1 =[]; EF1 = [];
 
@@ -6,7 +6,6 @@ function [XC1,YC1,ZC1,GL1,EF1]=BuildLayer_0(e,j,il,nz,Lz,mesh2d,zf1,zf2);
    xt2 = zeros(4,1); yt2 = zeros(4,1); zt2 = zeros(4,1);
 
    lz = 0;       % starting 'z'
-   dz = Lz/nz;
 
    glno=0;
 

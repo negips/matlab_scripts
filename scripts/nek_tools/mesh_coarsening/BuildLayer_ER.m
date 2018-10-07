@@ -83,6 +83,7 @@ function [XC1,YC1,ZC1,GL1,EF1]=BuildLayer_ER(e,j,il,nz,Lz,mesh2d,zf1,zf2)
      ef(2,:) = mesh2d.cbc(2,e).bc;    % BC on face 2
      ef(3,:) = mesh2d.cbc(3,e).bc;    % BC on face 3
      ef(4,:) = mesh2d.cbc(4,e).bc;    % BC on face 4
+
      if k==1
        ef(5,:) = zf1;
        ef(6,:) = 'E  ';

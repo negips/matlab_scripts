@@ -55,8 +55,6 @@ function [mesh3d] = Generate3D(mesh2d,nlayers,nz0,Lz,ifperiodic);
     zf1='W  ';
     zf2='W  ';  
   end  
-
-
  
   nz = nz0;        % No of elements in 'z' in the first layer.
   dz = Lz/nz;
@@ -66,6 +64,7 @@ function [mesh3d] = Generate3D(mesh2d,nlayers,nz0,Lz,ifperiodic);
   ZC   = [];
   GL3D = [];       % Global no for 3d elements
   EF   = [];       % element face bc values
+  ifzc = [];
 
   glno = 0;
   
@@ -81,7 +80,7 @@ function [mesh3d] = Generate3D(mesh2d,nlayers,nz0,Lz,ifperiodic);
     LY   = mesh2d.yc(:,ind);
     nel_lay = length(LE);
  
-    ifcl = CoarsenZLayer(il,nlayers,LX,LY,LE);
+    ifcl = CoarsenZLayer(il,nlayers,LX,LY,LE,mesh2d,cz_pl);
 
     if ~ifcl
 %     No z coarsening
@@ -93,15 +92,27 @@ function [mesh3d] = Generate3D(mesh2d,nlayers,nz0,Lz,ifperiodic);
         GL1  = [];       % Global no for 3d elements
         EF1  = [];       % BC on the faces
         e    = LE(j);    % Element number of the 2D mesh
-       
-        [XC1,YC1,ZC1,GL1,EF1]=BuildLayer_0(e,j,il,nz,Lz,mesh2d,zf1,zf2);
 
+        if ~cz_pl
+          ifzc(il)=0;         % no coarsening no previous layer
+          [XC1,YC1,ZC1,GL1,EF1]=BuildLayer_0(e,j,il,nz,dz,Lz,mesh2d,zf1,zf2);
+        else
+          ifzc(il)=2;         % second layer after coarsening
+          dz = Lz/(2*nz);     % previous dz
+          [XC1,YC1,ZC1,GL1,EF1]=BuildLayer_E0c(e,j,il,nz,dz,Lz,mesh2d,zf1,zf2);
+          dz=2*dz;            % new dz
+          cz_pl=0;
+        end 
+
+        GL1  = GL1 + glno;
+        
         XC = [XC XC1];
         YC = [YC YC1];
         ZC = [ZC ZC1];
         GL3D = [GL3D GL1];
         EF = [EF EF1];
 
+        glno = max(GL3D);
         LayerGEl{e}=GL1; 
       end         % j
       il=il+1;
@@ -121,38 +132,39 @@ function [mesh3d] = Generate3D(mesh2d,nlayers,nz0,Lz,ifperiodic);
       end
   
       if ifquad
-        [XC1,YC1,ZC1,GL1,LayerGEl,EF1]= QuadExpansion(mesh2d,LayerGEl,il,nz,Lz,cz_pl,zf1,zf2);
+        ifzc(il)=1;         % Layer 1 of coarsening
+        [XC1,YC1,ZC1,GL1,LayerGEl,EF1]= QuadExpansion(mesh2d,LayerGEl,glno,il,nz,Lz,ifcl,cz_pl,zf1,zf2);
   
         il=il+1;
-        GL1=GL1+glno;
-        glno=glno+length(GL1);
+
         XC   = [XC XC1];
         YC   = [YC YC1];
         ZC   = [ZC ZC1];
         GL3D = [GL3D GL1];
         EF   = [EF EF1];
 
-        if ~isempty(GL1)
-          cz_pl=1;
-        else
-          cz_pl=0;
-        end  
-  
+        glno=max(GL3D);
+        cz_pl=1;
+
         nz = nz/2;
+
+        disp(['Quad Expansion of Layer ', num2str(il)])
   
-        continue
       end 
   
     end % ~ifcl
   
   end   % while il<=nlayers
   
-  mesh3d.XC   = XC;
-  mesh3d.YC   = YC;
-  mesh3d.ZC   = ZC;
-  mesh3d.GL3D = GL3D;
+  mesh3d.xc   = XC;
+  mesh3d.yc   = YC;
+  mesh3d.zc   = ZC;
+  mesh3d.globalno = GL3D;
   mesh3d.LayerGEl = LayerGEl;
   mesh3d.EF   = EF;
+  mesh3d.ifzc = ifzc;
+
+  [mesh3d] = Build3DConnectivity(mesh3d,mesh2d);
 
 end   % function
 
@@ -187,10 +199,10 @@ function maxdlv = MaxDLV(LX,LY,nel)
 end % function
 %---------------------------------------------------------------------- 
 
-function ifcl = CoarsenZLayer(il,nlayers,LX,LY,LE)
+function ifcl = CoarsenZLayer(il,nlayers,LX,LY,LE,mesh2d,cz_pl)
 
 % Test 1.
-  Zskip = 5;       % Start 'z' refinement after Zskip 2D layer.
+  Zskip = 7;       % Start 'z' refinement after Zskip 2D layer.
  
   nel_lay = length(LE);
   maxdlo  = MaxDLO(LX,LY,nel_lay);    
@@ -208,6 +220,21 @@ function ifcl = CoarsenZLayer(il,nlayers,LX,LY,LE)
   
   if il==nlayers
     ifcl = 0;
+  end
+
+% If previous layer was 'z' coarsened  
+  if cz_pl
+    ifcl = 0;
+  end
+
+% We don't coarsen with e1,e3 type 2d elements.
+% If we do this, Then the elements in the lower layer with get stretched across 3 layers.
+% Making bad aspect ratios (which we were trying to avoid in the first place).
+  for j=1:length(LE)
+    e=LE(j);
+    if strcmpi(mesh2d.EType{e},'e1') || strcmpi(mesh2d.EType{e},'e3')
+      ifcl=0;
+    end
   end  
 
 end   %function
