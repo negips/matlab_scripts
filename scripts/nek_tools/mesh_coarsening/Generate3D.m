@@ -57,6 +57,7 @@ function [mesh3d] = Generate3D(mesh2d,nlayers,nz0,Lz,ifperiodic);
   YC   = [];
   ZC   = [];
   GL3D = [];       % Global no for 3d elements
+
   glno = 0;
   
   il=1;
@@ -81,10 +82,10 @@ function [mesh3d] = Generate3D(mesh2d,nlayers,nz0,Lz,ifperiodic);
     if il==Zskip+1
   %   Coarsen entire layer
       ifcl = 1;
-    elseif il==Zskip+4
-      ifcl = 1;
-    elseif il==Zskip+8
-      ifcl = 1;
+%    elseif il==Zskip+4
+%      ifcl = 1;
+%    elseif il==Zskip+8
+%      ifcl = 1;
     end
   
     if il==nlayers
@@ -95,20 +96,33 @@ function [mesh3d] = Generate3D(mesh2d,nlayers,nz0,Lz,ifperiodic);
 %     No z coarsening
       dz = Lz/nz;
       for j=1:nel_lay
+        XC1  = [];
+        YC1  = [];
+        ZC1  = [];
+        GL1  = [];       % Global no for 3d elements
+           
         lz = 0;  
         for k=1:nz
-          xt  = [LX(:,j); LX(:,j)];
-          XC  = [XC xt];
-          yt  = [LY(:,j); LY(:,j)];
-          YC  = [YC yt];
-          zt1 = zeros(4,1) + lz;
-          lz  = lz + dz;
-          zt2 = zeros(4,1) + lz;
-          zt  = [zt1; zt2];
-          ZC  = [ZC zt];
+          xt   = [LX(:,j); LX(:,j)];
+          XC1  = [XC1 xt];
+          yt   = [LY(:,j); LY(:,j)];
+          YC1  = [YC1 yt];
+          zt1  = zeros(4,1) + lz;
+          lz   = lz + dz;
+          zt2  = zeros(4,1) + lz;
+          zt   = [zt1; zt2];
+          ZC1  = [ZC1 zt];
           glno = glno+1;
-          GL3D = [GL3D glno];
+          GL1  = [GL1 glno];
         end       % k
+
+        XC = [XC XC1];
+        YC = [YC YC1];
+        ZC = [ZC ZC1];
+        GL3D = [GL3D GL1];
+
+        gl2d = LE(j);
+        LayerGEl{gl2d}=GL1; 
       end         % j
       il=il+1;
   
@@ -127,7 +141,7 @@ function [mesh3d] = Generate3D(mesh2d,nlayers,nz0,Lz,ifperiodic);
       end
   
       if ifquad
-        [XC1,YC1,ZC1,GL1]= QuadExpansion(mesh2d,il,nz,Lz,cz_pl);
+        [XC1,YC1,ZC1,GL1,LayerGEl]= QuadExpansion(mesh2d,LayerGEl,il,nz,Lz,cz_pl);
   
         il=il+1;
         GL1=GL1+glno;
@@ -156,6 +170,7 @@ function [mesh3d] = Generate3D(mesh2d,nlayers,nz0,Lz,ifperiodic);
   mesh3d.YC   = YC;
   mesh3d.ZC   = ZC;
   mesh3d.GL3D = GL3D;
+  mesh3d.LayerGEl = LayerGEl;
 
 end   % function
 

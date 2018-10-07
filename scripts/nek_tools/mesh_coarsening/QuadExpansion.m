@@ -1,4 +1,4 @@
-function [XC,YC,ZC,GL] = QuadExpansion(mesh2d,il,nz0,Lz,cz_pl);
+function [XC,YC,ZC,GL,LayerGEl] = QuadExpansion(mesh2d,LayerGEl,il,nz0,Lz,cz_pl);
 
   il1   = il;  
   ind1  = mesh2d.layerindex{il1}; 
@@ -13,9 +13,6 @@ function [XC,YC,ZC,GL] = QuadExpansion(mesh2d,il,nz0,Lz,cz_pl);
   while j<=nel_lay
 
     XC1 =[]; YC1 =[]; ZC1 =[]; GL1 =[];
-    XC2 =[]; YC2 =[]; ZC2 =[]; GL2 =[];
-    XC3 =[]; YC3 =[]; ZC3 =[]; GL3 =[];
-    XC4 =[]; YC4 =[]; ZC4 =[]; GL4 =[];
 
     e=LE1(j);
     nz=nz0;
@@ -48,7 +45,7 @@ function [XC,YC,ZC,GL] = QuadExpansion(mesh2d,il,nz0,Lz,cz_pl);
     end  
 
     if strcmpi(etype,'s') 
-      [XC1,XC2,YC1,YC2,ZC1,ZC2,GL1,GL2]=BuildLayer_S(XC1,XC2,YC1,YC2,ZC1,ZC2,GL1,GL2,e,j,il,nz,Lz,mesh2d);
+      [XC1,YC1,ZC1,GL1]=BuildLayer_S(XC1,YC1,ZC1,GL1,e,j,il,nz,Lz,mesh2d);
 
     elseif (strcmpi(etype,'e1') || strcmpi(etype,'e3'))
       [XC1,YC1,ZC1,GL1]=BuildLayer_E13(XC1,YC1,ZC1,GL1,e,j,il,nz,Lz,mesh2d);
@@ -76,10 +73,12 @@ function [XC,YC,ZC,GL] = QuadExpansion(mesh2d,il,nz0,Lz,cz_pl);
 
     j=j+1;
 
-    XC = [XC XC1 XC2 XC3 XC4];
-    YC = [YC YC1 YC2 YC3 YC4];
-    ZC = [ZC ZC1 ZC2 ZC3 ZC4];
-    GL = [GL GL1 GL2 GL3 GL4];
+    XC = [XC XC1];
+    YC = [YC YC1];
+    ZC = [ZC ZC1];
+    GL = [GL GL1];
+
+    LayerGEl{e}=GL1;
 
   end             % j<=nel_layer
       

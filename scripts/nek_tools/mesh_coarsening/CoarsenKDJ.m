@@ -43,7 +43,7 @@ function ifc = CoarsenKDJ(LX,LY,j,i,iflocked)
         end
       end
 
-      if xmid>0.02 && xmid<0.04
+      if xmid>0.02 && xmid<0.08
         if i==start_layer+6
           ifc=1;
         end
@@ -85,6 +85,7 @@ function ifc = CoarsenKDJ(LX,LY,j,i,iflocked)
       ifc=0;
     end
 
+%    ifc = 0;
 
 end % function
 %---------------------------------------------------------------------- 

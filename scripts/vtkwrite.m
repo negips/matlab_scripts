@@ -69,7 +69,6 @@ fprintf(fid, '# vtk DataFile Version 2.0\n');
 % 2. Title
 fprintf(fid, 'VTK from Matlab\n');
 
-
 binaryflag = any(strcmpi(varargin, 'BINARY'));
 if any(strcmpi(varargin, 'PRECISION'))
     precision = num2str(varargin{find(strcmpi(varargin, 'PRECISION'))+1});
@@ -197,7 +196,13 @@ switch upper(dataType)
         
     case 'POLYDATA'
 
-        fprintf(fid, 'ASCII\n');
+        if binaryflag
+          disp(['Binary polygon VTK not working'])
+          disp('Switching to ASCII')
+          binaryflag = ~binaryflag;
+        end
+        setdataformat(fid, binaryflag);
+
         if numel(varargin)<4, error('Not enough input arguments'); end
         x = varargin{2}(:);
         y = varargin{3}(:);
@@ -225,8 +230,16 @@ switch upper(dataType)
         output = [x(1:3:end-2), y(1:3:end-2), z(1:3:end-2),...
                   x(2:3:end-1), y(2:3:end-1), z(2:3:end-1),...
                   x(3:3:end), y(3:3:end), z(3:3:end)]';
-              
-        fprintf(fid, spec, output);
+
+        if ~binaryflag
+            fprintf(fid, spec, output);
+        else
+            output = transpose(output);
+            output = output(:);
+            fwrite(fid, output, 'float', 'b');
+        end
+             
+%        fprintf(fid, spec, output);
         
         switch upper(varargin{1})
             case 'LINES'
@@ -272,12 +285,13 @@ if strcmpi(filename,'matlab_export.vtk')
 end
 end
 
+%---------------------------------------------------------------------- 
 function setdataformat(fid, binaryflag)
 
-if ~binaryflag
-    fprintf(fid, 'ASCII\n');
-else
-    fprintf(fid, 'BINARY\n');
-end
+  if ~binaryflag
+      fprintf(fid, 'ASCII\n');
+  else
+      fprintf(fid, 'BINARY\n');
+  end
 end
     

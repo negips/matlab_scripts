@@ -153,12 +153,12 @@ yvtk=ygll(:);
 zvtk=0*xvtk;
 
 vfname = 'test2d.vtk';
-vtkwrite(vfname,'polydata','tetrahedron',xvtk,yvtk,zvtk,polydata)
+vtkwrite(vfname,'polydata','tetrahedron',xvtk,yvtk,zvtk,polydata,'binary')
 
 
 
 % Generate 3D mesh
-nz0=16;
+nz0=4;
 Lz=0.02;
 ifperiodic=1;
 [mesh3d] = Generate3D(mesh2d,nlayers,nz0,Lz,ifperiodic);
@@ -221,7 +221,7 @@ yvtk=ygll(:);
 zvtk=zgll(:);
 
 vfname = 'test.vtk';
-vtkwrite(vfname,'polydata','hexahedron',xvtk,yvtk,zvtk,polydata)
+vtkwrite(vfname,'polydata','hexahedron',xvtk,yvtk,zvtk,polydata,'binary')
  
 %---------------------------------------------------------------------- 
 function Plot3DElement(mesh3d,i,fig)
