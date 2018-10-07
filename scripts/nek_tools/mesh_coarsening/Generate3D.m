@@ -46,10 +46,18 @@ function [mesh3d] = Generate3D(mesh2d,nlayers,nz0,Lz,ifperiodic);
 
 % Same order for y,z
 
+  if ifperiodic
+    zf1='P  ';
+    zf2='P  ';
+  else
+    disp('Non-periodic BC on the Z faces')
+    disp(['Setting zf1=W;    zf2=W'])
+    zf1='W  ';
+    zf2='W  ';  
+  end  
 
-  % Test 1.
-  Zskip = 5;       % Start 'z' refinement after Zskip 2D layer.
-  
+
+ 
   nz = nz0;        % No of elements in 'z' in the first layer.
   dz = Lz/nz;
   
@@ -57,6 +65,7 @@ function [mesh3d] = Generate3D(mesh2d,nlayers,nz0,Lz,ifperiodic);
   YC   = [];
   ZC   = [];
   GL3D = [];       % Global no for 3d elements
+  EF   = [];       % element face bc values
 
   glno = 0;
   
@@ -70,59 +79,30 @@ function [mesh3d] = Generate3D(mesh2d,nlayers,nz0,Lz,ifperiodic);
     LE   = mesh2d.globalno(ind); 
     LX   = mesh2d.xc(:,ind);
     LY   = mesh2d.yc(:,ind);
-    LZ   = zeros(size(LX));
-    cbc  = mesh2d.cbc(:,ind);
-  
     nel_lay = length(LE);
-    maxdlo  = MaxDLO(LX,LY,nel_lay);    
-    maxdlv  = MaxDLV(LX,LY,nel_lay);
-  
-    ifcl = 0;       % if coarsen layer
-  %  if maxdlo/dz>2 || maxdlv/dz>2 && il>Zskip
-    if il==Zskip+1
-  %   Coarsen entire layer
-      ifcl = 1;
-%    elseif il==Zskip+4
-%      ifcl = 1;
-%    elseif il==Zskip+8
-%      ifcl = 1;
-    end
-  
-    if il==nlayers
-      ifcl = 0;
-    end  
-  
+ 
+    ifcl = CoarsenZLayer(il,nlayers,LX,LY,LE);
+
     if ~ifcl
 %     No z coarsening
-      dz = Lz/nz;
+
       for j=1:nel_lay
         XC1  = [];
         YC1  = [];
         ZC1  = [];
         GL1  = [];       % Global no for 3d elements
-           
-        lz = 0;  
-        for k=1:nz
-          xt   = [LX(:,j); LX(:,j)];
-          XC1  = [XC1 xt];
-          yt   = [LY(:,j); LY(:,j)];
-          YC1  = [YC1 yt];
-          zt1  = zeros(4,1) + lz;
-          lz   = lz + dz;
-          zt2  = zeros(4,1) + lz;
-          zt   = [zt1; zt2];
-          ZC1  = [ZC1 zt];
-          glno = glno+1;
-          GL1  = [GL1 glno];
-        end       % k
+        EF1  = [];       % BC on the faces
+        e    = LE(j);    % Element number of the 2D mesh
+       
+        [XC1,YC1,ZC1,GL1,EF1]=BuildLayer_0(e,j,il,nz,Lz,mesh2d,zf1,zf2);
 
         XC = [XC XC1];
         YC = [YC YC1];
         ZC = [ZC ZC1];
         GL3D = [GL3D GL1];
+        EF = [EF EF1];
 
-        gl2d = LE(j);
-        LayerGEl{gl2d}=GL1; 
+        LayerGEl{e}=GL1; 
       end         % j
       il=il+1;
   
@@ -141,7 +121,7 @@ function [mesh3d] = Generate3D(mesh2d,nlayers,nz0,Lz,ifperiodic);
       end
   
       if ifquad
-        [XC1,YC1,ZC1,GL1,LayerGEl]= QuadExpansion(mesh2d,LayerGEl,il,nz,Lz,cz_pl);
+        [XC1,YC1,ZC1,GL1,LayerGEl,EF1]= QuadExpansion(mesh2d,LayerGEl,il,nz,Lz,cz_pl,zf1,zf2);
   
         il=il+1;
         GL1=GL1+glno;
@@ -150,6 +130,7 @@ function [mesh3d] = Generate3D(mesh2d,nlayers,nz0,Lz,ifperiodic);
         YC   = [YC YC1];
         ZC   = [ZC ZC1];
         GL3D = [GL3D GL1];
+        EF   = [EF EF1];
 
         if ~isempty(GL1)
           cz_pl=1;
@@ -171,6 +152,7 @@ function [mesh3d] = Generate3D(mesh2d,nlayers,nz0,Lz,ifperiodic);
   mesh3d.ZC   = ZC;
   mesh3d.GL3D = GL3D;
   mesh3d.LayerGEl = LayerGEl;
+  mesh3d.EF   = EF;
 
 end   % function
 
@@ -205,6 +187,30 @@ function maxdlv = MaxDLV(LX,LY,nel)
 end % function
 %---------------------------------------------------------------------- 
 
+function ifcl = CoarsenZLayer(il,nlayers,LX,LY,LE)
 
+% Test 1.
+  Zskip = 5;       % Start 'z' refinement after Zskip 2D layer.
+ 
+  nel_lay = length(LE);
+  maxdlo  = MaxDLO(LX,LY,nel_lay);    
+  maxdlv  = MaxDLV(LX,LY,nel_lay);
+  
+  ifcl = 0;       % if coarsen layer
+  if il==Zskip+1
+%   Coarsen entire layer
+    ifcl = 1;
+%  elseif il==Zskip+4
+%    ifcl = 1;
+%  elseif il==Zskip+8
+%    ifcl = 1;
+  end
+  
+  if il==nlayers
+    ifcl = 0;
+  end  
+
+end   %function
+%---------------------------------------------------------------------- 
 
 
