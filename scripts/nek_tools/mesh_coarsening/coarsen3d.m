@@ -21,8 +21,8 @@ close all
 
 
 %load saab_wing2d.mat
-%load saab750k.mat
-load fluent_plus2.mat
+load saab750k.mat
+%load fluent_plus2.mat
 
 skiplayers = 2;         % Need to skip first layer since its smaller than the others
 ifplot = 0;
@@ -99,8 +99,9 @@ for i=1:nlayers
   for j=1:l1
       
 %    ifc(j) = CoarsenCriteria(LX,LY,j,i,iflocked);
-    ifc(j) = CoarsenKDJ(LX,LY,j,i,iflocked);
-       
+%    ifc(j) = CoarsenKDJ(LX,LY,j,i,iflocked);
+    ifc(j) = CoarsenSaab(LX,LY,j,i,iflocked);
+      
     xt = LX(:,j);
     yt = LY(:,j);
 
@@ -128,7 +129,7 @@ end
 disp(['Total Number of Elements: ', num2str(new_nelg)])
 
 % Not done for multiple definitions right now
-curvedef= 'W  ';
+curvedef= 'mv ';
 mesh2d = ReOrderElements(NewE,NewX,NewY,NewBC,NewCEl,NewCoF,NewET,rea.mesh,curvedef); 
 
 polydata = [];

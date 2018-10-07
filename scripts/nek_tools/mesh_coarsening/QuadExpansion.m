@@ -61,6 +61,10 @@ function [XC,YC,ZC,GL] = QuadExpansion(mesh2d,il,nz0,Lz,cz_pl);
 
       [XC1,YC1,ZC1,GL1]=BuildLayer_ER(XC1,YC1,ZC1,GL1,e,j,il,nz,Lz,mesh2d);
 
+    elseif strcmpi(etype,'e4') && strcmpi(f3t,'B')        % Elongated Boundary element 
+
+      [XC1,YC1,ZC1,GL1]=BuildLayer_EL(XC1,YC1,ZC1,GL1,e,j,il,nz,Lz,mesh2d);
+
     else  
        disp(['Some more elements need attention ', etype,' ', f1t,' ', f2t, ' ', f3t,' ', f4t])
        figure(4);

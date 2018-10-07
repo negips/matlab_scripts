@@ -147,12 +147,22 @@ function [NewE, NewX, NewY, NewBC, NewCEl, NewCoF, NewET, iflocked]=Create2DLaye
         
         LCEl2(1,k-1) = LCEl(1,j-1);
         LCEl2(2,k-1) = LCEl(2,j-1);
-        LCEl2(3,k-1) = LCEl(3,j);
+        if j<=l1-2
+          LCEl2(3,k-1) = LCEl(3,j+1);
+        else
+          LCEl2(3,k-1) = LCEl(3,j);
+        end  
+
         LCEl2(4,k-1) = LCEl(4,j-1);
 
         LCoF2(1,k-1) = LCoF(1,j-1);
         LCoF2(2,k-1) = LCoF(2,j-1);
-        LCoF2(3,k-1) = LCoF(3,j);
+        if j<=l1-2
+          LCoF2(3,k-1) = LCoF(3,j+1);
+        else  
+          LCoF2(3,k-1) = LCoF(3,j);
+        end  
+
         LCoF2(4,k-1) = LCoF(4,j-1);
 
         LET2{k-1}    = 's';   % no change
