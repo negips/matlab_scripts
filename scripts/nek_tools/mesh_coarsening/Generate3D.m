@@ -81,6 +81,10 @@ function [mesh3d] = Generate3D(mesh2d,nlayers,nz0,Lz,ifperiodic);
     if il==Zskip+1
   %   Coarsen entire layer
       ifcl = 1;
+    elseif il==Zskip+4
+      ifcl = 1;
+    elseif il==Zskip+8
+      ifcl = 1;
     end
   
     if il==nlayers
