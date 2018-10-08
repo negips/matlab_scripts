@@ -1,4 +1,4 @@
-function [XC,YC,ZC,GL,LayerGEl,EF] = QuadExpansion(mesh2d,LayerGEl,il,nz0,Lz,ifcl,cz_pl,zf1,zf2);
+function [XC,YC,ZC,GL,LayerGEl,EF] = QuadExpansion(mesh2d,LayerGEl,glno,il,nz0,Lz,ifcl,cz_pl,zf1,zf2);
 
   il1   = il;  
   ind1  = mesh2d.layerindex{il1}; 
@@ -12,7 +12,7 @@ function [XC,YC,ZC,GL,LayerGEl,EF] = QuadExpansion(mesh2d,LayerGEl,il,nz0,Lz,ifc
 
   j=1;
 % Go through all the elements in the 2D layer 
-  while j<=nel_lay-1
+  while j<=nel_lay
 
     e=LE1(j);
     nz=nz0;
@@ -45,16 +45,16 @@ function [XC,YC,ZC,GL,LayerGEl,EF] = QuadExpansion(mesh2d,LayerGEl,il,nz0,Lz,ifc
     end  
 
     if strcmpi(etype,'s') 
-      [XC1,YC1,ZC1,GL1,EF1]=BuildLayer_S(e,j,il,nz,Lz,mesh2d,zf1,zf2);
+      [XC1,YC1,ZC1,GL1,EF1]=BuildLayer_S(e,j,il,nz,Lz,glno,mesh2d,zf1,zf2);
 
-    elseif (strcmpi(etype,'e1') || strcmpi(etype,'e3'))
-      [XC1,YC1,ZC1,GL1,EF1]=BuildLayer_E13(e,j,il,nz,Lz,mesh2d,zf1,zf2);
+%    elseif (strcmpi(etype,'e1') || strcmpi(etype,'e3'))
+%      [XC1,YC1,ZC1,GL1,EF1]=BuildLayer_E13(e,j,il,nz,Lz,mesh2d,zf1,zf2);
 
     elseif strcmpi(etype,'e4') && strcmpi(f3t,'e4')       % Left elongated element 
 
       [XC1,YC1,ZC1,GL1,EF1]=BuildLayer_EL(e,j,il,nz,Lz,mesh2d,zf1,zf2);
 
-    elseif strcmpi(etype,'e4') && strcmpi(f4t,'e1')       % Right elongated element 
+    elseif strcmpi(etype,'e4') && strcmpi(f1t,'e4')       % Right elongated element 
 
       [XC1,YC1,ZC1,GL1,EF1]=BuildLayer_ER(e,j,il,nz,Lz,mesh2d,zf1,zf2);
 
@@ -73,11 +73,15 @@ function [XC,YC,ZC,GL,LayerGEl,EF] = QuadExpansion(mesh2d,LayerGEl,il,nz0,Lz,ifc
 
     j=j+1;
 
+    GL1 = GL1+glno;
+
     XC = [XC XC1];
     YC = [YC YC1];
     ZC = [ZC ZC1];
     GL = [GL GL1];
     EF = [EF EF1];
+
+    glno=max(GL);
 
     LayerGEl{e}=GL1;
 

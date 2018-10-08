@@ -9,6 +9,7 @@ function [XC1,YC1,ZC1,GL1,EF1]=BuildLayer_S(e,j,il,nz,Lz,mesh2d,zf1,zf2);
    elf2 = mesh2d.cbc(2,e).connectsto;    % Element no connecting face 2
    elf3 = mesh2d.cbc(3,e).connectsto;    % Element no connecting face 3
    elf4 = mesh2d.cbc(4,e).connectsto;    % Element no connecting face 4
+
 %  Element types
    if elf1~=0
      f1t  = mesh2d.EType{elf1};
@@ -33,8 +34,7 @@ function [XC1,YC1,ZC1,GL1,EF1]=BuildLayer_S(e,j,il,nz,Lz,mesh2d,zf1,zf2);
 
    lz = 0;       % starting 'z'
    dz = Lz/nz;
-
-   glno=0;
+   glno = 0;
 
    for k=1:nz
 
@@ -146,6 +146,8 @@ function [XC1,YC1,ZC1,GL1,EF1]=BuildLayer_S(e,j,il,nz,Lz,mesh2d,zf1,zf2);
 
      end         % mod(k,4)
 
+%     cel = ConnectivityS(mesh2d,mesh3d,il,e,j,k)
+     
      ef(1,:) = mesh2d.cbc(1,e).bc;    % BC on face 1
      ef(2,:) = mesh2d.cbc(2,e).bc;    % BC on face 2
      ef(3,:) = mesh2d.cbc(3,e).bc;    % BC on face 3
@@ -170,4 +172,25 @@ function [XC1,YC1,ZC1,GL1,EF1]=BuildLayer_S(e,j,il,nz,Lz,mesh2d,zf1,zf2);
 
 end   % function
 %---------------------------------------------------------------------- 
+
+function [cel] = ConnectivityS(mesh2d,mesh3d,il,e,j,k,glno)
+
+%  glno is the global no of the current element
+%  index numbers in the global array
+   cel = zeros(6,1);    
+  
+   if mod(k,4)==1
+     if k==1;
+       cel(5)=0;        %
+     else
+       cel(5)=glno-1;
+     end  
+      
+     cel(6)=glno+1; 
+   end   
+            
+
+end
+%---------------------------------------------------------------------- 
+
 

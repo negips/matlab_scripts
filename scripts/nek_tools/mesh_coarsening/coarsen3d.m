@@ -45,13 +45,13 @@ for i=1:nlayers
   NewCEl{i}=OldCEl{i};
   NewCoF{i}=ConnectedOnFace(NewCEl{i});
 
+% Define an element type  
   l1=length(NewE{i});
   for j=1:l1
     NewET{i}{j}='s';
   end  
 
 end
-
 
 % Test coarsening algorithm 1
 % Coarsen Layer by Layer
@@ -115,7 +115,9 @@ for i=1:nlayers
 
   c_ind = find(ifc);
   nc = length(c_ind);
-  disp(['Coarsen ' num2str(nc) ' Elements in layer ' num2str(i)])
+  if nc>0
+    disp(['Coarsen ' num2str(nc) ' Elements in layer ' num2str(i)])
+  end  
 
   ifplot =0;
 % Coarsen layer in consecutive pairs
@@ -128,7 +130,7 @@ for i=1:nlayers
 end
 disp(['Total Number of Elements: ', num2str(new_nelg)])
 
-% Not done for multiple definitions right now
+% Not done for multiple curvature definitions right now
 curvedef= 'W  ';
 mesh2d = ReOrderElements(NewE,NewX,NewY,NewBC,NewCEl,NewCoF,NewET,rea.mesh,curvedef); 
 
@@ -154,7 +156,6 @@ zvtk=0*xvtk;
 
 vfname = 'test2d.vtk';
 vtkwrite(vfname,'polydata','tetrahedron',xvtk,yvtk,zvtk,polydata,'binary')
-
 
 
 % Generate 3D mesh
@@ -213,8 +214,11 @@ for i=1:nel
   f6 = [4 5 6 7] + 1 + p0;
 
   polydata = [polydata; f1; f2; f3; f4; f5; f6];
+  
 
 end  
+
+
 
 xvtk=xgll(:);
 yvtk=ygll(:);
@@ -223,139 +227,12 @@ zvtk=zgll(:);
 vfname = 'test.vtk';
 vtkwrite(vfname,'polydata','hexahedron',xvtk,yvtk,zvtk,polydata,'binary')
  
-%---------------------------------------------------------------------- 
-function Plot3DElement(mesh3d,i,fig)
-
-  figure(fig)
-  
-  ind=[1 2 3 4 1];
-  plot3(mesh3d.XC(ind,i),mesh3d.YC(ind,i),mesh3d.ZC(ind,i), 'k'); hold on
-
-  ind=[5 6 7 8 5];
-  plot3(mesh3d.XC(ind,i),mesh3d.YC(ind,i),mesh3d.ZC(ind,i), 'k'); hold on
-
-  ind=[1 5 6 2 1];
-  plot3(mesh3d.XC(ind,i),mesh3d.YC(ind,i),mesh3d.ZC(ind,i), 'k'); hold on
-
-  ind=[4 8 7 3 4];
-  plot3(mesh3d.XC(ind,i),mesh3d.YC(ind,i),mesh3d.ZC(ind,i), 'k'); hold on
-
-  xlabel('x')
-  ylabel('y')
-  zlabel('z')
-  view(3)
-
+glls = [];
+for i=1:length(mesh3d.LayerGEl)
+  g1 = mesh3d.LayerGEl{i};
+  glls = [glls g1];
 end
-%---------------------------------------------------------------------- 
-
-function newcof = ConnectedOnFace(NewCEl)
-
-  [r nel] = size(NewCEl);
- 
-  newcof = []; 
-  nfaces=r;
-  for i=1:nel
-    f=int32(zeros(nfaces,1));
-    for j=1:nfaces
-      if NewCEl(j,i)==0   % Boundary element
-        f(j)=0;
-      else
-        f2=j+2;
-        if f2>4
-          f2=f2-4;
-        end
-        f(j)=f2;
-      end     % if
-  
-    end       % j=1:nfaces
-    newcof = [newcof f]; 
-  
-  end         % i=1:nel
-
-end   % function  
-%---------------------------------------------------------------------- 
-
-function ifc = CoarsenCriteria(LX,LY,j,i,iflocked)
-
-    ARcut = 2.5;             % Coarsen if Aspect ratio is larger than this.
-    start_layer = 5;
-
-%   Find aspect ratio of elements 
-
-%   Length of sides 1 and 3   % Facing 'O'
-    l1o = sqrt( (LX(1,j)-LX(2,j))^2 + (LY(1,j) - LY(2,j))^2);
-    l2o = sqrt( (LX(3,j)-LX(4,j))^2 + (LY(3,j) - LY(4,j))^2);
-    dlo = mean([l1o l2o]);
-     
-%   Length of sides 2 and 4   % Facing 'V'
-    l1v = sqrt( (LX(2,j)-LX(3,j))^2 + (LY(2,j) - LY(3,j))^2);
-    l2v = sqrt( (LX(4,j)-LX(1,j))^2 + (LY(4,j) - LY(1,j))^2);
-    dlv = mean([l1v l2v]);
-
-    l_ar = dlo/dlv;
-    lmax = max([l1o l2o l1v l2v]);
-
-    ifc=0;
-    if l_ar>ARcut
-      ifc=1; 
-    end
-
-    xmid = mean(LX(:,j));
-    ymid = mean(LY(:,j));
-    rad = sqrt(xmid^2 + ymid^2);  
-
-    if (xmid<0.0 && rad>0.1 )
-      ifc=0;
-    end
-
-    if xmid>1 && l_ar>1.25
-      ifc=1;
-    end
-
-%   Maximum length  
-    if dlv>0.1
-      ifc=0;
-    end
-
-%   For the radially emerging elements I refine by number of layers
-    if i==start_layer
-      theta=atan(ymid/(xmid-0.25))*180/pi;
-      if xmid<0.25 && abs(theta)<15
-        ifc=1;
-      end
-    elseif i<=start_layer+4
-      theta=atan(ymid/(xmid-0.25))*180/pi;
-      if xmid<0.25 && abs(theta)>15 && abs(theta)<75
-        ifc=1;
-      end
-    else
-      if xmid<0.25 
-        ifc=0;
-      end
-    end
-    
-%   Skip first n layers      
-    if i<start_layer
-      ifc=0;
-    end  
-
-    [pts nels]=size(LX);  
-%   End condition           
-    if (iflocked(j) || j==1 || j>=nels-1)
-      ifc=0;
-    end
-    
-%   If this layer has anything locked, lock the whole layer
-    if max(iflocked)
-      ifc=0;
-    end  
-
-
-end % function
-%---------------------------------------------------------------------- 
-
-
-
+plot(glls)
 
 
 
