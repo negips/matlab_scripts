@@ -150,7 +150,7 @@ function [mesh3d] = Generate3D(mesh2d,nlayers,nz0,Lz,ifperiodic);
   mesh3d.EF   = EF;
   mesh3d.ifzc = ifzc;
 
-%  [mesh3d] = Build3DConnectivity(mesh3d,mesh2d);
+  [mesh3d] = Build3DConnectivity(mesh3d,mesh2d);
 
 end   % function
 
@@ -188,7 +188,7 @@ end % function
 function ifcl = CoarsenZLayer(il,nlayers,LX,LY,LE,mesh2d,cz_pl)
 
 % Test 1.
-  Zskip = 7;       % Start 'z' refinement after Zskip 2D layer.
+  Zskip = 11;       % Start 'z' refinement after Zskip 2D layer.
  
   nel_lay = length(LE);
   maxdlo  = MaxDLO(LX,LY,nel_lay);    
@@ -198,9 +198,9 @@ function ifcl = CoarsenZLayer(il,nlayers,LX,LY,LE,mesh2d,cz_pl)
   if il==Zskip+1
 %   Coarsen entire layer
     ifcl = 1;
-%  elseif il==Zskip+4
-%    ifcl = 1;
-%  elseif il==Zskip+8
+  elseif il==Zskip+3
+    ifcl = 1;
+%  elseif il==Zskip+5
 %    ifcl = 1;
   end
   
@@ -208,20 +208,18 @@ function ifcl = CoarsenZLayer(il,nlayers,LX,LY,LE,mesh2d,cz_pl)
     ifcl = 0;
   end
 
-% We don't coarsen with e1,e3 type 2d elements.
-% If we do this, Then the elements in the lower layer with get stretched across 3 layers.
-% Making bad aspect ratios (which we were trying to avoid in the first place).
-  for j=1:length(LE)
-    e=LE(j);
-    if strcmpi(mesh2d.EType{e},'e1') || strcmpi(mesh2d.EType{e},'e3')
-      ifcl=0;
-    end
-  end  
-
 % If previous layer was 'z' coarsened  
   if cz_pl
     ifcl = 2;
   end
+
+% We don't modify layers that have been used to modify 'x' resolution
+  for j=1:length(LE)
+    e=LE(j);
+    if strcmpi(mesh2d.EType{e},'e1') || strcmpi(mesh2d.EType{e},'e3') || strcmpi(mesh2d.EType{e},'e4')
+      ifcl=0;
+    end
+  end  
 
 
 end   %function

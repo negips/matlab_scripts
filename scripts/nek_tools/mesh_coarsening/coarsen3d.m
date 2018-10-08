@@ -159,8 +159,8 @@ vtkwrite(vfname,'polydata','tetrahedron',xvtk,yvtk,zvtk,polydata,'binary')
 
 
 % Generate 3D mesh
-nz0=4;
-Lz=-0.02;
+nz0=8;
+Lz=0.1;
 ifperiodic=1;
 [mesh3d] = Generate3D(mesh2d,nlayers,nz0,Lz,ifperiodic);
 [~, nel]=size(mesh3d.xc)
@@ -218,14 +218,12 @@ for i=1:nel
 
 end  
 
-
-
 xvtk=xgll(:);
 yvtk=ygll(:);
 zvtk=zgll(:);
 
 vfname = 'test.vtk';
-vtkwrite(vfname,'polydata','hexahedron',xvtk,yvtk,zvtk,polydata,'binary')
+%vtkwrite(vfname,'polydata','hexahedron',xvtk,yvtk,zvtk,polydata,'binary')
  
 glls = [];
 for i=1:length(mesh3d.LayerGEl)
