@@ -1,4 +1,4 @@
-function [XC1,YC1,ZC1,GL1,EF1]=BuildLayer_EL(e,j,il,nz,Lz,mesh2d,zf1,zf2)
+function [XC1,YC1,ZC1,GL1,EF1]=BuildLayer_E0c(e,j,il,nz,dz,Lz,mesh2d,zf1,zf2)
 
    XC1 =[]; YC1 =[]; ZC1 =[]; GL1 =[]; EF1 = [];
 
@@ -8,27 +8,9 @@ function [XC1,YC1,ZC1,GL1,EF1]=BuildLayer_EL(e,j,il,nz,Lz,mesh2d,zf1,zf2)
    elf1 = mesh2d.cbc(1,e).connectsto;    % Element no connecting face 1
    elf3 = mesh2d.cbc(1,e).connectsto;    % Element no connecting face 3
    elf4 = mesh2d.cbc(4,e).connectsto;    % Element no connecting face 4
-%  Element types
-   if elf1~=0
-     f1t  = mesh2d.EType{elf1};
-   else
-     f1t  = 'B';                   % boundary
-   end
-   if elf3~=0
-     f3t  = mesh2d.EType{elf3};
-   else
-     f3t  = 'B';
-   end
-   if elf4~=0
-     f4t  = mesh2d.EType{elf4};
-   else
-     f4t  = 'B';
-   end  
 
    lz = 0;       % starting 'z'
-   dz = Lz/nz;
    glno=0;
-   nz=nz/2;
 
    for k=1:nz
 
@@ -43,9 +25,9 @@ function [XC1,YC1,ZC1,GL1,EF1]=BuildLayer_EL(e,j,il,nz,Lz,mesh2d,zf1,zf2)
 
        zt1 = zeros(4,1) + lz;
 
-       zt2(1) = lz1;
+       zt2(1) = lz2;
        zt2(2) = lz1;
-       zt2(3) = lz2;
+       zt2(3) = lz1;
        zt2(4) = lz2;
 
        zt  = [zt1; zt2];
@@ -62,12 +44,12 @@ function [XC1,YC1,ZC1,GL1,EF1]=BuildLayer_EL(e,j,il,nz,Lz,mesh2d,zf1,zf2)
        yt  = [mesh2d.yc(:,e); mesh2d.yc(:,e)];
        YC1 = [YC1 yt];
 
-       zt1(1) = lz1;
+       zt1(1) = lz;
        zt1(2) = lz1;
-       zt1(3) = lz;
+       zt1(3) = lz1;
        zt1(4) = lz;
 
-       zt1 = zeros(4,1) + lz2;
+       zt2 = zeros(4,1) + lz2;
 
        zt  = [zt1; zt2];
        ZC1 = [ZC1 zt];

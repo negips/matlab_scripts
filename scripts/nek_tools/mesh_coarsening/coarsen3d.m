@@ -159,7 +159,7 @@ vtkwrite(vfname,'polydata','tetrahedron',xvtk,yvtk,zvtk,polydata,'binary')
 
 % Generate 3D mesh
 nz0=4;
-Lz=0.02;
+Lz=-0.02;
 ifperiodic=1;
 [mesh3d] = Generate3D(mesh2d,nlayers,nz0,Lz,ifperiodic);
 [~, nel]=size(mesh3d.XC)

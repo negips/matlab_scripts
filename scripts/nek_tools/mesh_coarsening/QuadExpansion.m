@@ -1,4 +1,4 @@
-function [XC,YC,ZC,GL,EF,LayerGEl] = QuadExpansion(mesh2d,LayerGEl,il,nz0,Lz,cz_pl,zf1,zf2);
+function [XC,YC,ZC,GL,LayerGEl,EF] = QuadExpansion(mesh2d,LayerGEl,il,nz0,Lz,ifcl,cz_pl,zf1,zf2);
 
   il1   = il;  
   ind1  = mesh2d.layerindex{il1}; 
@@ -6,12 +6,13 @@ function [XC,YC,ZC,GL,EF,LayerGEl] = QuadExpansion(mesh2d,LayerGEl,il,nz0,Lz,cz_
 
   nel_lay = length(ind1);
 
-  XC  = []; YC  = []; ZC  = []; GL  = []; EF = [];
+  XC  = []; YC  = []; ZC  = []; GL  = []; EF  = [];
+
+  XC1 = []; YC1 = []; ZC1 = []; GL1 = []; EF1 = [];
 
   j=1;
 % Go through all the elements in the 2D layer 
-  while j<=nel_lay
-
+  while j<=nel_lay-1
 
     e=LE1(j);
     nz=nz0;
@@ -79,6 +80,7 @@ function [XC,YC,ZC,GL,EF,LayerGEl] = QuadExpansion(mesh2d,LayerGEl,il,nz0,Lz,cz_
     EF = [EF EF1];
 
     LayerGEl{e}=GL1;
+
 
   end             % j<=nel_layer
       

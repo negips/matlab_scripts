@@ -95,31 +95,31 @@ function [XC1,YC1,ZC1,GL1,EF1]=BuildLayer_E13(e,j,il,nz,Lz,mesh2d,zf1,zf2);
 
        xt    = [xt1; xt2];
        yt    = [yt1; yt2];
-       XC1    = [XC1 xt];
-       YC1    = [YC1 yt];
+%       XC1    = [XC1 xt];
+%       YC1    = [YC1 yt];
 
        zt1 = zeros(4,1) + lz;
        lz  = lz + dz;
        zt2 = zeros(4,1) + lz;
        zt  = [zt1; zt2];
-       ZC1  = [ZC1 zt];
+%       ZC1  = [ZC1 zt];
 
        glno=glno+1;
-       GL1 = [GL1 glno];
+%       GL1 = [GL1 glno];
 
      elseif mod(k,4)==0
        xt  = [mesh2d.xc(:,e); mesh2d.xc(:,e)];
-       XC1  = [XC1 xt];
+%       XC1  = [XC1 xt];
        yt  = [mesh2d.yc(:,e); mesh2d.yc(:,e)];
-       YC1  = [YC1 yt];
+%       YC1  = [YC1 yt];
        zt1 = zeros(4,1) + lz;
        lz  = lz + dz;
        zt2 = zeros(4,1) + lz;
        zt  = [zt1; zt2];
-       ZC1  = [ZC1 zt];
+%       ZC1  = [ZC1 zt];
 
        glno=glno+1;
-       GL1 = [GL1 glno];
+%       GL1 = [GL1 glno];
 
      end         % mod(k,4)
 
@@ -140,10 +140,8 @@ function [XC1,YC1,ZC1,GL1,EF1]=BuildLayer_E13(e,j,il,nz,Lz,mesh2d,zf1,zf2);
      
      EF1{k} = ef;  
 
-
    end           % k=1:nz
 
-%  Build second layer
 
 
 end   % function
