@@ -156,7 +156,7 @@ function [mesh3d] = Build3DConnectivity(mesh3d,mesh2d)
              elseif mod(j,4)==3
                c3d_el = rsum_z(c2d_el-1) + (j-3)/2 + 2;
                cbc1(k).connectsto = c3d_el;
-               cbc1(k).onface     = 1;
+               cbc1(k).onface     = 5;
              else
                c3d_el = rsum_z(c2d_el-1) + (j-4)/2 + 2;
                cbc1(k).connectsto = c3d_el;

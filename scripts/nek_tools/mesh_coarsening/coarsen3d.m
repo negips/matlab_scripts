@@ -214,7 +214,6 @@ for i=1:nel
   f6 = [4 5 6 7] + 1 + p0;
 
   polydata = [polydata; f1; f2; f3; f4; f5; f6];
-  
 
 end  
 
@@ -223,14 +222,8 @@ yvtk=ygll(:);
 zvtk=zgll(:);
 
 vfname = 'test.vtk';
-%vtkwrite(vfname,'polydata','hexahedron',xvtk,yvtk,zvtk,polydata,'binary')
+vtkwrite(vfname,'polydata','hexahedron',xvtk,yvtk,zvtk,polydata,'binary')
  
-glls = [];
-for i=1:length(mesh3d.LayerGEl)
-  g1 = mesh3d.LayerGEl{i};
-  glls = [glls g1];
-end
-plot(glls)
 
 
 
