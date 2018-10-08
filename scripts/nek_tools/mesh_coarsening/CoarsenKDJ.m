@@ -81,7 +81,7 @@ function ifc = CoarsenKDJ(LX,LY,j,i,iflocked)
 
     [pts nels]=size(LX);  
 %   End condition           
-    if (iflocked(j) || j==1 || j==nels-1)
+    if (iflocked(j) || j==1 || j>=nels-1)
       ifc=0;
     end
 

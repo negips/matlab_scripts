@@ -6,7 +6,7 @@ function [mesh3d] = Build3DConnectivity(mesh3d,mesh2d)
    nfaces3 = 6;
    nfaces2 = 4;
 
-   for e2d = 1:zlines         % 2d element number
+   for il = 1:zlines         % 2d element number
 
      bcf1 = mesh2d.cbc(1,e2d).connectsto;    % bc on 2d face 1
      bcf2 = mesh2d.cbc(2,e2d).connectsto;    % bc on 2d face 2
@@ -20,26 +20,22 @@ function [mesh3d] = Build3DConnectivity(mesh3d,mesh2d)
       
      for j=1:nz
        ieg = glnos(j);
-%      Setting face boundary conditions       
-       cbc1(j).bc = mesh3d.EF{j,ieg};
+%      Setting face boundary conditions
+       for k=1:nfaces3
+         cbc1(k).bc = mesh3d.EF{k,ieg};
+       end  
 
 %      Find connecting element
-       
+        
        
      end
 
-      
-
-
-
-
-
-
-
-
-
-
-
-
 
 end   % function
+
+%----------------------------------------------------------------------
+
+function ConnectivityS(mesh3d,mesh2d,e2d,j,k)
+
+
+

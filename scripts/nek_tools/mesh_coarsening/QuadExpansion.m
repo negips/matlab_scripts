@@ -45,7 +45,7 @@ function [XC,YC,ZC,GL,LayerGEl,EF] = QuadExpansion(mesh2d,LayerGEl,glno,il,nz0,L
     end  
 
     if strcmpi(etype,'s') 
-      [XC1,YC1,ZC1,GL1,EF1]=BuildLayer_S(e,j,il,nz,Lz,glno,mesh2d,zf1,zf2);
+      [XC1,YC1,ZC1,GL1,EF1]=BuildLayer_S(e,j,il,nz,Lz,mesh2d,zf1,zf2);
 
 %    elseif (strcmpi(etype,'e1') || strcmpi(etype,'e3'))
 %      [XC1,YC1,ZC1,GL1,EF1]=BuildLayer_E13(e,j,il,nz,Lz,mesh2d,zf1,zf2);

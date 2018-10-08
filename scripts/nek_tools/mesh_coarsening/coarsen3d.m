@@ -163,7 +163,7 @@ nz0=4;
 Lz=-0.02;
 ifperiodic=1;
 [mesh3d] = Generate3D(mesh2d,nlayers,nz0,Lz,ifperiodic);
-[~, nel]=size(mesh3d.XC)
+[~, nel]=size(mesh3d.xc)
 
 if if3dplot
   fig3 = figure(3); hold on
@@ -181,7 +181,7 @@ nps=0;
 ifx=1;
 ifu=1;
 ifp=0;
-Glno=mesh3d.GL3D;
+Glno=mesh3d.globalno;
 U = [];
 V = [];
 W = [];
@@ -200,9 +200,9 @@ polydata = [];
 
 for i=1:nel
 
-  xgll(:,i) = mesh3d.XC(:,i);
-  ygll(:,i) = mesh3d.YC(:,i);
-  zgll(:,i) = mesh3d.ZC(:,i);
+  xgll(:,i) = mesh3d.xc(:,i);
+  ygll(:,i) = mesh3d.yc(:,i);
+  zgll(:,i) = mesh3d.zc(:,i);
 
   p0 = (2^ndim)*(i-1);
 
