@@ -1,13 +1,6 @@
-function [LayerX LayerY LayerE LayerBC LayerCEl]=ArrangeMatrices(nlayers LayersEl LayersFopO LayersFopV MeshC rea n ndim)
+function [LayerX,LayerY,LayerE,LayerBC,LayerCEl]=ArrangeMatrices(nlayers,LayersEl,LayersFopO,LayersFopV,MeshC,rea,ndim)
 
 % Creating new structures/arrays so that future manipulation is easy
-
-%clear
-%clc
-%close all
-%
-%load saab_wing2d.mat
-
 
 %                 f2
 %           x3-----------x2      
@@ -20,8 +13,6 @@ function [LayerX LayerY LayerE LayerBC LayerCEl]=ArrangeMatrices(nlayers LayersE
 %                 f4
 %               'v  '
 
-
-% Create new Structures
 % Simpler structure otherwise we end up with a very complicated code
 
     for i=1:nlayers
@@ -39,12 +30,11 @@ function [LayerX LayerY LayerE LayerBC LayerCEl]=ArrangeMatrices(nlayers LayersE
       nel = length(thislayer);
       for j=1:nel
     
-    %   First layer first element is complicated.
         e=thislayer(j);
         fo=thisfaceo(j);
         fv=thisfacev(j);
     
-        [xcs ycs bcs ces] = GetFirstEl(rea,e,fo,fv);
+        [xcs ycs bcs ces] = GetElement(rea,e,fo,fv);
         LX = [LX xcs];
         LY = [LY ycs];
         LE = [LE e];
@@ -64,7 +54,7 @@ function [LayerX LayerY LayerE LayerBC LayerCEl]=ArrangeMatrices(nlayers LayersE
 end   % function
 %---------------------------------------------------------------------- 
 
-function [xcs ycs bcs ces] = GetFirstEl(rea,e,fo,fv)
+function [xcs ycs bcs ces] = GetElement(rea,e,fo,fv)
 
     dtol=1.0e-12;     % Distance tolerance
 
@@ -146,7 +136,6 @@ function [xcs ycs bcs ces] = GetFirstEl(rea,e,fo,fv)
         y4 = yv(2);
       end
 
-
     end  
 
     xop = rea.mesh.xc(iop,e);
@@ -166,6 +155,6 @@ function [xcs ycs bcs ces] = GetFirstEl(rea,e,fo,fv)
     bcs = [bc1; bc2; bc3; bc4]; 
     ces = [c_el1; c_el2; c_el3; c_el4]; 
 
-end
+end         % function
 
 

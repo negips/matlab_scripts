@@ -172,7 +172,14 @@ while (~done)
   bc = rea.mesh.cbc(of2,e2).bc;
   if ~strcmpi(bc,'E  ')
     done=1;
-  end  
+%   If we don't hit the outflow again, then its not a C-mesh type layer    
+    if ~strcmpi(bc,'O  ')
+      MeshC(1)=0;             % This layer is not Ctype
+    else
+      MeshC(1)=1;             % This layer is Ctype
+    end
+
+  end
 
 end
 
@@ -267,12 +274,6 @@ while (~finished_layers)
     if ~strcmpi(bc,'E  ')
       done=1;
     end
-
-%   Criteria to stop getting layers  
-%   Should work for now but should use something more general     
-%    if strcmpi(bc,'mv ') || strcmpi(bc,'W  ')
-%      finished_layers=1;
-%    end  
   
   end       % ~done
  
@@ -280,6 +281,13 @@ while (~finished_layers)
   LayersEl{nlayers}   = ly_el;         % New Layer's Element numbers
   LayersFopO{nlayers} = ly_fopO;       % New Layer's Face opposite the 'O  '
   LayersFopV{nlayers} = ly_fopV;       % New Layer's Face opposite the 'v  '
+
+% If we don't hit the outflow again, then its not a C-mesh type layer    
+  if ~strcmpi(bc,'O  ')
+    MeshC(nlayers)=0;             % This layer is not Ctype
+  else
+    MeshC(nlayers)=1;             % This layer is Ctype
+  end
 
 % Test for end of layers
   el2=ly_el(1);
@@ -316,9 +324,11 @@ while (~finished_layers)
 
 end   % ~finished_layers 
 
-arrange_matrices
+%arrange_matrices
 
-clearvars -except nlayers LayersEl LayersFopO LayersFopV LayerX LayerY LayerE LayerBC LayerCEl rea n ndim svfname
+[LayerX,LayerY,LayerE,LayerBC,LayerCEl] = ArrangeMatrices(nlayers,LayersEl,LayersFopO,LayersFopV,MeshC,rea,ndim);
+
+clearvars -except nlayers LayersEl LayersFopO LayersFopV LayerX LayerY LayerE LayerBC LayerCEl MeshC rea n ndim svfname
 save(svfname)
 
 

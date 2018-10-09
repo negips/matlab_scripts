@@ -19,7 +19,6 @@ close all
 %                 f4
 %               'v  '
 
-
 %load saab_wing2d.mat
 load saab750k.mat
 %load fluent_plus2.mat
@@ -30,6 +29,9 @@ if3dplot = 0;
 
 disp(['Total Number of Elements: ', num2str(rea.mesh.nelg)])
 
+
+OldMeshC=MeshC(nlayers:-1:1);
+NewMeshC=OldMeshC;
 for i=1:nlayers
   j=nlayers-i+1;
   OldE{i}=LayerE{j};
@@ -43,15 +45,17 @@ for i=1:nlayers
   NewY{i}=OldY{i};
   NewBC{i}=OldBC{i};
   NewCEl{i}=OldCEl{i};
-  NewCoF{i}=ConnectedOnFace(NewCEl{i});
 
-% Define an element type  
+% Define an element type 
   l1=length(NewE{i});
   for j=1:l1
     NewET{i}{j}='s';
   end  
 
 end
+
+
+NewCoF = ConnectedOnFace(NewE,NewCEl,NewMeshC);
 
 % Test coarsening algorithm 1
 % Coarsen Layer by Layer
@@ -74,17 +78,6 @@ for i=1:nlayers
   if (i<layer_start)
     nels_layer = length(LX);    
     new_nelg = new_nelg+nels_layer; 
-
-    if (ifplot)
-      cmap = jet(nels_layer);
-      for j=1:nels_layer 
-        xt = LX(:,j);
-        yt = LY(:,j);
-
-        figure(2)
-        fill(xt,yt,cmap(j,:)); hold on
-      end 
-    end
 
     continue
   end  
@@ -121,7 +114,7 @@ for i=1:nlayers
 
   ifplot =0;
 % Coarsen layer in consecutive pairs
-  [LX,LY,ifc,NewX,NewY,NewCEl,NewCoF,NewET] = Coarsen2DLayer(LE,LX,LY,ifc,NewX,NewY,NewCEl,NewCoF,NewET,i,fig2,ifplot);
+  [LX,LY,ifc,NewX,NewY,NewCEl,NewCoF,NewET]=Coarsen2DLayer(LE,LX,LY,ifc,NewX,NewY,NewCEl,NewCoF,NewMeshC,NewET,i,fig2,ifplot);
 % Modify all subsequent Layers
   if3skip=1;
   [NewE, NewX, NewY, NewBC, NewCEl, NewCoF, NewET, iflocked]=Create2DLayers(NewE,NewX,NewY,NewBC,NewCEl,NewCoF,NewET,i,ifc,if3skip,fig2,ifplot);
@@ -133,6 +126,8 @@ disp(['Total Number of Elements: ', num2str(new_nelg)])
 % Not done for multiple curvature definitions right now
 curvedef= 'mv ';
 mesh2d = ReOrderElements(NewE,NewX,NewY,NewBC,NewCEl,NewCoF,NewET,rea.mesh,curvedef); 
+
+CheckConnectivity2D(mesh2d)
 
 polydata = [];
 
