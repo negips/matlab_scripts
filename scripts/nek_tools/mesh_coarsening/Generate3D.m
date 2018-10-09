@@ -152,7 +152,7 @@ function [mesh3d] = Generate3D(mesh2d,nlayers,nz0,Lz,ifperiodic);
 
   [mesh3d] = Build3DConnectivity(mesh3d,mesh2d);
 
-%  CheckConnectivity3D(mesh3d);
+  CheckConnectivity3D(mesh3d);
 
 end   % function
 

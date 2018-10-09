@@ -6,7 +6,7 @@ function CheckConnectivity3D(mesh3d)
 
   nfaces = 6;
   ierr = 0;
-  for i=1:20 %nel
+  for i=1:nel
         
     elerr=0; 
     for j=1:nfaces

@@ -152,7 +152,6 @@ zvtk=0*xvtk;
 vfname = 'test2d.vtk';
 vtkwrite(vfname,'polydata','tetrahedron',xvtk,yvtk,zvtk,polydata,'binary')
 
-return
 % Generate 3D mesh
 nz0=4;
 Lz=0.1;
