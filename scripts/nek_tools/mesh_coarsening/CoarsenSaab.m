@@ -1,7 +1,7 @@
 function ifc = CoarsenSaab(LX,LY,j,i,iflocked)
 
     ARcut = 2.5;             % Coarsen if Aspect ratio is larger than this.
-    start_layer = 4;
+    start_layer = 13;
 
 %   Find aspect ratio of elements 
 
@@ -23,16 +23,17 @@ function ifc = CoarsenSaab(LX,LY,j,i,iflocked)
     rad = sqrt(xmid^2 + ymid^2);  
 
     ifc=0;
-%    if l_ar>ARcut
-%      ifc=1; 
-%    end
 
     if ymid>0.00
 %     Upper Side          
       if xmid>0.04
         if i==start_layer+1
           ifc=1;
-        else
+        elseif i==start_layer+3
+          ifc=1;
+        elseif i==start_layer+5
+          ifc=1;
+        else    
           ifc=0;
         end
       end
@@ -43,11 +44,11 @@ function ifc = CoarsenSaab(LX,LY,j,i,iflocked)
     end  % ymid>0
 
 %   Radially outgoing stuff      
-    if xmid<0.02
-      if i==start_layer+1
-        ifc=1;
-      end
-    end  
+%    if xmid<0.02
+%      if i==start_layer+1
+%        ifc=1;
+%      end
+%    end  
 
     
 %   Skip first n layers      

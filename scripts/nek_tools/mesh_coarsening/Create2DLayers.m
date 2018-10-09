@@ -1,4 +1,4 @@
-function [NewE, NewX, NewY, NewBC, NewCEl, NewCoF, NewET, iflocked]=Create2DLayers(NewE,NewX,NewY,NewBC,NewCEl,NewCoF,NewET,cr_layer,ifc,if3skip,fig2,ifplot)
+function [NewE, NewX, NewY, NewBC, NewCEl, NewCoF, NewET, iflocked]=Create2DLayers(NewE,NewX,NewY,NewBC,NewCEl,NewCoF,NewET,cr_layer,ifc,fig2,ifplot)
 
   iflocked = [];
 

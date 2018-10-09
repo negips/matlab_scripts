@@ -1,6 +1,5 @@
 function CheckConnectivity3D(mesh3d)
 
-
   nel    = length(mesh3d.globalno);
   disp(['Checking Element connectivity information for ' num2str(nel) ' elements'])
 
