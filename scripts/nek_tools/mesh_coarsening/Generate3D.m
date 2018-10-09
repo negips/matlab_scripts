@@ -137,22 +137,34 @@ function [mesh3d] = Generate3D(mesh2d,nlayers,nz0,Lz,ifperiodic);
     EF   = [EF EF1];
 
     glno=max(GL3D);
-
-  
   
   end   % while il<=nlayers
-  
+  nelg = length(GL3D);
+   
+  mesh3d.nelg = nelg;
+  mesh3d.ndim = 3;
+  mesh3d.globalno = GL3D;
   mesh3d.xc   = XC;
   mesh3d.yc   = YC;
   mesh3d.zc   = ZC;
-  mesh3d.globalno = GL3D;
   mesh3d.LayerGEl = LayerGEl;
   mesh3d.EF   = EF;
   mesh3d.ifzc = ifzc;
 
-  [mesh3d] = Build3DConnectivity(mesh3d,mesh2d);
+  mesh3d = BuildCurvedSides(mesh3d,mesh2d,Lz);
 
+  mesh3d = Build3DConnectivity(mesh3d,mesh2d);
   CheckConnectivity3D(mesh3d);
+
+  mesh3d = rmfield(mesh3d, 'EF');
+  mesh3d = rmfield(mesh3d, 'rsum_z');
+  mesh3d.xfac = mesh2d.xfac;
+  mesh3d.yfac = mesh2d.yfac;
+  mesh3d.xzero = mesh2d.xzero;
+  mesh3d.yzero = mesh2d.yzero;
+  mesh3d.ifre2 = mesh2d.ifre2;
+  mesh3d.ifgtp = mesh2d.ifgtp;
+
 
 end   % function
 

@@ -1,13 +1,10 @@
 function mesh3d = Generate3DCoarse(mesh2d,nz0,Lz,ifperiodic,ifvtk) 
 
-
       nlayers = length(mesh2d.layerindex);
-
       [mesh3d] = Generate3D(mesh2d,nlayers,nz0,Lz,ifperiodic);
-      [~, nel]=size(mesh3d.xc);
+      nel=mesh3d.nelg;
       
       ndim=3;
-
       if (ifvtk)
         xvtk = zeros(2^ndim,nel);
         yvtk = zeros(2^ndim,nel);

@@ -1,6 +1,5 @@
 function [mesh3d] = Build3DConnectivity(mesh3d,mesh2d)
 
-
    zlines = mesh2d.nelg;
    nz0 = length(mesh3d.LayerGEl{1});      % Maximum elelements in the span in layer1
    nfaces3 = 6;
@@ -297,9 +296,10 @@ function [mesh3d] = Build3DConnectivity(mesh3d,mesh2d)
    end              % il=1:nlayers 
       
    mesh3d.cbc = cbc;
+
+
 end   % function
 
 %----------------------------------------------------------------------
-
 
 
