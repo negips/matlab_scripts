@@ -30,66 +30,21 @@ function ifc = CoarsenSaab(LX,LY,j,i,iflocked)
     if ymid>0.00
 %     Upper Side          
       if xmid>0.04
-        if i==start_layer+6
+        if i==start_layer+1
           ifc=1;
         else
           ifc=0;
         end
       end
-
-      if xmid>0.1
-        if i==start_layer+14
-          ifc=1;
-        end
-      end
-
-      if xmid>0.2 && xmid<2.0
-        if i==start_layer+16
-          ifc=1;
-        end
-      end
-
-      if xmid>0.25 && xmid<1.0
-        if i==start_layer+18
-          ifc=1;
-        end
-      end
-
       
     else 
 %     Lower Side          
-      if xmid>0.04
-        if i==start_layer+6
-          ifc=1;
-        else
-          ifc=0;
-        end
-      end
-
-      if xmid>0.1
-        if i==start_layer+12
-          ifc=1;
-        end
-      end
-
-      if xmid>0.2 && xmid<2.0
-        if i==start_layer+14
-          ifc=1;
-        end
-      end
-
-      if xmid>0.25 && xmid<1.0
-        if i==start_layer+16
-          ifc=1;
-        end
-      end
-
 
     end  % ymid>0
 
 %   Radially outgoing stuff      
     if xmid<0.02
-      if i==start_layer+6
+      if i==start_layer+1
         ifc=1;
       end
     end  
@@ -102,7 +57,7 @@ function ifc = CoarsenSaab(LX,LY,j,i,iflocked)
 
     [pts nels]=size(LX);  
 %   End condition           
-    if (iflocked(j) || j==1 || j==nels-1)
+    if (iflocked(j) || j==1 || j>=nels-1)
       ifc=0;
     end
 
