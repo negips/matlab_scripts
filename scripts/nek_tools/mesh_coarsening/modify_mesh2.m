@@ -20,24 +20,6 @@ n=rea.mesh.nelg;
 ndim=rea.mesh.ndim;
 cmap = jet(n);
 
-%figure(1);
-%for i=1:n
-%  fill(rea.mesh.xc(:,i),rea.mesh.yc(:,i),cmap(i,:)); hold on
-%end
-%colorbar
-
-% Calculate element mid points.
-% Just for plotting for now
-xmid=zeros(n,1);
-ymid=zeros(n,1);
-GLNO=zeros(n,1);
-for i=1:n
-  xmid(i) = mean(rea.mesh.xc(:,i));
-  ymid(i) = mean(rea.mesh.yc(:,i));
-  GLNO(i) = rea.mesh.globalno(i);
-end  
-
-
 % Find element with bc='v  ' as well as 'O  '
 nfaces=2*ndim;
 bcels=0;
