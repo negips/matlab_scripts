@@ -10,6 +10,7 @@ ifplot = 0;
 %casename = 'saab750k';
 %casename = 'lu';             % Doesn't work
 casename = 'fluent_plus2';
+%casename = 'saab10k';
 svfname  = [casename '.mat'];
 
 disp(['CaseName: ' casename])
@@ -26,17 +27,19 @@ bcels=0;
 Elno  = [];
 Vface = [];
 Oface = [];
+OBound = 'O  ';
+VBound = 'v  ';
 for i=1:n
 
    ifV=0;
    ifO=0;
    for j=1:nfaces
      bc=rea.mesh.cbc(j,i).bc;
-     if strcmpi(bc,'v  ')
+     if strcmpi(bc,VBound)
         ifV=1;
         vface=j;
      end   
-     if strcmpi(bc,'o  ')
+     if strcmpi(bc,OBound)
         ifO=1;
         oface=j;
      end
@@ -136,7 +139,7 @@ while (~done)
   vf=0;
   for j=1:nfaces
     bc=rea.mesh.cbc(j,e2).bc;
-    if strcmpi(bc,'v  ') || strcmpi(bc, 'on ')
+    if strcmpi(bc,VBound) || strcmpi(bc, 'on ')
       ifV=1;
       vf=j;
     end
@@ -155,7 +158,7 @@ while (~done)
   if ~strcmpi(bc,'E  ')
     done=1;
 %   If we don't hit the outflow again, then its not a C-mesh type layer    
-    if ~strcmpi(bc,'O  ')
+    if ~strcmpi(bc,OBound)
       MeshC(1)=0;             % This layer is not Ctype
     else
       MeshC(1)=1;             % This layer is Ctype
@@ -204,7 +207,7 @@ while (~finished_layers)
   of=0;
   for j=1:nfaces
     bc=rea.mesh.cbc(j,e2).bc;
-    if strcmpi(bc,'o  ')
+    if strcmpi(bc,OBound)
       of=j;
     end
   end
@@ -265,7 +268,7 @@ while (~finished_layers)
   LayersFopV{nlayers} = ly_fopV;       % New Layer's Face opposite the 'v  '
 
 % If we don't hit the outflow again, then its not a C-mesh type layer    
-  if ~strcmpi(bc,'O  ')
+  if ~strcmpi(bc,OBound)
     MeshC(nlayers)=0;             % This layer is not Ctype
   else
     MeshC(nlayers)=1;             % This layer is Ctype

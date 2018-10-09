@@ -73,8 +73,8 @@ function [mesh2d] = Generate2DCoarse(rea,LayerE,LayerX,LayerY,LayerBC,LayerCEl,M
         for j=1:l1
             
 %         ifc(j) = CoarsenCriteria(LX,LY,j,i,iflocked);
-         ifc(j) = CoarsenKDJ(LX,LY,j,i,iflocked);
-%         ifc(j) = CoarsenSaab(LX,LY,j,i,iflocked);
+%         ifc(j) = CoarsenKDJ(LX,LY,j,i,iflocked);
+         ifc(j) = CoarsenSaab(LX,LY,j,i,iflocked);
       
         end
 

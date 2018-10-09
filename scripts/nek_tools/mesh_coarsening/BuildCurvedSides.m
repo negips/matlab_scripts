@@ -8,6 +8,7 @@ function mesh3d = BuildCurvedSides(mesh3d,mesh2d,Lz)
    curveparams = [];
    curveedge   = [];
    curveieg    = [];
+   ctype       = [];   
    nc3d  = 0;
    nedge = 0;
    for i=1:ncurves
@@ -37,6 +38,7 @@ function mesh3d = BuildCurvedSides(mesh3d,mesh2d,Lz)
          curveieg  = [curveieg  cieg];
          curveedge = [curveedge iedge];
          curveparams = [curveparams cp];
+         ctype{nedge} = 'm';
        end  % k=0:1
      end    % j=1:nel3d
    end      % i=1:ncurves 
@@ -44,6 +46,7 @@ function mesh3d = BuildCurvedSides(mesh3d,mesh2d,Lz)
    mesh3d.ncurve    = nedge;
    mesh3d.curveieg  = curveieg;
    mesh3d.curveedge = curveedge;
+   mesh3d.ctype     = ctype;
 
 end   % function
 %---------------------------------------------------------------------- 
