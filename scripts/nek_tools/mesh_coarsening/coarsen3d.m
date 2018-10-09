@@ -159,11 +159,11 @@ vtkwrite(vfname,'polydata','tetrahedron',xvtk,yvtk,zvtk,polydata,'binary')
 
 
 % Generate 3D mesh
-nz0=8;
+nz0=4;
 Lz=0.1;
 ifperiodic=1;
 [mesh3d] = Generate3D(mesh2d,nlayers,nz0,Lz,ifperiodic);
-[~, nel]=size(mesh3d.xc)
+[~, nel]=size(mesh3d.xc);
 
 if if3dplot
   fig3 = figure(3); hold on
@@ -171,7 +171,6 @@ if if3dplot
     Plot3DElement(mesh3d,i,fig3);
   end
 end  
-
 
 % Output as a Nek field file
 ndim=3;
@@ -196,13 +195,24 @@ xgll = zeros(2^ndim,nel);
 ygll = zeros(2^ndim,nel);
 zgll = zeros(2^ndim,nel);
 
+
+xvtk = xgll;
+yvtk = ygll;
+zvtk = zgll;
 polydata = [];
+
+GLLind = [1 2 4 3 5 6 8 7];
 
 for i=1:nel
 
-  xgll(:,i) = mesh3d.xc(:,i);
-  ygll(:,i) = mesh3d.yc(:,i);
-  zgll(:,i) = mesh3d.zc(:,i);
+  xgll(:,i) = mesh3d.xc(GLLind,i);
+  ygll(:,i) = mesh3d.yc(GLLind,i);
+  zgll(:,i) = mesh3d.zc(GLLind,i);
+
+  xvtk(:,i) = mesh3d.xc(:,i);
+  yvtk(:,i) = mesh3d.yc(:,i);
+  zvtk(:,i) = mesh3d.zc(:,i);
+
 
   p0 = (2^ndim)*(i-1);
 
@@ -217,9 +227,8 @@ for i=1:nel
 
 end  
 
-xvtk=xgll(:);
-yvtk=ygll(:);
-zvtk=zgll(:);
+fname = 'test0.f00001';
+%[status] = Nek_WriteFld(ndim,N,nel,xgll,ygll,zgll,U,V,W,P,T,nps,ifx,ifu,ifp,Glno,fname)
 
 vfname = 'test.vtk';
 vtkwrite(vfname,'polydata','hexahedron',xvtk,yvtk,zvtk,polydata,'binary')

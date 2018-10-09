@@ -200,8 +200,8 @@ function ifcl = CoarsenZLayer(il,nlayers,LX,LY,LE,mesh2d,cz_pl)
   if il==Zskip+1
 %   Coarsen entire layer
     ifcl = 1;
-  elseif il==Zskip+3
-    ifcl = 1;
+%  elseif il==Zskip+3
+%    ifcl = 1;
 %  elseif il==Zskip+5
 %    ifcl = 1;
   end
