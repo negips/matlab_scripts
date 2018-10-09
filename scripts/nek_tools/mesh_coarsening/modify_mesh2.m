@@ -4,6 +4,8 @@ clear
 clc
 close all
 
+
+ifplot = 0;
 %casename = 'saab_wing2d';
 casename = 'saab750k';
 %casename = 'lu';             % Doesn't work
@@ -71,12 +73,12 @@ end
 
 l1=bcels;
 cmap = jet(l1);
-for i=1:bcels
-  glno=Elno(i);
-  xt = rea.mesh.xc(:,glno);
-  yt = rea.mesh.yc(:,glno);  
-  fill(xt,yt,cmap(i,:)); hold on
-end
+%for i=1:bcels
+%  glno=Elno(i);
+%  xt = rea.mesh.xc(:,glno);
+%  yt = rea.mesh.yc(:,glno);  
+%  fill(xt,yt,cmap(i,:)); hold on
+%end
 
 % Lets take bottom element as starting element
 if length(Elno)>1
@@ -176,12 +178,14 @@ end
 
 % Plotting
 l1=e;
-cmap = jet(l1);
-for i=1:l1
-  glno=ly_el(i);
-  xt = rea.mesh.xc(:,glno);
-  yt = rea.mesh.yc(:,glno);  
-  fill(xt,yt,cmap(i,:)); hold on
+if ifplot
+  cmap = jet(l1);
+  for i=1:l1
+    glno=ly_el(i);
+    xt = rea.mesh.xc(:,glno);
+    yt = rea.mesh.yc(:,glno);  
+    fill(xt,yt,cmap(i,:)); hold on
+  end
 end
 
 LayersEl{1}=ly_el;
@@ -300,14 +304,15 @@ while (~finished_layers)
 
   % Plotting
   l1=e;
-  cmap = jet(l1);
-  for i=1:l1
-    glno=ly_el(i);
-    xt = rea.mesh.xc(:,glno);
-    yt = rea.mesh.yc(:,glno);  
-    fill(xt,yt,cmap(i,:)); hold on
+  if ifplot
+    cmap = jet(l1);
+    for i=1:l1
+      glno=ly_el(i);
+      xt = rea.mesh.xc(:,glno);
+      yt = rea.mesh.yc(:,glno);  
+      fill(xt,yt,cmap(i,:)); hold on
+    end
   end
-
 
 end   % ~finished_layers 
 

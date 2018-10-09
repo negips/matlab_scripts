@@ -152,7 +152,7 @@ function [mesh3d] = Generate3D(mesh2d,nlayers,nz0,Lz,ifperiodic);
 
   [mesh3d] = Build3DConnectivity(mesh3d,mesh2d);
 
-  CheckConnectivity3D(mesh3d);
+%  CheckConnectivity3D(mesh3d);
 
 end   % function
 
@@ -200,8 +200,8 @@ function ifcl = CoarsenZLayer(il,nlayers,LX,LY,LE,mesh2d,cz_pl)
   if il==Zskip+1
 %   Coarsen entire layer
     ifcl = 1;
-  elseif il==Zskip+3
-    ifcl = 1;
+%  elseif il==Zskip+3
+%    ifcl = 1;
 %  elseif il==Zskip+5
 %    ifcl = 1;
   end
