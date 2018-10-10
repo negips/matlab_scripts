@@ -9,8 +9,9 @@ ifplot = 0;
 %casename = 'saab_wing2d';
 %casename = 'saab750k';
 %casename = 'lu';             % Doesn't work
-casename = 'fluent_plus2';
+%casename = 'fluent_plus2';
 %casename = 'saab10k';
+casename = 'stretched';
 svfname  = [casename '.mat'];
 
 disp(['CaseName: ' casename])
