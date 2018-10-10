@@ -26,6 +26,7 @@ function Nek_WriteReaMesh(mesh,fid)
 
 %  Curved sides   
    ncurve=mesh.ncurve;
+   ncurve=0.
    WriteCurvehdr(fid,ncurve)   
    for e=1:ncurve      
      WriteCurveData(fid,mesh,e,nelg)
@@ -102,10 +103,11 @@ end   % function
 %----------------------------------------------------------------------
 function WriteCurvehdr(fid,ncurve)
 
-      hdr = ' ***** CURVED SIDE DATA *****';
+      hdr = '  ***** CURVED SIDE DATA *****';
       fprintf(fid,'%s\n',hdr);
-      hdr = ' Curved sides follow IEDGE,IEL,CURVE(I),I=1,5, CCURVE';
-      fprintf(fid,'%12i %s\n',ncurve,hdr);
+      hdr = 'Curved sides follow IEDGE,IEL,CURVE(I),I=1,5, CCURVE';
+      space2=blanks(2);
+      fprintf(fid,'%12i%s%s\n',ncurve,space2,hdr);
 
 end   % function 
 %----------------------------------------------------------------------
