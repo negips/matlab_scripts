@@ -1,6 +1,6 @@
 function Nek_WriteReaMesh(mesh,fid)
 
-   disp('Writing mesh file...')
+   disp('Writing mesh')
 
    nelg=mesh.nelg;
    ndim=mesh.ndim;

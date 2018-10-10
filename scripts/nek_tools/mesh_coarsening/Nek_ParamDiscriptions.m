@@ -32,7 +32,7 @@ function [p,c] = Nek_ParamDiscriptions;
       c{10}  = '[Simulation end time if >0]';
 
       p{11}  = 'NSTEP';
-      c{11}  = '[Simulation end time if >0]';
+      c{11}  = '[Number of time steps]';
 
       p{12}  = 'DT';
       c{12}  = '[if <0 dt=|PARAM(12)|. Else dt upper bound]';
@@ -127,7 +127,7 @@ function [p,c] = Nek_ParamDiscriptions;
       c{43}  = '[0:Additive multilevel; 1:Original two level]';
 
       p{44}  = 'PRECONDITIONER';
-      c{44}  = '[0:E-based additive Schwarz for PnPn-s; 1:A-based]';
+      c{44}  = '[0:E-based additive Schwarz for PnPn-2; 1:A-based]';
 
       p{45}  = 'FACTOR';
       c{45}  = '[Free-surface stability control. Default 1.]';

@@ -39,10 +39,33 @@ end
 tline = fgetl(fid); cell=textscan(tline, '%f');                  % Logical Switches
 nLogic = cell{1};
 for i=1:nLogic
-  tline = fgetl(fid); 
-  cell  = sscanf(tline(2:end), '%s');
-  Logical{i,1} = cell(1);
-  Logical{i,2} = cell(2:end);
+  tline  = fgetl(fid); 
+  cell   = sscanf(tline(2:end), '%s');
+  ifnav  = strfind(lower(cell),'ifnav');
+  ifadvc = strfind(lower(cell),'ifadvc');
+  iftmsh = strfind(lower(cell),'iftmsh');
+
+  if ~isempty(ifnav) && ~isempty(ifadvc)
+%   Navier Stokes and passive scalar advection switches
+    indmin = min([ifnav ifadvc]);
+    Logical{i,1} = cell(1:indmin-1);
+    Logical{i,2} = 'IFNAV && IFADVC';
+  elseif ~isempty(ifnav) && isempty(ifadvc) 
+    indmin = ifnav;
+    Logical{i,1} = cell(1:indmin-1);
+    Logical{i,2} = 'IFNAV';
+  elseif isempty(ifnav) && ~isempty(ifadvc) 
+    indmin = ifadvc;
+    Logical{i,1} = cell(1:indmin-1);
+    Logical{i,2} = 'IFADVC';
+  elseif ~isempty(iftmsh) 
+    indmin = iftmsh;
+    Logical{i,1} = cell(1:indmin-1);
+    Logical{i,2} = 'IFTMSH';
+  else
+    Logical{i,1} = cell(1);
+    Logical{i,2} = cell(2:end);
+  end  
 
 % Checking for IFFLOW and IFHEAT logicals.
 % IfHEAT is required for reading the mesh
