@@ -5,13 +5,13 @@ clc
 close all
 
 %load saab_wing2d.mat
-load saab750k.mat
-%load fluent_plus2.mat
+%load saab750k.mat
+load fluent_plus2.mat
 
 skiplayers = 2;         % Need to skip some layers since its smaller than the others
-curvedef   = 'mv ';
+curvedef   = 'W  ';
 ifvtk      = 1;
-mesh2d = Generate2DCoarse(rea,LayerE,LayerX,LayerY,LayerBC,LayerCEl,MeshC,skiplayers,curvedef,ifvtk);
+rea2d = Generate2DCoarse(rea,LayerE,LayerX,LayerY,LayerBC,LayerCEl,MeshC,skiplayers,curvedef,ifvtk);
 
 
 

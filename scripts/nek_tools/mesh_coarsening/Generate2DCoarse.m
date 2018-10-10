@@ -1,4 +1,4 @@
-function [mesh2d] = Generate2DCoarse(rea,LayerE,LayerX,LayerY,LayerBC,LayerCEl,MeshC,skiplayers,curvedef,ifvtk)
+function [rea2d] = Generate2DCoarse(rea,LayerE,LayerX,LayerY,LayerBC,LayerCEl,MeshC,skiplayers,curvedef,ifvtk)
 %     First attempts at coarsening the mesh
 
 %           Element arrangement
@@ -102,6 +102,17 @@ function [mesh2d] = Generate2DCoarse(rea,LayerE,LayerX,LayerY,LayerBC,LayerCEl,M
 %     Not done for multiple curvature definitions right now
       mesh2d = ReOrderElements(NewE,NewX,NewY,NewBC,NewCEl,NewCoF,NewET,rea.mesh,curvedef); 
       CheckConnectivity2D(mesh2d)
+
+      rea2d.casename = rea.casename;
+      rea2d.nekver   = rea.nekver;
+      rea2d.nparams  = rea.nparams;
+      rea2d.nlogical = rea.nlogical;
+      rea2d.npscal   = rea.npscal;
+      rea2d.ifflow   = rea.ifflow;
+      rea2d.ifheat   = rea.ifheat;
+      rea2d.param    = rea.param;
+      rea2d.logical  = rea.logical;
+      rea2d.mesh     = mesh2d;
       
       if ifvtk      
         polydata = [];

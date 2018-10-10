@@ -1,26 +1,21 @@
-function status = Nek_WriteReaMesh(mesh)
+function Nek_WriteReaMesh(mesh,fid)
 
-   fname = 'rea.mesh';
-   wdsize = 'float32';   
-%  Open file
-   endian= 'le';
-   [fid,message] = fopen(fname,'w+');
-   
-   if fid == -1
-     disp(message) 
-     return 
-   end
- 
-   disp('Writing rea file...')
+   disp('Writing mesh file...')
 
    nelg=mesh.nelg;
    ndim=mesh.ndim;
 
-%  Mesh
+%  Xfac,Yfac,Xzero,YZero
+   WritePrenekhdr(fid,mesh)
+
+%  Mesh hdr
+   WriteMeshhdr(fid,ndim,nelg);
+
+%  Mesh data   
    if ndim==2
      zlev = 1;
      a = ' ';
-     igroup = 0;  
+     igroup = 0;
      for e=1:nelg 
        WriteElementhdr(fid,e,zlev,a,igroup);
        WriteXYZRea(fid,e,mesh,ndim);
@@ -45,45 +40,63 @@ function status = Nek_WriteReaMesh(mesh)
 %  Have not implemented thermal boundary conditions
    WriteNoThermalhdr(fid)             
 
-   fclose(fid);
+end   % function
+%---------------------------------------------------------------------- 
+function WritePrenekhdr(fid,mesh)
 
+      space5 = blanks(5);
+      space4 = blanks(4);
 
+      hdr='XFAC,YFAC,XZERO,YZERO';
+         
+      fprintf(fid,'%10f%s%10f%s%10f%s%10f%s%s\n',mesh.xfac,space4,mesh.yfac,space4,mesh.xzero,space4,mesh.yzero,space5,hdr);
 
+end   % function 
+%----------------------------------------------------------------------  
 
+function WriteMeshhdr(fid,ndim,nelg)
 
+      if ndim==3
+        hdr=' **MESH DATA** 6 lines are X,Y,Z;X,Y,Z. Columns corners 1-4;5-8';
+        fprintf(fid,'%s\n',hdr);
+      else
+        hdr=' **MESH DATA** 2 lines are X,Y. Columns corners 1-4';
+        fprintf(fid,'%s\n',hdr);
+      end  
 
+      space11=blanks(11);
+      hdr='NEL,NDIM,NELV';
+      fprintf(fid,'%12i%3i%12i%s%s\n',nelg,ndim,nelg,space11,hdr); 
 
 end   % function
 %----------------------------------------------------------------------
 function WriteElementhdr(fid,e,zlev,a,igroup)
 
-   space5 = blanks(5);
-   space4 = blanks(4);
-      
-   hdr = sprintf('%sELEMENT%12i [%5i%1s]%sGROUP%5i\n',space5,e,zlev,a,space4,igroup);
-   s=uint8(hdr);
-   fwrite(fid,s,'char');   
+      space5 = blanks(5);
+      space4 = blanks(4);
+         
+      fprintf(fid,'%sELEMENT%12i [%5i%1s]%sGROUP%5i\n',space5,e,zlev,a,space4,igroup);
 
 end   % function 
 %----------------------------------------------------------------------  
 function WriteXYZRea(fid,e,mesh,ndim)
 
-   fmt = repmat('%14.6e',1,4);
-   fmt = [fmt '\n'];    
-      
-   if ndim==2   
-     fprintf(fid,fmt,mesh.xc(:,e)); 
-     fprintf(fid,fmt,mesh.yc(:,e));
-   else
-     ind=1:4; 
-     fprintf(fid,fmt,mesh.xc(ind,e)); 
-     fprintf(fid,fmt,mesh.yc(ind,e));
-     fprintf(fid,fmt,mesh.zc(ind,e));
-     ind=5:8; 
-     fprintf(fid,fmt,mesh.xc(ind,e)); 
-     fprintf(fid,fmt,mesh.yc(ind,e));
-     fprintf(fid,fmt,mesh.zc(ind,e));
-   end   
+      fmt = repmat('%14.6e',1,4);
+      fmt = [fmt '\n'];    
+         
+      if ndim==2   
+        fprintf(fid,fmt,mesh.xc(:,e)); 
+        fprintf(fid,fmt,mesh.yc(:,e));
+      else
+        ind=1:4; 
+        fprintf(fid,fmt,mesh.xc(ind,e)); 
+        fprintf(fid,fmt,mesh.yc(ind,e));
+        fprintf(fid,fmt,mesh.zc(ind,e));
+        ind=5:8; 
+        fprintf(fid,fmt,mesh.xc(ind,e)); 
+        fprintf(fid,fmt,mesh.yc(ind,e));
+        fprintf(fid,fmt,mesh.zc(ind,e));
+      end   
 
 end   % function
 %----------------------------------------------------------------------
@@ -119,9 +132,9 @@ function  WriteCurveData(fid,mesh,e,nelg)
 
       fprintf(fid,fmt,edge,ieg,cp1,cp2,cp3,cp4,cp5,ct);
 
-%   60    format(i3,i3,5g14.6,1x,a1)
-%   61    format(i2,i6,5g14.6,1x,a1)
-%   62    format(i2,i12,5g14.6,1x,a1)
+%     60 format(i3,i3,5g14.6,1x,a1)
+%     61 format(i2,i6,5g14.6,1x,a1)
+%     62 format(i2,i12,5g14.6,1x,a1)
 
 end   % function
 %---------------------------------------------------------------------- 
