@@ -26,7 +26,6 @@ function Nek_WriteReaMesh(mesh,fid)
 
 %  Curved sides   
    ncurve=mesh.ncurve;
-   ncurve=0.
    WriteCurvehdr(fid,ncurve)   
    for e=1:ncurve      
      WriteCurveData(fid,mesh,e,nelg)
@@ -125,11 +124,11 @@ function  WriteCurveData(fid,mesh,e,nelg)
 
       ieg=mesh.curveieg(e);
       edge=mesh.curveface(e);
-      cp1=mesh.curveparams(1);
-      cp2=mesh.curveparams(2);
-      cp3=mesh.curveparams(3);
-      cp4=mesh.curveparams(4);
-      cp5=mesh.curveparams(5);
+      cp1=mesh.curveparams(1,e);
+      cp2=mesh.curveparams(2,e);
+      cp3=mesh.curveparams(3,e);
+      cp4=mesh.curveparams(4,e);
+      cp5=mesh.curveparams(5,e);
       ct =mesh.curvetype{e};
 
       fprintf(fid,fmt,edge,ieg,cp1,cp2,cp3,cp4,cp5,ct);
@@ -179,9 +178,9 @@ function WriteFluidBC(fid,mesh,e,ndim,nelg)
         bc=mesh.cbc(j,e).bc;
         c2=mesh.cbc(j,e).connectsto;
         of=mesh.cbc(j,e).onface;
-        p1=mesh.cbc(j,e).param1;
-        p2=mesh.cbc(j,e).param2;
-        p3=mesh.cbc(j,e).param3;
+        p1=mesh.cbc(j,e).param3;
+        p2=mesh.cbc(j,e).param4;
+        p3=mesh.cbc(j,e).param5;
 
         if fmt1
           fprintf(fid,fmt,bc,e,j,c2,of,p1,p2,p3);

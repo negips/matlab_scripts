@@ -174,9 +174,9 @@ function cbc = Build2DCBC(NewBC,NewCEl,NewCoF,Old2New,NewE,nlayers)
         cbc(k,glno).onface = onface;
 
 %       Hard coded since I have not saved information on this        
-        cbc(k,glno).param1 = 0;
-        cbc(k,glno).param2 = 0;
         cbc(k,glno).param3 = 0;
+        cbc(k,glno).param4 = 0;
+        cbc(k,glno).param5 = 0;
 
         ifE  = strcmpi(bc, 'E  ');
         if ~ifE && c2el~=0

@@ -1,5 +1,9 @@
 function rea = StupidChange(rea,shift)
 
+      if shift<=0
+        disp(['Invalid Shift: ', num2str(shift)])
+        return
+      end
 
       nelg=rea.mesh.nelg;
       ncurve=rea.mesh.ncurve;

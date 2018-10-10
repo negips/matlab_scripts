@@ -13,6 +13,4 @@ curvedef   = 'W  ';
 ifvtk      = 1;
 rea2d = Generate2DCoarse(rea,LayerE,LayerX,LayerY,LayerBC,LayerCEl,MeshC,skiplayers,curvedef,ifvtk);
 
-shift=-1;
-rea2d = StupidChange(rea2d,shift);
 
