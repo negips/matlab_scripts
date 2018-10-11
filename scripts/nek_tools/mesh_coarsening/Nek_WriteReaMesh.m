@@ -5,24 +5,14 @@ function Nek_WriteReaMesh(mesh,fid)
    nelg=mesh.nelg;
    ndim=mesh.ndim;
 
-%  Xfac,Yfac,Xzero,YZero
-   WritePrenekhdr(fid,mesh)
-
-%  Mesh hdr
-   WriteMeshhdr(fid,ndim,nelg);
-
 %  Mesh data   
-   if ndim==2
-     zlev = 1;
-     a = ' ';
-     igroup = 0;
-     for e=1:nelg 
-       WriteElementhdr(fid,e,zlev,a,igroup);
-       WriteXYZRea(fid,e,mesh,ndim);
-     end
-   else % 3d
-
-   end       
+   zlev = 1;      % Ignoring 'zlevels'
+   a = ' ';
+   igroup = 0;
+   for e=1:nelg 
+     WriteElementhdr(fid,e,zlev,a,igroup);
+     WriteXYZRea(fid,e,mesh,ndim);
+   end
 
 %  Curved sides   
    ncurve=mesh.ncurve;
@@ -42,34 +32,6 @@ function Nek_WriteReaMesh(mesh,fid)
 
 end   % function
 %---------------------------------------------------------------------- 
-function WritePrenekhdr(fid,mesh)
-
-      space5 = blanks(5);
-      space4 = blanks(4);
-
-      hdr='XFAC,YFAC,XZERO,YZERO';
-         
-      fprintf(fid,'%10f%s%10f%s%10f%s%10f%s%s\n',mesh.xfac,space4,mesh.yfac,space4,mesh.xzero,space4,mesh.yzero,space5,hdr);
-
-end   % function 
-%----------------------------------------------------------------------  
-
-function WriteMeshhdr(fid,ndim,nelg)
-
-      if ndim==3
-        hdr=' **MESH DATA** 6 lines are X,Y,Z;X,Y,Z. Columns corners 1-4;5-8';
-        fprintf(fid,'%s\n',hdr);
-      else
-        hdr=' **MESH DATA** 2 lines are X,Y. Columns corners 1-4';
-        fprintf(fid,'%s\n',hdr);
-      end  
-
-      space11=blanks(11);
-      hdr='NEL,NDIM,NELV';
-      fprintf(fid,'%12i%3i%12i%s%s\n',nelg,ndim,nelg,space11,hdr); 
-
-end   % function
-%----------------------------------------------------------------------
 function WriteElementhdr(fid,e,zlev,a,igroup)
 
       space5 = blanks(5);

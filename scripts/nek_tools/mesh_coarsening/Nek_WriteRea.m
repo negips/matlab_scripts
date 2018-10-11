@@ -1,35 +1,46 @@
-function status = Nek_WriteRea(rea)
+function status = Nek_WriteRea(rea,ifre2)
 
    fname = 'new.rea';
-   wdsize = 'float32';   
+   wdsize = 'float64';   
 %  Open file
-   endian= 'le';
-   [fid,message] = fopen(fname,'w+');
+   [frea,message] = fopen(fname,'w+');
    
-   if fid == -1
+   if frea == -1
      disp(message) 
      return 
    end
- 
+
    disp('Writing rea file...')
 
    nelg=rea.mesh.nelg;
+   nelv=nelg;
    ndim=rea.mesh.ndim;
    ver=rea.nekver;
 
-   WriteNekhdr(fid,ver,ndim);
+   WriteNekhdr(frea,ver,ndim);
    [pard, parc]=Nek_ParamDiscriptions;
-   WriteParams(fid,rea,pard,parc); 
+   WriteParams(frea,rea,pard,parc); 
 
 %  Skipping Passive scalar data. Needs to be coded in
-   WriteNoPShdr(fid);
+   WriteNoPShdr(frea);
 
    nlogic=rea.nlogical;
-   WriteLogicalSwitches(fid,rea,nlogic); 
+   WriteLogicalSwitches(frea,rea,nlogic); 
 
-   Nek_WriteReaMesh(rea.mesh,fid);   
+%  Xfac,Yfac,Xzero,YZero
+   WritePrenekhdr(frea,rea.mesh)
 
-   status = fclose(fid);
+%  Mesh hdr
+   WriteMeshhdr(frea,ndim,nelg,nelv,ifre2);
+
+%  Mesh data
+   if ifre2
+     Nek_WriteRe2(rea.mesh);
+     WriteNoThermalhdr(frea); 
+   else            
+     Nek_WriteReaMesh(rea.mesh,frea);   
+   end  
+   status = fclose(frea);
 
 
 end   % function
@@ -74,6 +85,37 @@ function WriteParams(fid,rea,pard,parc)
 
 end   % function
 %---------------------------------------------------------------------- 
+function WritePrenekhdr(fid,mesh)
+
+      space5 = blanks(5);
+      space4 = blanks(4);
+      hdr='XFAC,YFAC,XZERO,YZERO';
+
+      datafmt = repmat('%10f%s',1,4);
+      fmt     = [datafmt '%s\n'];
+      fprintf(fid,fmt,mesh.xfac,space4,mesh.yfac,space4,mesh.xzero,space4,mesh.yzero,space5,hdr);
+
+end   % function
+%---------------------------------------------------------------------- 
+function WriteMeshhdr(fid,ndim,nelg,nelv,ifre2)
+
+      if ndim==3
+        hdr=' **MESH DATA** 6 lines are X,Y,Z;X,Y,Z. Columns corners 1-4;5-8';
+        fprintf(fid,'%s\n',hdr);
+      else
+        hdr=' **MESH DATA** 2 lines are X,Y. Columns corners 1-4';
+        fprintf(fid,'%s\n',hdr);
+      end  
+
+      space11=blanks(11);
+      hdr='NEL,NDIM,NELV';
+      if ifre2
+        nelg=-nelg;
+      end  
+      fprintf(fid,'%12i%3i%12i%s%s\n',nelg,ndim,nelv,space11,hdr); 
+
+end   % function
+%----------------------------------------------------------------------
 function WriteNoPShdr(fid)
 
 %     This needs to be modified in a proper implementation
@@ -87,7 +129,6 @@ function WriteNoPShdr(fid)
 end   % function 
 %----------------------------------------------------------------------
 function WriteLogicalSwitches(fid,rea,nlogic)
-
 
 %     header
       space2=blanks(2);
@@ -112,9 +153,24 @@ function WriteLogicalSwitches(fid,rea,nlogic)
         end  
       end  
 
-
 end   % function
 %---------------------------------------------------------------------- 
+function WriteNoThermalhdr(fid)
 
-%%----------------------------------------------------------------------
+      hdr = '  ***** NO THERMAL BOUNDARY CONDITIONS *****';
+      fprintf(fid,'%s\n',hdr);
 
+end   % function 
+%---------------------------------------------------------------------- 
+
+%    From genxyz.f in genbox:
+%C   Preprocessor Corner notation:      Symmetric Corner notation:
+%C
+%C           4+-----+3    ^ s                    3+-----+4    ^ s
+%C           /     /|     |                      /     /|     |
+%C          /     / |     |                     /     / |     |
+%C        8+-----+7 +2    +----> r            7+-----+8 +2    +----> r
+%C         |     | /     /                     |     | /     /
+%C         |     |/     /                      |     |/     /
+%C        5+-----+6    t                      5+-----+6    t
+%C

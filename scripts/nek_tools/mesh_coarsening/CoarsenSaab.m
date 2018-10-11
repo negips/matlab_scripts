@@ -25,13 +25,25 @@ function ifc = CoarsenSaab(LX,LY,j,i,iflocked)
     ifc=0;
 
     if i==skip_layers+1
-        ifc=1;
+        if xmid>0.06
+          ifc=1;
+        end  
     elseif i==skip_layers+3
-        ifc=1;
-    elseif i==skip_layers+5 && xmid>0.08 && xmid<1.30
-        ifc=1;  
-    elseif i==skip_layers+7 && xmid>0.3 && xmid<1.1
-        ifc=1;  
+        if xmid>0.06
+          ifc=1;
+        end  
+    elseif i==skip_layers+5 
+        if xmid>0.08 && xmid<1.30
+          ifc=1;
+        elseif xmid<=0.06
+          ifc=1;
+        end  
+    elseif i==skip_layers+7 
+        if xmid>0.3 && xmid<1.1
+          ifc=1;
+        elseif  xmid<0.030
+          ifc=1;
+        end  
     end  
 
 %   Radially outgoing stuff      
