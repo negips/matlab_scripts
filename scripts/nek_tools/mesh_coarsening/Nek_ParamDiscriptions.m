@@ -44,7 +44,7 @@ function [p,c] = Nek_ParamDiscriptions;
       c{14}  = '[if >0 time interval to dump fld file]';
 
       p{15}  = 'IOSTEP';
-      c{15}  = '[No of time steps between fld dumps]';
+      c{15}  = '[No. of time steps between fld dumps]';
 
       p{16}  = 'PSSOLVER';
       c{16}  = '[Heat/PS solver. 1: Helmholtz; 2:CVODE; 3:CVODE with user jacobian]';
@@ -68,7 +68,7 @@ function [p,c] = Nek_ParamDiscriptions;
       c{22}  = '[Tolerance for velocity solver. Relative if <0]';
 
       p{23}  = 'NPSCAL';
-      c{23}  = '[No of passive scalars]';
+      c{23}  = '[No. of passive scalars]';
 
       p{24}  = 'TOLREL';
       c{24}  = '[Relative tol for passive scalars]';
@@ -95,7 +95,7 @@ function [p,c] = Nek_ParamDiscriptions;
       c{31}  = '[No. of perturbation modes. if >0 then time advance base flow.]';
 
       p{32}  = 'NBCRE2';
-      c{32}  = '[if >0: No of BCs in re2 file. 0: All]';
+      c{32}  = '[if >0: No. of BCs in re2 file. 0: All]';
 
       for i=33:35
         p{i} = '-';
@@ -186,7 +186,7 @@ function [p,c] = Nek_ParamDiscriptions;
       c{64}  = '[if =1 restart perturbation solution]';
 
       p{65}  = 'IONODES';
-      c{65}  = '[No of IO nodes]';
+      c{65}  = '[No. of IO nodes]';
 
       p{66}  = 'OUT FORMAT';
       c{66}  = '[Output format. if >=0, binary. Else ASCII. Default: 6]';
@@ -244,7 +244,7 @@ function [p,c] = Nek_ParamDiscriptions;
       c{92}  = '[Not in use]';
 
       p{93}  = 'MXPREV';
-      c{93}  = '[No of solutions for projection]';
+      c{93}  = '[No. of solutions for projection]';
 
       p{94}  = 'MSTEP';
       c{94}  = '[Start of velocity projection]';
@@ -268,7 +268,7 @@ function [p,c] = Nek_ParamDiscriptions;
       c{100} = '[Pres. preconditioner when using CG]';
 
       p{101} = 'NMODES';
-      c{101} = '[No of additional modes for filtering]';
+      c{101} = '[No. of additional modes for filtering]';
 
       p{102} = '-';
       c{102} = '[Not in use]';
@@ -290,13 +290,13 @@ function [p,c] = Nek_ParamDiscriptions;
       end  
 
       p{116} = 'NELX';
-      c{116} = '[No of elements in x for Fast Tensor Product (FTP)]';
+      c{116} = '[No. of elements in x for Fast Tensor Product (FTP)]';
 
       p{117} = 'NELY';
-      c{117} = '[No of elements in y for Fast Tensor Product (FTP)]';
+      c{117} = '[No. of elements in y for Fast Tensor Product (FTP)]';
 
       p{118} = 'NELZ';
-      c{118} = '[No of elements in z for Fast Tensor Product (FTP)]';
+      c{118} = '[No. of elements in z for Fast Tensor Product (FTP)]';
 
       for i=119:200
         p{i} = '-';
