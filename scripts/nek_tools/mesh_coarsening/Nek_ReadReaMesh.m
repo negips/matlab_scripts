@@ -88,8 +88,8 @@ for i=1:NCurve
 
 end
 
-EL.ncurve         = NCurve;
-EL.curveface      = iedge;
+EL.Ncurve         = NCurve;
+EL.curveedge      = iedge;
 EL.curveieg       = ieg;
 EL.curveparams    = CurveParams;
 EL.curvetype      = CurveType;

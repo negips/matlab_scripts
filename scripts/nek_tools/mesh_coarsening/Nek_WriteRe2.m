@@ -42,7 +42,7 @@ function Nek_WriteRe2(mesh)
       end
 
 %     Curved sides   
-      ncurve=mesh.ncurve;
+      ncurve=mesh.Ncurve;
       fwrite(fre2,ncurve,rt);       % No of curves 
       for e=1:ncurve      
         WriteCurveData(fre2,mesh,e,rt)
@@ -81,7 +81,7 @@ end   % function
 function  WriteCurveData(fid,mesh,e,rt)
 
       ieg=double(mesh.curveieg(e));
-      edge=double(mesh.curveface(e));
+      edge=double(mesh.curveedge(e));
       cp1=mesh.curveparams(1,e);
       cp2=mesh.curveparams(2,e);
       cp3=mesh.curveparams(3,e);
@@ -128,17 +128,17 @@ function WriteFluidBC(fid,mesh,e,ndim,rt)
         if isfield(mesh.cbc(j,e),'param3');
           p3=mesh.cbc(j,e).param3;
         else
-          p3 = 0.
+          p3 = 0.;
         end  
         if isfield(mesh.cbc(j,e),'param4');
           p4=mesh.cbc(j,e).param4;
         else
-          p4 = 0.
+          p4 = 0.;
         end  
         if isfield(mesh.cbc(j,e),'param5');
           p5=mesh.cbc(j,e).param5;
         else
-          p5 = 0.
+          p5 = 0.;
         end 
 
         buf = [double(e) double(j) c2 of p3 p4 p5];

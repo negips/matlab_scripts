@@ -15,7 +15,7 @@ function Nek_WriteReaMesh(fid,mesh)
    end
 
 %  Curved sides   
-   ncurve=mesh.ncurve;
+   ncurve=mesh.Ncurve;
    WriteCurvehdr(fid,ncurve)   
    for e=1:ncurve      
      WriteCurveData(fid,mesh,e,nelg)
@@ -85,7 +85,7 @@ function  WriteCurveData(fid,mesh,e,nelg)
       end
 
       ieg=mesh.curveieg(e);
-      edge=mesh.curveface(e);
+      edge=mesh.curveedge(e);
       cp1=mesh.curveparams(1,e);
       cp2=mesh.curveparams(2,e);
       cp3=mesh.curveparams(3,e);

@@ -6,17 +6,17 @@ function rea = StupidChange(rea,shift)
       end
 
       nelg=rea.mesh.nelg;
-      ncurve=rea.mesh.ncurve;
+      ncurve=rea.mesh.Ncurve;
 %     Shift curved sides      
       for i=1:ncurve
-        cs=rea.mesh.curveface(i);
+        cs=rea.mesh.curveedge(i);
         cs=cs+shift;
         if cs>4
           cs=cs-4;
         elseif cs<0
           cs=cs+4;
         end
-        rea.mesh.curveface(i)=cs;
+        rea.mesh.curveedge(i)=cs;
       end
 
 %     Shift connecting element information

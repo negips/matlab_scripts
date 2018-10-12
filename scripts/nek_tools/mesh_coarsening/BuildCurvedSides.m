@@ -4,7 +4,7 @@ function mesh3d = BuildCurvedSides(mesh3d,mesh2d,Lz)
 %  I assume the curved elements have not been modified.
 %  Otherwise the code needs a lot of modifications
    
-   ncurves = mesh2d.ncurve;
+   ncurves = mesh2d.Ncurve;
    curveparams = [];
    curveedge   = [];
    curveieg    = [];
@@ -13,7 +13,7 @@ function mesh3d = BuildCurvedSides(mesh3d,mesh2d,Lz)
    nedge = 0;
    for i=1:ncurves
      el2d = mesh2d.curveieg(i);
-     f2d  = mesh2d.curveface(i);
+     f2d  = mesh2d.curveedge(i);
      ct   = mesh2d.curvetype{i};
      if ~strcmpi(ct,'m')
        disp(['Not implemented for Curve Type ', ct, '. Skipping curved element'])
@@ -28,7 +28,7 @@ function mesh3d = BuildCurvedSides(mesh3d,mesh2d,Lz)
          nedge   = nedge+1;
          cp = zeros(5,1);
          cieg    =  mesh3d.LayerGEl{el2d}(j);     % 3d Element number
-         iedge   =  mesh2d.curveface(i) + k*4;    % edge number
+         iedge   =  mesh2d.curveedge(i) + k*4;    % edge number
          cp(1)   =  mesh2d.curveparams(1,i);
          cp(2)   =  mesh2d.curveparams(2,i);
          cp(3)   =  ((j-1)*2 + k)*dz;
@@ -43,10 +43,11 @@ function mesh3d = BuildCurvedSides(mesh3d,mesh2d,Lz)
      end    % j=1:nel3d
    end      % i=1:ncurves 
       
-   mesh3d.ncurve    = nedge;
-   mesh3d.curveieg  = curveieg;
-   mesh3d.curveedge = curveedge;
-   mesh3d.ctype     = ctype;
+   mesh3d.Ncurve      = nedge;
+   mesh3d.curveedge   = curveedge;
+   mesh3d.curveieg    = curveieg;
+   mesh3d.curveparams = curveparams;
+   mesh3d.curvetype   = ctype;
 
 end   % function
 %---------------------------------------------------------------------- 

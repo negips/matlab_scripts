@@ -202,7 +202,7 @@ end % function
 function ifcl = CoarsenZLayer(il,nlayers,LX,LY,LE,mesh2d,cz_pl)
 
 % Test 1.
-  Zskip = 10;       % Start 'z' refinement after Zskip 2D layer.
+  Zskip = 5;       % Start 'z' refinement after Zskip 2D layer.
  
   nel_lay = length(LE);
   maxdlo  = MaxDLO(LX,LY,nel_lay);    
@@ -212,7 +212,7 @@ function ifcl = CoarsenZLayer(il,nlayers,LX,LY,LE,mesh2d,cz_pl)
   if il==Zskip+1
 %   Coarsen entire layer
     ifcl = 1;
-  elseif il==Zskip+3
+%  elseif il==Zskip+3
     ifcl = 1;
 %  elseif il==Zskip+5
 %    ifcl = 1;

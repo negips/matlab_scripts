@@ -4,10 +4,11 @@ clear
 clc
 close all
 
-%load saab_wing2d.mat
+load saab_wing2d.mat
 %load saab750k.mat
 %load fluent_plus2.mat
-load stretched.mat
+%load stretched.mat
+%load saab600k.mat
 
 skiplayers = 3;         % Need to skip some layers since its smaller than the others
 curvedef   = 'mv ';

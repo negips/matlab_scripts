@@ -18,7 +18,7 @@ function [Mesh2D] = ReOrderElements(NewE,NewX,NewY,NewBC,NewCEl,NewCoF,NewET,old
     tnel = tnel+nel;
     lindex = [];
     for j=1:nel
-      glno   = int32(glno+1);
+      glno   = glno+1;
       lindex = [lindex glno];
       OldGN  = [OldGN EL(j)];
       NewGN  = [NewGN glno];
@@ -37,6 +37,9 @@ function [Mesh2D] = ReOrderElements(NewE,NewX,NewY,NewBC,NewCEl,NewCoF,NewET,old
     if i==oldsort(j)
        Old2New(i) = newsort(j);
        j=j+1;
+       if j>length(newsort)        % We are done
+         break
+       end
     else
        Old2New(i) = -1;
     end
@@ -52,10 +55,10 @@ function [Mesh2D] = ReOrderElements(NewE,NewX,NewY,NewBC,NewCEl,NewCoF,NewET,old
   Mesh2D.EType = EType;
   
 % Assuming I don't touch the curved faces
-  [curveieg,curveface,curveparams,ctype,ncurve] = Build2DCurved(oldmesh,Old2New,nlayers,NewBC,LayerEnd,cdef);
+  [curveieg,curveedge,curveparams,ctype,ncurve] = Build2DCurved(oldmesh,Old2New,nlayers,NewBC,LayerEnd,cdef);
 
-  Mesh2D.ncurve=ncurve;
-  Mesh2D.curveface=curveface;
+  Mesh2D.Ncurve=ncurve;
+  Mesh2D.curveedge=curveedge;
   Mesh2D.curveieg=curveieg;
   Mesh2D.curveparams=curveparams;
   Mesh2D.curvetype=ctype;
@@ -77,14 +80,14 @@ end   % end function
 
 %----------------------------------------------------------------------
 
-function [curveieg,curveface,curveparams,ctype,ncurve] = Build2DCurved(oldmesh,Old2New,nlayers,NewBC,LayerEnd,cdef)
+function [curveieg,curveedge,curveparams,ctype,ncurve] = Build2DCurved(oldmesh,Old2New,nlayers,NewBC,LayerEnd,cdef)
 
   newcurveieg = Old2New(oldmesh.curveieg);
       
   ncold=length(newcurveieg);
  
   curveieg    = []; 
-  curveface   = [];
+  curveedge   = [];
   curveparams = [];
   ctype       = [];
   ncurve = 0;
@@ -124,7 +127,7 @@ function [curveieg,curveface,curveparams,ctype,ncurve] = Build2DCurved(oldmesh,O
       bc = NewBC{i}{j}(k,:);
       if strcmpi(bc,cdef)
         curveieg  = [curveieg newieg];    
-        curveface = [curveface k];
+        curveedge = [curveedge k];
         iffound = 1;
         ncurve=ncurve+1;
         curveieg(ncurve)=newieg;
