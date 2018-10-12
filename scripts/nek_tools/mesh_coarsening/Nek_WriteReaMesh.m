@@ -1,4 +1,4 @@
-function Nek_WriteReaMesh(mesh,fid)
+function Nek_WriteReaMesh(fid,mesh)
 
    disp('Writing mesh')
 

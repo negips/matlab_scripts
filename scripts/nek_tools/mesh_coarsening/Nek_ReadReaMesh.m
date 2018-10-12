@@ -179,23 +179,6 @@ end
 
 EL.cbc = CBC;
 
-%% Restart conditions
-tline = fgetl(fid);  %  1 PRESOLVE/RESTART OPTIONS  *****
-cell = textscan(tline, '%f');
-Nrestart = cell{1};
-for i=1:Nrestart
-  tline = fgetl(fid);  % Restart file(s)
-  cell=textscan(tline,'%s %s');
-  rstFiles{i}=cell{1}{1};
-  rstOptions{i}=cell{2}{1};
-end
-
-if (Nrestart>0)
-  EL.rstfiles       = rstFiles;
-  EL.rstoptions     = rstOptions;
-end
-
-
 
 return
 

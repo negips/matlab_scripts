@@ -24,8 +24,8 @@ function status = Nek_WriteRea(rea,ifre2)
 %  Skipping Passive scalar data. Needs to be coded in
    WriteNoPShdr(frea);
 
-   nlogic=rea.nlogical;
-   WriteLogicalSwitches(frea,rea,nlogic); 
+%  Logical Switches   
+   WriteLogicalSwitches(frea,rea); 
 
 %  Xfac,Yfac,Xzero,YZero
    WritePrenekhdr(frea,rea.mesh)
@@ -36,10 +36,31 @@ function status = Nek_WriteRea(rea,ifre2)
 %  Mesh data
    if ifre2
      Nek_WriteRe2(rea.mesh);
-     WriteNoThermalhdr(frea); 
    else            
-     Nek_WriteReaMesh(rea.mesh,frea);   
-   end  
+     Nek_WriteReaMesh(frea,rea.mesh);   
+   end
+
+%  Restart
+   WriteRestart(frea,rea)
+
+%  Initial
+   WriteInitialCond(frea,rea)
+
+%  Drive Force
+   WriteDriveForce(frea,rea)
+
+%  Drive Force
+   WriteVarProp(frea,rea)
+
+%  History and Integral
+   WriteHist(frea,rea)
+
+%  Output specification
+   WriteOutputSpec(frea,rea)
+
+%  Object specification
+   WriteObjectSpec(frea,rea)
+  
    status = fclose(frea);
 
 
@@ -128,7 +149,9 @@ function WriteNoPShdr(fid)
 
 end   % function 
 %----------------------------------------------------------------------
-function WriteLogicalSwitches(fid,rea,nlogic)
+function WriteLogicalSwitches(fid,rea)
+
+      nlogic=rea.Nlogical;
 
 %     header
       space2=blanks(2);
@@ -155,12 +178,152 @@ function WriteLogicalSwitches(fid,rea,nlogic)
 
 end   % function
 %---------------------------------------------------------------------- 
-function WriteNoThermalhdr(fid)
+function WriteRestart(fid,rea)
 
-      hdr = '  ***** NO THERMAL BOUNDARY CONDITIONS *****';
-      fprintf(fid,'%s\n',hdr);
+      nrestart=rea.Nrestart;
 
-end   % function 
+      space5 = blanks(5);
+      space1 = blanks(1);
+      hdr='PRESOLVE/RESTART OPTIONS';
+
+      fmt     = '%s%3i%s%s\n';
+      fprintf(fid,fmt,space5,nrestart,space1,hdr);
+
+      fmt     = '%s%s%s\n';
+      for i=1:nrestart
+        fprintf(fid,fmt,rea.rstFiles{i},space1,rea.rstOptions{i});
+      end  
+
+end   % function
+%---------------------------------------------------------------------- 
+function WriteInitialCond(fid,rea)
+
+      nic=rea.Nic;
+
+      space5 = blanks(5);
+      space1 = blanks(1);
+      hdr='INITIAL CONDITIONS';
+
+      fmt     = '%s%3i%s%s\n';
+      fprintf(fid,fmt,space5,nic,space1,hdr);
+
+      fmt     = '%s\n';
+      for i=1:nic
+        fprintf(fid,fmt,rea.initialconditions{i});
+      end  
+
+end   % function
+%---------------------------------------------------------------------- 
+function WriteDriveForce(fid,rea)
+
+      ndrive=rea.Ndriveforce;
+
+      hdr=' ***** DRIVE FORCE DATA ***** BODY FORCE, FLOW, Q ';
+      fmt     = '%s\n';
+      fprintf(fid,fmt,hdr);
+
+      space5 = blanks(5);
+      space1 = blanks(1);
+      hdr='Lines of Drive force data follow';
+
+      fmt     = '%s%3i%s%s\n';
+      fprintf(fid,fmt,space5,ndrive,space1,hdr);
+
+      fmt     = '%s\n';
+      for i=1:ndrive
+        fprintf(fid,fmt,rea.driveforce{i});
+      end  
+
+end   % function
+%---------------------------------------------------------------------- 
+function WriteVarProp(fid,rea)
+
+      hdr=' ***** VARIABLE PROPERTY DATA ***** Overrides Parameter data ';
+      fmt     = '%s\n';
+      fprintf(fid,fmt,hdr);
+
+      space5 = blanks(5);
+      space1 = blanks(1);
+
+      hdr='Lines follow';
+      fmt     = '%s%3i%s%s\n';
+      fprintf(fid,fmt,space5,rea.Nvplines,space1,hdr);
+
+      hdr='PACKETS OF DATA FOLLOW';
+      fmt     = '%s%3i%s%s\n';
+      npackets = rea.Npackets;
+      fprintf(fid,fmt,space5,npackets,space1,hdr);
+     
+      fmt     = '%s\n';
+      for i=1:npackets
+        fprintf(fid,fmt,rea.datapacket{i});
+      end  
+
+end   % function
+%---------------------------------------------------------------------- 
+function WriteHist(fid,rea)
+
+      nhist=rea.Nhist;
+
+      hdr=' ***** HISTORY AND INTEGRAL DATA *****';
+      fmt     = '%s\n';
+      fprintf(fid,fmt,hdr);
+
+      space5 = blanks(5);
+      space1 = blanks(1);
+
+      hdr='POINTS. Hcode, I,J,H,IEL';
+      fmt     = '%s%3i%s%s\n';
+      fprintf(fid,fmt,space5,nhist,space1,hdr);
+     
+      fmt     = '%s\n';
+      for i=1:nhist
+        fprintf(fid,fmt,rea.history{i});
+      end  
+
+end   % function
+%---------------------------------------------------------------------- 
+function WriteOutputSpec(fid,rea)
+
+      noutspec=rea.Noutspec;
+
+      hdr=' ***** OUTPUT FIELD SPECIFICATION *****';
+      fmt     = '%s\n';
+      fprintf(fid,fmt,hdr);
+
+      space5 = blanks(5);
+      space1 = blanks(1);
+
+      hdr='SPECIFICATIONS FOLLOW';
+      fmt     = '%s%3i%s%s\n';
+      fprintf(fid,fmt,space5,noutspec,space1,hdr);
+
+      space2 = blanks(2);
+      fmt     = '%s%s%s%s\n';
+      for i=1:noutspec
+        fprintf(fid,fmt,space2,rea.outputspec{i,1},space5,rea.outputspec{i,2});
+      end  
+
+end   % function
+%---------------------------------------------------------------------- 
+function WriteObjectSpec(fid,rea)
+
+      nobject=rea.Nobjects;
+
+      hdr=' ***** OBJECT SPECIFICATION *****';
+      fmt     = '%s\n';
+      fprintf(fid,fmt,hdr);
+
+      space5 = blanks(5);
+      space1 = blanks(1);
+
+      space2 = blanks(2);
+      fmt     = '%s%3i%s%s\n';
+      for i=1:nobject
+        fprintf(fid,fmt,space2,rea.objects{i,1},space5,rea.objects{i,2});
+      end  
+
+end   % function
 %---------------------------------------------------------------------- 
 
 %    From genxyz.f in genbox:

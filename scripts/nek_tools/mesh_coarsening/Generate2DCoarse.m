@@ -73,8 +73,8 @@ function [rea2d] = Generate2DCoarse(rea,LayerE,LayerX,LayerY,LayerBC,LayerCEl,Me
         for j=1:l1
             
 %         ifc(j) = CoarsenCriteria(LX,LY,j,i,iflocked);
-         ifc(j) = CoarsenKDJ(LX,LY,j,i,iflocked);
-%         ifc(j) = CoarsenSaab(LX,LY,j,i,iflocked);
+%         ifc(j) = CoarsenKDJ(LX,LY,j,i,iflocked);
+         ifc(j) = CoarsenSaab(LX,LY,j,i,iflocked);
       
         end
 
@@ -103,16 +103,32 @@ function [rea2d] = Generate2DCoarse(rea,LayerE,LayerX,LayerY,LayerBC,LayerCEl,Me
       mesh2d = ReOrderElements(NewE,NewX,NewY,NewBC,NewCEl,NewCoF,NewET,rea.mesh,curvedef); 
       CheckConnectivity2D(mesh2d)
 
-      rea2d.casename = rea.casename;
-      rea2d.nekver   = rea.nekver;
-      rea2d.nparams  = rea.nparams;
-      rea2d.nlogical = rea.nlogical;
-      rea2d.npscal   = rea.npscal;
-      rea2d.ifflow   = rea.ifflow;
-      rea2d.ifheat   = rea.ifheat;
-      rea2d.param    = rea.param;
-      rea2d.logical  = rea.logical;
-      rea2d.mesh     = mesh2d;
+      rea2d.casename          = rea.casename;
+      rea2d.nekver            = rea.nekver;
+      rea2d.nparams           = rea.nparams;
+      rea2d.Nlogical          = rea.Nlogical;
+      rea2d.npscal            = rea.npscal;
+      rea2d.ifflow            = rea.ifflow;
+      rea2d.ifheat            = rea.ifheat;
+      rea2d.param             = rea.param;
+      rea2d.logical           = rea.logical;
+      rea2d.mesh              = mesh2d;
+      rea2d.Nrestart          = rea.Nrestart;
+      rea2d.rstFiles          = rea.rstFiles;
+      rea2d.rstOptions        = rea.rstOptions;
+      rea2d.Nic               = rea.Nic;
+      rea2d.initialconditions = rea.initialconditions;
+      rea2d.Ndriveforce       = rea.Ndriveforce;
+      rea2d.driveforce        = rea.driveforce;
+      rea2d.Nvplines          = rea.Nvplines;
+      rea2d.Npackets          = rea.Npackets;
+      rea2d.datapacket        = rea.datapacket;
+      rea2d.Nhist             = rea.Nhist;
+      rea2d.history           = rea.history;
+      rea2d.Noutspec          = rea.Noutspec;
+      rea2d.outputspec        = rea.outputspec;
+      rea2d.Nobjects          = rea.Nobjects;
+      rea2d.objects           = rea.objects;
       
       if ifvtk      
         polydata = [];
