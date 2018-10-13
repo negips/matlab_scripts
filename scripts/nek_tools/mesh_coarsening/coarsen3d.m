@@ -16,7 +16,7 @@ rea2d = Generate2DCoarse(rea,LayerE,LayerX,LayerY,LayerBC,LayerCEl,MeshC,skiplay
 
 
 % Generate 3D mesh
-nz0=4;
+nz0=8;
 Lz=0.15;
 ifperiodic=1;
 ifvtk=1;

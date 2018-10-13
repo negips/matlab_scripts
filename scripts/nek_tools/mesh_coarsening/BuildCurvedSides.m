@@ -20,9 +20,9 @@ function mesh3d = BuildCurvedSides(mesh3d,mesh2d,Lz)
        continue
      end
 
-     nel3d=length(mesh3d.LayerGEl{el2d});
-     dz = Lz/nel3d;
-     for j=1:nel3d
+     nz=length(mesh3d.LayerGEl{el2d});
+     dz = Lz/nz;
+     for j=1:nz
        nc3d = nc3d+1;
        for k=0:1
          nedge   = nedge+1;
@@ -31,7 +31,7 @@ function mesh3d = BuildCurvedSides(mesh3d,mesh2d,Lz)
          iedge   =  mesh2d.curveedge(i) + k*4;    % edge number
          cp(1)   =  mesh2d.curveparams(1,i);
          cp(2)   =  mesh2d.curveparams(2,i);
-         cp(3)   =  ((j-1)*2 + k)*dz;
+         cp(3)   =  ((j-1) + k)*dz;
          cp(4)   = 0.;
          cp(5)   = 0.;
 
