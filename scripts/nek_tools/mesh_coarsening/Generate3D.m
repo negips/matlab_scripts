@@ -81,7 +81,9 @@ function [mesh3d] = Generate3D(mesh2d,nlayers,nz0,Lz,ifperiodic);
     LY   = mesh2d.yc(:,ind);
     nel_lay = length(LE);
  
-    ifcl = CoarsenZLayer(il,nlayers,LX,LY,LE,mesh2d,cz_pl);
+%    ifcl = CoarsenZLayer(il,nz,nlayers,LX,LY,LE,mesh2d,cz_pl);
+    ifcl = CoarsenZLayerSaab600k(il,nz,nlayers,LX,LY,LE,mesh2d,cz_pl);
+
     if ifcl==0
       ifzc(il)=0;
     elseif ifcl==1
@@ -199,7 +201,7 @@ function maxdlv = MaxDLV(LX,LY,nel)
 end % function
 %---------------------------------------------------------------------- 
 
-function ifcl = CoarsenZLayer(il,nlayers,LX,LY,LE,mesh2d,cz_pl)
+function ifcl = CoarsenZLayer(il,nz,nlayers,LX,LY,LE,mesh2d,cz_pl)
 
 % Test 1.
   Zskip = 5;       % Start 'z' refinement after Zskip 2D layer.
@@ -220,6 +222,11 @@ function ifcl = CoarsenZLayer(il,nlayers,LX,LY,LE,mesh2d,cz_pl)
   
   if il==nlayers
     ifcl = 0;
+  end
+
+% Coarsened layer needs to have multiple of 4 elements for periodicity  
+  if mod(nz,4)~=0
+    ifcl=0;
   end
 
 % If previous layer was 'z' coarsened  

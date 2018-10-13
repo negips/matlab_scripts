@@ -75,7 +75,8 @@ function [rea2d] = Generate2DCoarse(rea,LayerE,LayerX,LayerY,LayerBC,LayerCEl,Me
 %         ifc(j) = CoarsenCriteria(LX,LY,j,i,iflocked);
 %         ifc(j) = CoarsenKDJ(LX,LY,j,i,iflocked);
 %         ifc(j) = CoarsenSaab(LX,LY,j,i,iflocked);
-         ifc(j) = CoarsenSaab2d(LX,LY,j,i,iflocked);
+         ifc(j) = CoarsenSaab600k(LX,LY,j,i,iflocked);
+%         ifc(j) = CoarsenSaab2d(LX,LY,j,i,iflocked);
      
         end
 

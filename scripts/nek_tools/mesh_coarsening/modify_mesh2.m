@@ -12,8 +12,7 @@ ifplot = 0;
 %casename = 'fluent_plus2';
 %casename = 'saab10k';
 %casename = 'stretched';
-%casename = 'saab600k';
-casename = 'old';
+casename = 'saab600k';
 svfname  = [casename '.mat'];
 
 disp(['CaseName: ' casename])

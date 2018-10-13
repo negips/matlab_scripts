@@ -70,9 +70,9 @@ function WriteXYZ(fid,e,igroup,mesh,ndim,rt)
       else
         xc=mesh.xc(:,e);
         fwrite(fid,xc,rt);
-        yc=mesh.xc(:,e);
+        yc=mesh.yc(:,e);
         fwrite(fid,yc,rt);
-        zc=mesh.xc(:,e);
+        zc=mesh.zc(:,e);
         fwrite(fid,zc,rt);
       end   
 
