@@ -131,24 +131,8 @@ function [rea2d] = Generate2DCoarse(rea,LayerE,LayerX,LayerY,LayerBC,LayerCEl,Me
       rea2d.Nobjects          = rea.Nobjects;
       rea2d.objects           = rea.objects;
       
-      if ifvtk      
-        polydata = [];
-        nel=mesh2d.nelg;
-        for i=1:nel
-          xvtk(:,i) = mesh2d.xc(:,i);
-          yvtk(:,i) = mesh2d.yc(:,i);
-        
-          p0 = (2^2)*(i-1);
-          f1 = [0 1 2 3] + 1 + p0;
-          polydata = [polydata; f1];
-        end  
-        
-        xvtk=xvtk(:);
-        yvtk=yvtk(:);
-        zvtk=0*xvtk;
-        
-        vfname = 'mesh2d.vtk';
-        vtkwrite(vfname,'polydata','tetrahedron',xvtk,yvtk,zvtk,polydata,'binary')
+      if ifvtk
+        CreateVTKMesh(rea2d.mesh) 
       end  
 
 end   % function

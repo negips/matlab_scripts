@@ -33,11 +33,11 @@ function ifc = CoarsenSaab2d(LX,LY,j,i,iflocked)
           ifc=1;
 %        end  
     elseif i==skip_layers+5 
-%        if j==27
-%          ifc=1;
+        if j>=27 && j<=33
+          ifc=1;
 %        if xmid<=0.06
 %          ifc=1;
-%        end  
+        end  
     end  
 
 %   Radially outgoing stuff      

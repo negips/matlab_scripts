@@ -7,6 +7,13 @@ reafile = [casename '.rea'];
 
 fid=fopen(reafile,'r');
 
+if fid == -1
+  disp(message) 
+  return 
+end
+
+disp(['Reading ' reafile])
+
 tline = fgetl(fid);                                              % ***** Parameters ****
 tline = fgetl(fid); cell=textscan(tline, '%f');                  % Nekton Version
 NekVer = cell{1};

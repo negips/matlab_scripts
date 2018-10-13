@@ -16,11 +16,15 @@ rea2d = Generate2DCoarse(rea,LayerE,LayerX,LayerY,LayerBC,LayerCEl,MeshC,skiplay
 
 
 % Generate 3D mesh
-nz0=8;
+nz0=4;
 Lz=0.15;
 ifperiodic=1;
 ifvtk=1;
 rea3d = Generate3DCoarse(rea2d,nz0,Lz,ifperiodic,ifvtk); 
 
-Nek_WriteRea(rea3d,1);
+Nek_WriteRea(rea3d,0);
 
+
+
+% testing
+%new=Nek_ReadRea('new');

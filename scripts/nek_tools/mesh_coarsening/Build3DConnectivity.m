@@ -31,10 +31,10 @@ function [mesh3d] = Build3DConnectivity(mesh3d,mesh2d)
      lind_2d=mesh2d.layerindex{il};
      for i = lind_2d         % 2d element number
 
-       bcf1 = mesh2d.cbc(1,i).connectsto;    % bc on 2d face 1
-       bcf2 = mesh2d.cbc(2,i).connectsto;    % bc on 2d face 2
-       bcf3 = mesh2d.cbc(3,i).connectsto;    % bc on 2d face 3
-       bcf4 = mesh2d.cbc(4,i).connectsto;    % bc on 2d face 4
+%       bcf1 = mesh2d.cbc(1,i).connectsto;    % bc on 2d face 1
+%       bcf2 = mesh2d.cbc(2,i).connectsto;    % bc on 2d face 2
+%       bcf3 = mesh2d.cbc(3,i).connectsto;    % bc on 2d face 3
+%       bcf4 = mesh2d.cbc(4,i).connectsto;    % bc on 2d face 4
           
        glnos = mesh3d.LayerGEl{i};
        nz=length(glnos);
@@ -50,8 +50,12 @@ function [mesh3d] = Build3DConnectivity(mesh3d,mesh2d)
            end  
 %          Find connecting element on face 5
            if strcmpi(cbc1(5).bc,'P  ')          % if its a periodic face
+             if (j~=1)
+               disp('Periodic BC on the wrong element')
+             end
              cbc1(5).connectsto = ieg+nz-1;
              cbc1(5).onface     = 6;
+
            elseif ~strcmpi(cbc1(5).bc,'E  ')     % If its a different boundary condition
              cbc1(5).connectsto = 0;
              cbc1(5).onface     = 0;
@@ -61,6 +65,9 @@ function [mesh3d] = Build3DConnectivity(mesh3d,mesh2d)
            end  
 %          Find connecting element on face 6
            if strcmpi(cbc1(6).bc,'P  ')
+             if (j~=nz)
+               disp('Periodic BC on the wrong element')
+             end
              cbc1(6).connectsto = ieg-nz+1;
              cbc1(6).onface     = 5;
            elseif ~strcmpi(cbc1(6).bc,'E  ')

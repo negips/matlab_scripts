@@ -202,7 +202,7 @@ function [p,c] = Nek_ParamDiscriptions;
         c{i} = '[Not in use]';
       end  
 
-      p{74}  = 'HlMPRINT';
+      p{74}  = 'HLMPRINT';
       c{74}  = '[If >0 print Helmholtz iterations]';
 
       for i=75:81

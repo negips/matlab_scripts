@@ -15,5 +15,5 @@ curvedef   = 'mv ';
 ifvtk      = 1;
 rea2d = Generate2DCoarse(rea,LayerE,LayerX,LayerY,LayerBC,LayerCEl,MeshC,skiplayers,curvedef,ifvtk);
 
-Nek_WriteRea(rea2d,1);
+Nek_WriteRea(rea2d,0);
 

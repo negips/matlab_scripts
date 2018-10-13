@@ -43,7 +43,7 @@ end   % function
 %----------------------------------------------------------------------  
 function WriteXYZRea(fid,e,mesh,ndim)
 
-      fmt = repmat('%14.6e',1,4);
+      fmt = repmat('%14.6E',1,4);
       fmt = [fmt '\n'];    
          
       if ndim==2   
@@ -74,7 +74,7 @@ end   % function
 %----------------------------------------------------------------------
 function  WriteCurveData(fid,mesh,e,nelg)
 
-      datafmt = repmat('%14.6e',1,5);
+      datafmt = repmat('%14.6E',1,5);
       space1=blanks(1);
       if nelg<1000
         fmt=['%3i%3i',datafmt,space1,'%1s\n'];
@@ -115,8 +115,9 @@ function WriteFluidBC(fid,mesh,e,ndim,nelg)
 %     Either there is a bug for large element numbers or 
 %     there is an inherent ordering of elements for BCs.
 
-      datafmt = repmat('%14.6e',1,5);
-      space1  = blanks(1);
+      datafmt  = repmat('%14.6f',1,5);
+      datafmt2 = repmat('%18.11f',1,5);
+      space1   = blanks(1);
 
       fmt1=0;
 
@@ -124,14 +125,13 @@ function WriteFluidBC(fid,mesh,e,ndim,nelg)
         fmt = [space1,'%3s%3i%3i',datafmt,'\n'];
         fmt1=1;
       elseif nelg<10^5
-        fmt = [space1,'%3s%6i%1i',datafmt,'\n'];
+        fmt = [space1,'%3s%5i%1i',datafmt,'\n'];
         fmt1=1;
       elseif nelg<10^6
-        fmt = [space1,'%3s%5i%1i',datafmt,'\n'];
+        fmt = [space1,'%3s%6i',datafmt,'\n'];
         fmt1=0;
       else
-        datafmt = repmat('%18.11',1,5);
-        fmt = [space1,'%3s%12i',datafmt,'\n'];
+        fmt = [space1,'%3s%12i',datafmt2,'\n'];
         fmt1=0;
       end
 
@@ -140,14 +140,26 @@ function WriteFluidBC(fid,mesh,e,ndim,nelg)
         bc=mesh.cbc(j,e).bc;
         c2=mesh.cbc(j,e).connectsto;
         of=mesh.cbc(j,e).onface;
-        p1=mesh.cbc(j,e).param3;
-        p2=mesh.cbc(j,e).param4;
-        p3=mesh.cbc(j,e).param5;
+        if isfield(mesh.cbc(j,e),'param3');
+          p3=mesh.cbc(j,e).param3;
+        else
+          p3 = 0.;
+        end  
+        if isfield(mesh.cbc(j,e),'param4');
+          p4=mesh.cbc(j,e).param4;
+        else
+          p4 = 0.;
+        end  
+        if isfield(mesh.cbc(j,e),'param5');
+          p5=mesh.cbc(j,e).param5;
+        else
+          p5 = 0.;
+        end 
 
         if fmt1
-          fprintf(fid,fmt,bc,e,j,c2,of,p1,p2,p3);
+          fprintf(fid,fmt,bc,e,j,c2,of,p3,p4,p5);
         else
-          fprintf(fid,fmt,bc,e,c2,of,p1,p2,p3);
+          fprintf(fid,fmt,bc,e,c2,of,p3,p4,p5);
         end
       end
 

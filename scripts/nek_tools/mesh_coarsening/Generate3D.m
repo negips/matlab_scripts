@@ -155,9 +155,9 @@ function [mesh3d] = Generate3D(mesh2d,nlayers,nz0,Lz,ifperiodic);
 
   mesh3d = Build3DConnectivity(mesh3d,mesh2d);
   CheckConnectivity3D(mesh3d);
-
   mesh3d = rmfield(mesh3d, 'EF');
   mesh3d = rmfield(mesh3d, 'rsum_z');
+
   mesh3d.xfac = mesh2d.xfac;
   mesh3d.yfac = mesh2d.yfac;
   mesh3d.xzero = mesh2d.xzero;
@@ -211,9 +211,9 @@ function ifcl = CoarsenZLayer(il,nlayers,LX,LY,LE,mesh2d,cz_pl)
   ifcl = 0;       % if coarsen layer
   if il==Zskip+1
 %   Coarsen entire layer
-    ifcl = 1;
+%    ifcl = 1;
 %  elseif il==Zskip+3
-    ifcl = 1;
+%    ifcl = 1;
 %  elseif il==Zskip+5
 %    ifcl = 1;
   end
