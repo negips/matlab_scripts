@@ -1,5 +1,6 @@
 function [mesh3d] = Build3DConnectivity(mesh3d,mesh2d)
 
+
    zlines = mesh2d.nelg;
    nz0 = length(mesh3d.LayerGEl{1});      % Maximum elelements in the span in layer1
    nfaces3 = 6;
@@ -23,7 +24,18 @@ function [mesh3d] = Build3DConnectivity(mesh3d,mesh2d)
 %  Running sum of global element numbers 
    mesh3d.rsum_z = rsum_z; 
 
-   cbc1 = [];
+
+%  preallocate memory for the structure cbc      
+   cbc0.bc='-b';
+   cbc0.connectsto=-99;
+   cbc0.onface=-99;
+   cbc0.param3=0;
+   cbc0.param4=0;
+   cbc0.param5=0;
+
+   cbc1 = repmat(cbc0,nfaces3,1);
+   cbc=repmat(cbc1,1,mesh3d.nelg); 
+
    e3d=0;
    nlayers=length(mesh2d.layerindex);
    for il = 1:nlayers
