@@ -23,7 +23,7 @@ for i = 1:nfiles
   ind2=ind1+flen-1;
   file = cmdout(ind1:ind2); 
   allfiles{i}=file;
-  time = file(l1+l3+2:flen-4); 
+  time = file(l1+l3+2:flen-4);
   tout(i)=str2num(time);
 end
 

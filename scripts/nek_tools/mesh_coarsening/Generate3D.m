@@ -82,7 +82,8 @@ function [mesh3d] = Generate3D(mesh2d,nlayers,nz0,Lz,ifperiodic);
     nel_lay = length(LE);
  
 %    ifcl = CoarsenZLayer(il,nz,nlayers,LX,LY,LE,mesh2d,cz_pl);
-    ifcl = CoarsenZLayerSaab600k(il,nz,nlayers,LX,LY,LE,mesh2d,cz_pl);
+%    ifcl = CoarsenZLayerSaab600k(il,nz,nlayers,LX,LY,LE,mesh2d,cz_pl);
+    ifcl = CoarsenZLayerKDJ(il,nz,nlayers,LX,LY,LE,mesh2d,cz_pl);
 
     if ifcl==0
       ifzc(il)=0;

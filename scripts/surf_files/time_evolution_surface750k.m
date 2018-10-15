@@ -4,21 +4,21 @@ clear
 clc
 close all
 
-addpath '/home/prabal/workstation/git_kth/matlabscripts/scripts/'
-% addpath '/scratch/negi/git_repos/matlabscripts/scripts/'
+%addpath '/home/prabal/workstation/git_kth/matlabscripts/scripts/'
+addpath '/scratch/negi/git_repos/matlabscripts/scripts/'
 
-fol = '750k_pitch';
+fol = 're750k_pitch';
 ifhdr = 1;
 fs = 16;                % fontsize
 lfs = 16;               % legend fontsize
 ifcols = 1;
-ifplot = 1;             % plot individual wall profiles
-tlast = 6.00;           % start from this time
-tstart0 = tlast;
+ifplot = 0;             % plot individual wall profiles
+tlast = 6.0;           % start from this time
+tstart0 = 6.00;
 tend = 100;             % stop at this time
 destn = 'plots/';
 ifcp = 0;               % plot pressure instead of cf
-ifdatasave=1;           % save data into a mat file
+ifdatasave=0;           % save data into a mat file
   datafile='re750k_surface.mat';
 lafs = 22;              % Latex font size
 
@@ -138,6 +138,37 @@ for i=1:length(snx_bot8)
   stx_bot8(i) = -sny_bot8(i);
   sty_bot8(i) = snx_bot8(i);
 end
+%---------------------------------------- 
+snormals = importdata('surf_normals.24.N9');
+
+x_imp9 = snormals.data(:,1);
+[x_imp9 I] = sort(x_imp9);
+y_imp9 = snormals.data(I,2);
+
+snx9 = -snormals.data(I,4);
+sny9 = -snormals.data(I,5);
+
+ind = sny9>0;
+snx_top9 = snx9(find(ind));
+sny_top9 = sny9(find(ind));
+xt_imp9  = x_imp9(find(ind));
+yt_imp9  = y_imp9(find(ind));
+
+snx_bot9 = snx9(find(~ind));
+sny_bot9 = sny9(find(~ind));
+xb_imp9  = x_imp9(find(~ind));
+yb_imp9  = y_imp9(find(~ind));
+
+for i=1:length(snx_top9)
+  stx_top9(i) = sny_top9(i);
+  sty_top9(i) = -snx_top9(i);
+end
+
+for i=1:length(snx_bot9)
+  stx_bot9(i) = -sny_bot9(i);
+  sty_bot9(i) = snx_bot9(i);
+end
+
 %% 
 
 
@@ -157,9 +188,18 @@ surf_v8 = [];
 surf_c8 = [];
 surf_p8 = [];
 
+npts8 = 0;
+
+surf_x9 = [];
+surf_t9 = [];
+surf_v9 = [];
+surf_c9 = [];
+surf_p9 = [];
+
+npts9 = 0;
+
 cz = [];
 cz_time = [];
-npts8 = 0;
 
 icalld = 0;
 for i = 1:nfiles
@@ -183,6 +223,11 @@ for i = 1:nfiles
       stx_top = stx_top8;
       xt_imp = xt_imp8;
       yt_imp = yt_imp8;
+    elseif (lx1(1)==10)    
+      sty_top = sty_top9;
+      stx_top = stx_top9;
+      xt_imp = xt_imp9;
+      yt_imp = yt_imp9;
     end  
 
     xmax = max(x(:));
@@ -332,6 +377,13 @@ for i = 1:nfiles
            surf_c8 = [surf_c8; sign(cf)'];
            surf_p8 = [surf_p8; cp'];
            npts8=npts8+1;
+         elseif(lx1(1)==10)    
+           surf_x9 = [surf_x9; xsort'/Chord];
+           surf_t9 = [surf_t9; tstamps(it)*ones(1,length(xsort))];
+           surf_v9 = [surf_v9; cf'];
+           surf_c9 = [surf_c9; sign(cf)'];
+           surf_p9 = [surf_p9; cp'];
+           npts9=npts9+1;
          end
 
          cz = [cz sintegrals(it,2,3)];
@@ -372,7 +424,7 @@ if ifdatasave
   save(datafile)
 end
 
-splot_750k
+%splot_750k
 
 
 % ncontours = 2;

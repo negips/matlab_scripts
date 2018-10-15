@@ -47,6 +47,7 @@ set(gcf, 'Position', figpos)
 i=0;
 %ax1=axes('Position', [0.25 0.1548 0.6589 0.7702]);
 ax1=axes;
+% N=6
 if (npts5>0)
   i=i+1;
   splot(i)=surf(ax1,surf_x5,(surf_t5-ptch_start)/Tosc-0.0,surf_v5,'EdgeColor', 'none', 'LineStyle', 'none', 'FaceColor', 'interp');
@@ -61,7 +62,7 @@ if (npts5>0)
     cplot{i}=contour(ax1,surf_x5,(surf_t5-ptch_start)/Tosc,surf_v5, [0 0], 'LineColor', 'k', 'LineWidth', 1.5  );
   end    
 end
-
+% N=8
 if (npts8>0)
   i=i+1;
   splot(i)=surf(ax1,surf_x8,(surf_t8-ptch_start)/Tosc-0.0,surf_v8,'EdgeColor', 'none', 'LineStyle', 'none', 'FaceColor', 'interp');
@@ -76,6 +77,22 @@ if (npts8>0)
   end 
 
 end
+% N=9
+if (npts9>0)
+  i=i+1;
+  splot(i)=surf(ax1,surf_x9,(surf_t9-ptch_start)/Tosc-0.0,surf_v9,'EdgeColor', 'none', 'LineStyle', 'none', 'FaceColor', 'interp');
+  view(2)
+  ylabel(ax1,'$\frac{t-t_{0}}{T_{osc}}$', 'Interpreter','Latex', 'rot', 0, 'FontSize', lafs+6)
+  xlabel(ax1,'$x/c$', 'FontSize', lafs)
+  xlim([0 1])
+  hold on
+
+  if (ifcontour)
+    cplot{i}=contour(ax1,surf_x9,(surf_t9-ptch_start)/Tosc,surf_v9, [0 0], 'LineColor', 'k', 'LineWidth', 1.5 );
+  end 
+
+end
+
 axis tight
 hold on
 set(ax1, 'YTickMode', 'manual')
@@ -127,7 +144,9 @@ end
 if (iftr)
   tr = load('tr750k.mat');
   figure(2)
-  if npts8>0
+  if npts9>0
+    cfmax = max(max(surf_v9));
+  elseif npts8>0
     cfmax = max(max(surf_v8));
   else
     cfmax = max(max(surf_v5));
@@ -209,6 +228,30 @@ if (npts8>0)
   colormap(ax4,'gray');
  
 end
+
+if (npts9>0)
+  axes(ax3)    
+  j=j+1;
+  gplot(j)=surf(ax3,surf_x9,(surf_t9-ptch_start)/Tosc-0.0,surf_c9,surf_c9,'EdgeColor', 'none', 'LineStyle', 'none', 'FaceColor', 'interp'); hold on
+  set(ax3,'Color', 'none')
+  view(2)
+  colormap(ax3,'gray');
+  %ylabel('t/T_{osc}', 'FontSize', 16)
+  xlabel('$x/c$', 'FontSize', lafs)
+  xlim([0 1])
+  axis tight
+  hold on
+
+  axes(ax4)
+  gplot2(j)=surf(ax4,surf_x9,(surf_t9-ptch_start)/Tosc,surf_c9,surf_c9,'EdgeColor', 'none', 'LineStyle', 'none', 'FaceColor', 'interp'); hold on
+  view(2)
+  xlim([0 1])
+  axis tight
+  colormap(ax4,'gray');
+ 
+end
+
+
 set(ax3, 'YTickMode', 'manual')
 yticks = [0:20]*0.25;
 set(ax3, 'YTick', yticks);
@@ -292,6 +335,19 @@ if (npts8>0)
   hold on
 
 end
+
+if (npts9>0)
+  k=k+1;
+  pplot(k)=surf(ax1,surf_x9,(surf_t9-ptch_start)/Tosc-0.0,surf_p9,'EdgeColor', 'none', 'LineStyle', 'none', 'FaceColor', 'interp');
+  view(2)
+  ylabel('$\frac{t-t_{0}}{T_{osc}}$', 'Interpreter','Latex', 'rot', 0, 'FontSize', lafs+6)
+  xlabel('$x/c$', 'FontSize', lafs)
+  xlim([0 1])
+  hold on
+
+end
+
+
 colorbar;
 axis tight
 hold on
