@@ -10,13 +10,13 @@ U0 = 1.0;
 D=1.0;
 
 % Reduced velocity
-U_star = 5.0;
+U_star = 20.0;
 
 % Dimensionless Damping ratio
-Xi_star = 0.007;
+Xi_star = 0.000;
 
 % Density ratio
-m_star = 1.0;
+m_star = 10.0;
 
 % Splitter plate dimensions
 a = D;            % Length
@@ -52,8 +52,13 @@ fn = Fn*(U0/D);         % dimensional
 % Non-dimensional stiffness
 K_star = MI_00*(2*pi*Fn)^2;
 
-% Dimensional Damping ratio
-Kai_star = Xi_star*2*sqrt(K_star*MI_00);
+% Critical damping
+critical_damping = 2*sqrt(K_star*MI_00);
+
+% Dimensional Damping
+Kai_star = Xi_star*critical_damping;
+
+
 
 disp('Lu et al. (2016) Numerical investigation of flow-induced rotary oscillation of circular cylinder with rigid splitter plate. Phy. of Fluids')
 disp('  ')
@@ -64,7 +69,8 @@ disp(['Angular Frequency:           ', num2str(sqrt(K_star/MI_00),7)])
 disp(['Mass moment of inertia:      ', num2str(MI_00,7)])
 disp(['Normalized stiffness:        ', num2str(K_star,7)])
 disp(['Damping ratio:               ', num2str(Xi_star,7)])
-disp(['Normalized Damping ratio:    ', num2str(Kai_star,7)])
+disp(['Critical Damping:            ', num2str(critical_damping,7)])
+disp(['Normalized Damping:          ', num2str(Kai_star,7)])
 
 
 

@@ -72,22 +72,25 @@ i=i+1; % 14
 file{i}='fsi_lu_re45_all_npert1.out';
 legen{i}='Re50; All; npert=1';
 
+i=i+1; % 15
+file{i}='fsi_cossu_re23.out';
+legen{i}='Re23.512; npert=1';
 
-ind=[5, 7];
+ind=[15];
 
 file=file(ind);
 legen=legen(ind);
 
 cols = ['b','r','k','m','c','g','y'];
 
-iskip=6;          % no of initial peaks to skip
+iskip=4;          % no of initial peaks to skip
 eskip=0;          % no of end peaks to skip
-tstart=700;
-tend  =920;
+tstart=-700;
+tend  =-920;
 
 %re45
-tstart=950;
-tend=1550;
+%tstart=950;
+%tend=1550;
 
 nfiles=length(ind);
 growth_all = [];
