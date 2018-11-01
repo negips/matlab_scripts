@@ -7,6 +7,13 @@ reafile = [casename '.rea'];
 
 fid=fopen(reafile,'r');
 
+if fid == -1
+  disp(message) 
+  return 
+end
+
+disp(['Reading ' reafile])
+
 tline = fgetl(fid);                                              % ***** Parameters ****
 tline = fgetl(fid); cell=textscan(tline, '%f');                  % Nekton Version
 NekVer = cell{1};
@@ -39,10 +46,33 @@ end
 tline = fgetl(fid); cell=textscan(tline, '%f');                  % Logical Switches
 nLogic = cell{1};
 for i=1:nLogic
-  tline = fgetl(fid); 
-  cell  = sscanf(tline(2:end), '%s');
-  Logical{i,1} = cell(1);
-  Logical{i,2} = cell(2:end);
+  tline  = fgetl(fid); 
+  cell   = sscanf(tline(2:end), '%s');
+  ifnav  = strfind(lower(cell),'ifnav');
+  ifadvc = strfind(lower(cell),'ifadvc');
+  iftmsh = strfind(lower(cell),'iftmsh');
+
+  if ~isempty(ifnav) && ~isempty(ifadvc)
+%   Navier Stokes and passive scalar advection switches
+    indmin = min([ifnav ifadvc]);
+    Logical{i,1} = cell(1:indmin-1);
+    Logical{i,2} = 'IFNAV && IFADVC';
+  elseif ~isempty(ifnav) && isempty(ifadvc) 
+    indmin = ifnav;
+    Logical{i,1} = cell(1:indmin-1);
+    Logical{i,2} = 'IFNAV';
+  elseif isempty(ifnav) && ~isempty(ifadvc) 
+    indmin = ifadvc;
+    Logical{i,1} = cell(1:indmin-1);
+    Logical{i,2} = 'IFADVC';
+  elseif ~isempty(iftmsh) 
+    indmin = iftmsh;
+    Logical{i,1} = cell(1:indmin-1);
+    Logical{i,2} = 'IFTMSH';
+  else
+    Logical{i,1} = cell(1);
+    Logical{i,2} = cell(2:end);
+  end  
 
 % Checking for IFFLOW and IFHEAT logicals.
 % IfHEAT is required for reading the mesh
@@ -93,7 +123,8 @@ if (meshndim<0)
 end  
 
 if (IFRE2)
-  EL = re2_mesh_read(casename,Nelgv,Ndim,IFHEAT,NPSCAL);
+%  Not implemented      
+%  EL = re2_mesh_read(casename,Nelgv,Ndim,IFHEAT,NPSCAL);
 else
   EL = Nek_ReadReaMesh(fid,Nelgv,Ndim,IFHEAT,NPSCAL,NekVer);
 end  
@@ -105,16 +136,125 @@ EL.yzero = Yzero;
 EL.ifre2 = IFRE2;
 EL.ifgtp = IFGTP;
 
+%% Restart conditions
+tline = fgetl(fid);  %  1 PRESOLVE/RESTART OPTIONS  *****
+cell = textscan(tline, '%f');
+Nrestart = cell{1};
+rstFiles=[];
+rstOptions=[];
+for i=1:Nrestart
+  tline = fgetl(fid);  % Restart file(s)
+  cell=textscan(tline,'%s %s');
+  rstFiles{i}=cell{1}{1};
+  rstOptions{i}=cell{2}{1};
+end
+
+tline = fgetl(fid); cell=textscan(tline, '%f');                % Initial conditions
+nic=cell{1};
+initialconditions=[];
+for i=1:nic
+  initialconditions{i} = fgetl(fid);
+end  
+
+tline = fgetl(fid);                                            % ****Drive Force Data****
+tline = fgetl(fid); cell=textscan(tline, '%f');                % n lines
+ndriveforce = cell{1};
+driveforce=[];
+for i=1:ndriveforce
+  driveforce{i} = fgetl(fid);
+end
+
+% This may not be entirely correct. Needs to be checked
+tline = fgetl(fid);                                            % ****Variable Property Data****
+tline = fgetl(fid); cell=textscan(tline, '%f');                % n lines
+nvplines = cell{1};
+
+tline = fgetl(fid); cell=textscan(tline, '%f');                % n Packets of data
+npackets  = cell{1};
+datapacket=[];
+for i=1:npackets
+  datapacket{i}=  fgetl(fid);                                  % Not sure what this is
+end
+%
+
+tline = fgetl(fid);                                            % ****History and Integral Data****
+tline = fgetl(fid); cell=textscan(tline, '%f');                % n points
+nhist = cell{1};
+history=[];
+for i=1:nhist
+  history{i}=  fgetl(fid);
+end
+
+tline = fgetl(fid);                                            % ****Output field specification****
+tline = fgetl(fid); cell=textscan(tline, '%f');                % n specifications
+noutspec = cell{1};
+outputspec=[];
+for i=1:noutspec
+  tline=  fgetl(fid);
+  kps=strfind(lower(tline), 'passive scalars');
+  ktg=strfind(lower(tline), 'temperature gradient');
+  if ~isempty(kps)
+    cell = textscan(tline,'%f');
+    outputspec{i,1}=num2str(cell{1});
+    index=strfind(tline,num2str(cell{1}));
+    str  =strtrim(tline(index+1:end));
+    outputspec{i,2}=str;
+  elseif ~isempty(ktg)
+    cell = textscan(tline,'%s%s%s');
+    outputspec{i,1}=cell{1}{1};
+    outputspec{i,2}=[cell{2}{1} ' ' cell{3}{1}];
+  else
+    cell   = sscanf(tline, '%s');
+    outputspec{i,1}=cell(1);
+    outputspec{i,2}=cell(2:end);
+  end
+end
+
+tline = fgetl(fid);                                            % ****Object specification****
+objects=[];
+i=0;
+while ~feof(fid)
+  tline=  fgetl(fid);
+  i=i+1;
+  cell  = sscanf(tline, '%f');
+  objects{i,1}=cell;
+  index=strfind(tline,num2str(cell));
+  str=strtrim(tline(index+1:end));   % Remove leading and trailing white spaces
+  objects{i,2}=str;
+
+end
+nobjects=i;
+
 REA.casename = casename;
 REA.nekver   = NekVer;
 REA.nparams  = nparams;
-REA.nlogical = nLogic;
+REA.Nlogical = nLogic;
 REA.npscal   = NPSCAL;
 REA.ifflow   = IFFLOW;
 REA.ifheat   = IFHEAT;
 REA.param    = PARAM;
 REA.logical  = Logical;
 REA.mesh     = EL;
+REA.Nrestart = Nrestart;
+REA.rstFiles = rstFiles;
+REA.rstOptions = rstOptions;
+REA.Nic=nic;
+REA.initialconditions  = initialconditions;
+REA.Ndriveforce=ndriveforce;
+REA.driveforce=driveforce;
+REA.Nvplines=nvplines;
+%REA.variableproperty=variableproperty;
+REA.Npackets=npackets;
+REA.datapacket=datapacket;
+REA.Nhist=nhist;
+REA.history=history;
+REA.Noutspec=noutspec;
+REA.outputspec=outputspec;
+%REA.Npsdata=npsdata;
+%REA.passivescalar=passivescalar;
+REA.Nobjects=nobjects;
+REA.objects=objects;
+
 
 fclose(fid);
 

@@ -1,7 +1,7 @@
-function ifc = CoarsenKDJ(LX,LY,j,i,iflocked)
+function ifc = CoarsenSaab2d(LX,LY,j,i,iflocked)
 
     ARcut = 2.5;             % Coarsen if Aspect ratio is larger than this.
-    start_layer = 4;
+    skip_layers = 7;
 
 %   Find aspect ratio of elements 
 
@@ -23,59 +23,33 @@ function ifc = CoarsenKDJ(LX,LY,j,i,iflocked)
     rad = sqrt(xmid^2 + ymid^2);  
 
     ifc=0;
-%    if l_ar>ARcut
-%      ifc=1; 
-%    end
 
-    if ymid>0.01
-%     Upper Side          
-      if xmid>0.02
-        if i==start_layer+2
+    if i==skip_layers+1
+        if xmid>0.06
           ifc=1;
-        else
-          ifc=0;
-        end
-      end
-
-      if xmid>0.02
-        if i==start_layer+4
+        end  
+    elseif i==skip_layers+3
+%        if xmid>0.06
           ifc=1;
-        end
-      end
-
-      if xmid>0.02 && xmid<0.08
-        if i==start_layer+6
+%        end  
+    elseif i==skip_layers+5 
+        if j>=27 && j<=33
           ifc=1;
-        end
-      end
-
-    else 
-%     Lower Side          
-      if xmid>0.02
-        if i==start_layer+2
-          ifc=1;
-        else
-          ifc=0;
-        end
-      end
-
-      if xmid>0.02
-        if i==start_layer+4
-          ifc=1;
-        end
-      end
+%        if xmid<=0.06
+%          ifc=1;
+        end  
     end  
 
 %   Radially outgoing stuff      
-    if xmid<0.02
-      if i==start_layer || i==start_layer+2
-        ifc=1;
-      end
-    end  
+%    if xmid<0.02
+%      if i==start_layer+1
+%        ifc=1;
+%      end
+%    end  
 
     
 %   Skip first n layers      
-    if i<start_layer
+    if i<=skip_layers
       ifc=0;
     end  
 
@@ -85,7 +59,6 @@ function ifc = CoarsenKDJ(LX,LY,j,i,iflocked)
       ifc=0;
     end
 
-%    ifc = 0;
 
 end % function
 %---------------------------------------------------------------------- 

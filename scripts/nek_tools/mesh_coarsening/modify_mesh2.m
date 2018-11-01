@@ -4,10 +4,15 @@ clear
 clc
 close all
 
+
+ifplot = 0;
 %casename = 'saab_wing2d';
-casename = 'saab750k';
+%casename = 'saab750k';
 %casename = 'lu';             % Doesn't work
-%casename = 'fluent_plus2';
+casename = 'fluent_plus2';
+%casename = 'saab10k';
+%casename = 'stretched';
+%casename = 'saab600k';
 svfname  = [casename '.mat'];
 
 disp(['CaseName: ' casename])
@@ -18,41 +23,25 @@ n=rea.mesh.nelg;
 ndim=rea.mesh.ndim;
 cmap = jet(n);
 
-%figure(1);
-%for i=1:n
-%  fill(rea.mesh.xc(:,i),rea.mesh.yc(:,i),cmap(i,:)); hold on
-%end
-%colorbar
-
-% Calculate element mid points.
-% Just for plotting for now
-xmid=zeros(n,1);
-ymid=zeros(n,1);
-GLNO=zeros(n,1);
-for i=1:n
-  xmid(i) = mean(rea.mesh.xc(:,i));
-  ymid(i) = mean(rea.mesh.yc(:,i));
-  GLNO(i) = rea.mesh.globalno(i);
-end  
-
-
 % Find element with bc='v  ' as well as 'O  '
 nfaces=2*ndim;
 bcels=0;
 Elno  = [];
 Vface = [];
 Oface = [];
+OBound = 'O  ';
+VBound = 'v  ';
 for i=1:n
 
    ifV=0;
    ifO=0;
    for j=1:nfaces
      bc=rea.mesh.cbc(j,i).bc;
-     if strcmpi(bc,'v  ')
+     if strcmpi(bc,VBound)
         ifV=1;
         vface=j;
      end   
-     if strcmpi(bc,'o  ')
+     if strcmpi(bc,OBound)
         ifO=1;
         oface=j;
      end
@@ -71,12 +60,12 @@ end
 
 l1=bcels;
 cmap = jet(l1);
-for i=1:bcels
-  glno=Elno(i);
-  xt = rea.mesh.xc(:,glno);
-  yt = rea.mesh.yc(:,glno);  
-  fill(xt,yt,cmap(i,:)); hold on
-end
+%for i=1:bcels
+%  glno=Elno(i);
+%  xt = rea.mesh.xc(:,glno);
+%  yt = rea.mesh.yc(:,glno);  
+%  fill(xt,yt,cmap(i,:)); hold on
+%end
 
 % Lets take bottom element as starting element
 if length(Elno)>1
@@ -152,7 +141,7 @@ while (~done)
   vf=0;
   for j=1:nfaces
     bc=rea.mesh.cbc(j,e2).bc;
-    if strcmpi(bc,'v  ') || strcmpi(bc, 'on ')
+    if strcmpi(bc,VBound) || strcmpi(bc, 'on ')
       ifV=1;
       vf=j;
     end
@@ -170,18 +159,27 @@ while (~done)
   bc = rea.mesh.cbc(of2,e2).bc;
   if ~strcmpi(bc,'E  ')
     done=1;
-  end  
+%   If we don't hit the outflow again, then its not a C-mesh type layer    
+    if ~strcmpi(bc,OBound)
+      MeshC(1)=0;             % This layer is not Ctype
+    else
+      MeshC(1)=1;             % This layer is Ctype
+    end
+
+  end
 
 end
 
 % Plotting
 l1=e;
-cmap = jet(l1);
-for i=1:l1
-  glno=ly_el(i);
-  xt = rea.mesh.xc(:,glno);
-  yt = rea.mesh.yc(:,glno);  
-  fill(xt,yt,cmap(i,:)); hold on
+if ifplot
+  cmap = jet(l1);
+  for i=1:l1
+    glno=ly_el(i);
+    xt = rea.mesh.xc(:,glno);
+    yt = rea.mesh.yc(:,glno);  
+    fill(xt,yt,cmap(i,:)); hold on
+  end
 end
 
 LayersEl{1}=ly_el;
@@ -211,7 +209,7 @@ while (~finished_layers)
   of=0;
   for j=1:nfaces
     bc=rea.mesh.cbc(j,e2).bc;
-    if strcmpi(bc,'o  ')
+    if strcmpi(bc,OBound)
       of=j;
     end
   end
@@ -263,12 +261,6 @@ while (~finished_layers)
     if ~strcmpi(bc,'E  ')
       done=1;
     end
-
-%   Criteria to stop getting layers  
-%   Should work for now but should use something more general     
-%    if strcmpi(bc,'mv ') || strcmpi(bc,'W  ')
-%      finished_layers=1;
-%    end  
   
   end       % ~done
  
@@ -276,6 +268,13 @@ while (~finished_layers)
   LayersEl{nlayers}   = ly_el;         % New Layer's Element numbers
   LayersFopO{nlayers} = ly_fopO;       % New Layer's Face opposite the 'O  '
   LayersFopV{nlayers} = ly_fopV;       % New Layer's Face opposite the 'v  '
+
+% If we don't hit the outflow again, then its not a C-mesh type layer    
+  if ~strcmpi(bc,OBound)
+    MeshC(nlayers)=0;             % This layer is not Ctype
+  else
+    MeshC(nlayers)=1;             % This layer is Ctype
+  end
 
 % Test for end of layers
   el2=ly_el(1);
@@ -300,20 +299,23 @@ while (~finished_layers)
 
   % Plotting
   l1=e;
-  cmap = jet(l1);
-  for i=1:l1
-    glno=ly_el(i);
-    xt = rea.mesh.xc(:,glno);
-    yt = rea.mesh.yc(:,glno);  
-    fill(xt,yt,cmap(i,:)); hold on
+  if ifplot
+    cmap = jet(l1);
+    for i=1:l1
+      glno=ly_el(i);
+      xt = rea.mesh.xc(:,glno);
+      yt = rea.mesh.yc(:,glno);  
+      fill(xt,yt,cmap(i,:)); hold on
+    end
   end
-
 
 end   % ~finished_layers 
 
-arrange_matrices
+%arrange_matrices
 
-clearvars -except nlayers LayersEl LayersFopO LayersFopV LayerX LayerY LayerE LayerBC LayerCEl rea n ndim svfname
+[LayerX,LayerY,LayerE,LayerBC,LayerCEl] = ArrangeMatrices(nlayers,LayersEl,LayersFopO,LayersFopV,MeshC,rea,ndim);
+
+clearvars -except nlayers LayersEl LayersFopO LayersFopV LayerX LayerY LayerE LayerBC LayerCEl MeshC rea n ndim svfname
 save(svfname)
 
 

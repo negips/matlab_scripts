@@ -81,7 +81,10 @@ function [mesh3d] = Generate3D(mesh2d,nlayers,nz0,Lz,ifperiodic);
     LY   = mesh2d.yc(:,ind);
     nel_lay = length(LE);
  
-    ifcl = CoarsenZLayer(il,nlayers,LX,LY,LE,mesh2d,cz_pl);
+%    ifcl = CoarsenZLayer(il,nz,nlayers,LX,LY,LE,mesh2d,cz_pl);
+%    ifcl = CoarsenZLayerSaab600k(il,nz,nlayers,LX,LY,LE,mesh2d,cz_pl);
+    ifcl = CoarsenZLayerKDJ(il,nz,nlayers,LX,LY,LE,mesh2d,cz_pl);
+
     if ifcl==0
       ifzc(il)=0;
     elseif ifcl==1
@@ -137,20 +140,34 @@ function [mesh3d] = Generate3D(mesh2d,nlayers,nz0,Lz,ifperiodic);
     EF   = [EF EF1];
 
     glno=max(GL3D);
-
-  
   
   end   % while il<=nlayers
-  
+  nelg = length(GL3D);
+   
+  mesh3d.nelg = nelg;
+  mesh3d.ndim = 3;
+  mesh3d.globalno = GL3D;
   mesh3d.xc   = XC;
   mesh3d.yc   = YC;
   mesh3d.zc   = ZC;
-  mesh3d.globalno = GL3D;
   mesh3d.LayerGEl = LayerGEl;
   mesh3d.EF   = EF;
   mesh3d.ifzc = ifzc;
 
-%  [mesh3d] = Build3DConnectivity(mesh3d,mesh2d);
+  mesh3d = BuildCurvedSides(mesh3d,mesh2d,Lz);
+
+  mesh3d = Build3DConnectivity(mesh3d,mesh2d);
+  CheckConnectivity3D(mesh3d);
+  mesh3d = rmfield(mesh3d, 'EF');
+  mesh3d = rmfield(mesh3d, 'rsum_z');
+
+  mesh3d.xfac = mesh2d.xfac;
+  mesh3d.yfac = mesh2d.yfac;
+  mesh3d.xzero = mesh2d.xzero;
+  mesh3d.yzero = mesh2d.yzero;
+  mesh3d.ifre2 = mesh2d.ifre2;
+  mesh3d.ifgtp = mesh2d.ifgtp;
+
 
 end   % function
 
@@ -185,10 +202,10 @@ function maxdlv = MaxDLV(LX,LY,nel)
 end % function
 %---------------------------------------------------------------------- 
 
-function ifcl = CoarsenZLayer(il,nlayers,LX,LY,LE,mesh2d,cz_pl)
+function ifcl = CoarsenZLayer(il,nz,nlayers,LX,LY,LE,mesh2d,cz_pl)
 
 % Test 1.
-  Zskip = 7;       % Start 'z' refinement after Zskip 2D layer.
+  Zskip = 5;       % Start 'z' refinement after Zskip 2D layer.
  
   nel_lay = length(LE);
   maxdlo  = MaxDLO(LX,LY,nel_lay);    
@@ -198,9 +215,9 @@ function ifcl = CoarsenZLayer(il,nlayers,LX,LY,LE,mesh2d,cz_pl)
   if il==Zskip+1
 %   Coarsen entire layer
     ifcl = 1;
-%  elseif il==Zskip+4
+%  elseif il==Zskip+3
 %    ifcl = 1;
-%  elseif il==Zskip+8
+%  elseif il==Zskip+5
 %    ifcl = 1;
   end
   
@@ -208,20 +225,23 @@ function ifcl = CoarsenZLayer(il,nlayers,LX,LY,LE,mesh2d,cz_pl)
     ifcl = 0;
   end
 
-% We don't coarsen with e1,e3 type 2d elements.
-% If we do this, Then the elements in the lower layer with get stretched across 3 layers.
-% Making bad aspect ratios (which we were trying to avoid in the first place).
-  for j=1:length(LE)
-    e=LE(j);
-    if strcmpi(mesh2d.EType{e},'e1') || strcmpi(mesh2d.EType{e},'e3')
-      ifcl=0;
-    end
-  end  
+% Coarsened layer needs to have multiple of 4 elements for periodicity  
+  if mod(nz,4)~=0
+    ifcl=0;
+  end
 
 % If previous layer was 'z' coarsened  
   if cz_pl
     ifcl = 2;
   end
+
+% We don't modify layers that have been used to modify 'x' resolution
+  for j=1:length(LE)
+    e=LE(j);
+    if strcmpi(mesh2d.EType{e},'e1') || strcmpi(mesh2d.EType{e},'e3') || strcmpi(mesh2d.EType{e},'e4')
+      ifcl=0;
+    end
+  end  
 
 
 end   %function

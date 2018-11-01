@@ -1,11 +1,6 @@
+function [LayerX,LayerY,LayerE,LayerBC,LayerCEl]=ArrangeMatrices(nlayers,LayersEl,LayersFopO,LayersFopV,MeshC,rea,ndim)
+
 % Creating new structures/arrays so that future manipulation is easy
-
-%clear
-%clc
-%close all
-%
-%load saab_wing2d.mat
-
 
 %                 f2
 %           x3-----------x2      
@@ -18,49 +13,48 @@
 %                 f4
 %               'v  '
 
-
-% Create new Structures
 % Simpler structure otherwise we end up with a very complicated code
 
-for i=1:nlayers
+    for i=1:nlayers
+    
+      thislayer = LayersEl{i};
+      thisfaceo = LayersFopO{i};
+      thisfacev = LayersFopV{i};
+    
+      LX   = [];  % x1,x2,x3,x4
+      LY   = [];  % y1,y2,y3,y4
+      LE   = [];  % Current element no
+      LBC  = [];  % bc1,bc2,bc3,bc4 on faces 1,2,3,4
+      LCE  = [];  % Connects to El Nos on faces 1,2,3,4
+    
+      nel = length(thislayer);
+      for j=1:nel
+    
+        e=thislayer(j);
+        fo=thisfaceo(j);
+        fv=thisfacev(j);
+    
+        [xcs ycs bcs ces] = GetElement(rea,e,fo,fv);
+        LX = [LX xcs];
+        LY = [LY ycs];
+        LE = [LE e];
+        LBC{j}= bcs;
+        LCE= [LCE ces];
+    
+      end
+    
+      LayerX{i}=LX;
+      LayerY{i}=LY;
+      LayerE{i}=LE;
+      LayerBC{i}=LBC;
+      LayerCEl{i}=LCE;
+    
+    end
 
-  thislayer = LayersEl{i};
-  thisfaceo = LayersFopO{i};
-  thisfacev = LayersFopV{i};
+end   % function
+%---------------------------------------------------------------------- 
 
-  LX   = [];  % x1,x2,x3,x4
-  LY   = [];  % y1,y2,y3,y4
-  LE   = [];  % Current element no
-  LBC  = [];  % bc1,bc2,bc3,bc4 on faces 1,2,3,4
-  LCE  = [];  % Connects to El Nos on faces 1,2,3,4
-
-  nel = length(thislayer);
-  for j=1:nel
-
-%   First layer first element is complicated.
-    e=thislayer(j);
-    fo=thisfaceo(j);
-    fv=thisfacev(j);
-
-    [xcs ycs bcs ces] = GetFirstEl(rea,e,fo,fv);
-    LX = [LX xcs];
-    LY = [LY ycs];
-    LE = [LE e];
-    LBC{j}= bcs;
-    LCE= [LCE ces];
-
-  end
-
-  LayerX{i}=LX;
-  LayerY{i}=LY;
-  LayerE{i}=LE;
-  LayerBC{i}=LBC;
-  LayerCEl{i}=LCE;
-
-end
-
-
-function [xcs ycs bcs ces] = GetFirstEl(rea,e,fo,fv)
+function [xcs ycs bcs ces] = GetElement(rea,e,fo,fv)
 
     dtol=1.0e-12;     % Distance tolerance
 
@@ -142,7 +136,6 @@ function [xcs ycs bcs ces] = GetFirstEl(rea,e,fo,fv)
         y4 = yv(2);
       end
 
-
     end  
 
     xop = rea.mesh.xc(iop,e);
@@ -162,6 +155,6 @@ function [xcs ycs bcs ces] = GetFirstEl(rea,e,fo,fv)
     bcs = [bc1; bc2; bc3; bc4]; 
     ces = [c_el1; c_el2; c_el3; c_el4]; 
 
-end
+end         % function
 
 

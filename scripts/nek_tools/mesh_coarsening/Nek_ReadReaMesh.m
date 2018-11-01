@@ -6,7 +6,7 @@ disp('Reading mesh from rea file')
 
 EL = [];
 
-nsides=2^ndim;
+nsides=2*ndim;
 Group = zeros(nelg);
 for i=1:nelg
   tline = fgetl(fid);         % ELEMENT          8 [    1 ]    GROUP     0
@@ -34,9 +34,9 @@ for i=1:nelg
     tline = fgetl(fid);         % Z5 Z6 Z7 Z8
     zt2 = textscan(tline, '%f');   % Read Z
    
-    xtmp = [xtmp; xt{1}];
-    ytmp = [ytmp; yt{1}];
-    ztmp = [ztmp; zt{1}];
+    xtmp = [xtmp; xt2{1}];
+    ytmp = [ytmp; yt2{1}];
+    ztmp = [ztmp; zt2{1}];
     
     ZC(:,i) = ztmp;
   end
@@ -88,8 +88,8 @@ for i=1:NCurve
 
 end
 
-EL.ncurve         = NCurve;
-EL.curveface      = iedge;
+EL.Ncurve         = NCurve;
+EL.curveedge      = iedge;
 EL.curveieg       = ieg;
 EL.curveparams    = CurveParams;
 EL.curvetype      = CurveType;
@@ -157,7 +157,7 @@ for i=1:nbcs
           I2 = str2double(tline(13:13))           % side
           cell=textscan(tline(14:end),rdfmt);
         end   % nelg<
-
+      
         CBC(I2,I1).bc         = cbc;
         CBC(I2,I1).connectsto = cell{1};
         CBC(I2,I1).onface     = cell{2};
@@ -178,23 +178,6 @@ if (nbcs==1)
 end  
 
 EL.cbc = CBC;
-
-%% Restart conditions
-tline = fgetl(fid);  %  1 PRESOLVE/RESTART OPTIONS  *****
-cell = textscan(tline, '%f');
-Nrestart = cell{1};
-for i=1:Nrestart
-  tline = fgetl(fid);  % Restart file(s)
-  cell=textscan(tline,'%s %s');
-  rstFiles{i}=cell{1}{1};
-  rstOptions{i}=cell{2}{1};
-end
-
-if (Nrestart>0)
-  EL.rstfiles       = rstFiles;
-  EL.rstoptions     = rstOptions;
-end
-
 
 
 return

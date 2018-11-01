@@ -22,7 +22,7 @@ lafs = 24;        % latex fontsize
 
 pcol = 4;         % plot variable
 
-fileind = [1];
+fileind = [1,2];
 
 files = fnames(fileind);
 ylbl = ylbls(fileind);
@@ -54,7 +54,7 @@ for ii=1:nfiles
   ind = find(pvar.data(:,2)>60.0);  % Only plotting for after pitching start
   pvar.data(ind,:) = [];
 
-  nfigs=nfigs+1;
+  nfigs=nfigs+1
   figure(nfigs); 
   plot((pvar.data(:,2) -ptch_start)/Tosc,pvar.data(:,pcol)/norm,'b', 'LineWidth', 2,'Parent', ax2); hold on
   %set(ax2, 'YLim', [1.1 1.6])
@@ -66,7 +66,7 @@ for ii=1:nfiles
   plot((pvar.data(ind4,2)-ptch_start)/Tosc,pvar.data(ind4,pcol)/norm, 'g', 'LineWidth', 2, 'Parent',ax2)
 
   set(ax2, 'Xlim', [min(pvar.data(:,2))-ptch_start max(pvar.data(:,2))-ptch_start]/Tosc)
-  set(ax2, 'Ylim', [1.1 1.42])
+%  set(ax2, 'Ylim', [1.1 1.42])
 
   ylabel(ylbl{ii}, 'FontSize', lafs, 'Parent', ax2)
   xlabel('$(t-t_{0})/T_{osc}$', 'FontSize', lafs, 'Parent', ax2)
@@ -86,7 +86,7 @@ for ii=1:nfiles
   %set(ax2,'XTick', [])
   %ylabel('\alpha^{o}', 'FontSize', 20, 'Parent', ax2)
   
-  SaveFig(gcf,'cl-time-alpha750k.eps', 'plots/',1)
+%  SaveFig(gcf,'cl-time-alpha750k.eps', 'plots/',1)
 
   nfigs=nfigs+1;    
   figure(nfigs)
@@ -116,12 +116,12 @@ for ii=1:nfiles
   alpha4=alpha(ind4);
   plot(alpha4,pvar4/norm, 'g', 'LineWidth', 2, 'Parent',ax3)
 
-  set(ax3, 'Ylim', [1.1 1.42])
+%  set(ax3, 'Ylim', [1.1 1.42])
 
   axpos = get(gca,'Position');    
 %  set(gca,'Position', axpos + [0.02 0 -0.02 -0.02])
 
-  SaveFig(gcf,'cl-alpha750k.eps', 'plots/',1)
+%  SaveFig(gcf,'cl-alpha750k.eps', 'plots/',1)
 
 %figure(3)
 %ax3=axes;

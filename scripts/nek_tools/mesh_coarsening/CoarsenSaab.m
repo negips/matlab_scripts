@@ -1,7 +1,7 @@
 function ifc = CoarsenSaab(LX,LY,j,i,iflocked)
 
     ARcut = 2.5;             % Coarsen if Aspect ratio is larger than this.
-    start_layer = 4;
+    skip_layers = 14;
 
 %   Find aspect ratio of elements 
 
@@ -23,80 +23,39 @@ function ifc = CoarsenSaab(LX,LY,j,i,iflocked)
     rad = sqrt(xmid^2 + ymid^2);  
 
     ifc=0;
-%    if l_ar>ARcut
-%      ifc=1; 
-%    end
 
-    if ymid>0.00
-%     Upper Side          
-      if xmid>0.04
-        if i==start_layer+6
+    if i==skip_layers+1
+        if xmid>0.06
           ifc=1;
-        else
-          ifc=0;
-        end
-      end
-
-      if xmid>0.1
-        if i==start_layer+14
+        end  
+    elseif i==skip_layers+3
+        if xmid>0.06
           ifc=1;
-        end
-      end
-
-      if xmid>0.2 && xmid<2.0
-        if i==start_layer+16
+        end  
+    elseif i==skip_layers+5 
+        if xmid>0.08 && xmid<1.30
           ifc=1;
-        end
-      end
-
-      if xmid>0.25 && xmid<1.0
-        if i==start_layer+18
+        elseif xmid<=0.06
           ifc=1;
-        end
-      end
-
-      
-    else 
-%     Lower Side          
-      if xmid>0.04
-        if i==start_layer+6
+        end  
+    elseif i==skip_layers+7 
+        if xmid>0.3 && xmid<1.1
           ifc=1;
-        else
-          ifc=0;
-        end
-      end
-
-      if xmid>0.1
-        if i==start_layer+12
+        elseif  xmid<0.030
           ifc=1;
-        end
-      end
-
-      if xmid>0.2 && xmid<2.0
-        if i==start_layer+14
-          ifc=1;
-        end
-      end
-
-      if xmid>0.25 && xmid<1.0
-        if i==start_layer+16
-          ifc=1;
-        end
-      end
-
-
-    end  % ymid>0
+        end  
+    end  
 
 %   Radially outgoing stuff      
-    if xmid<0.02
-      if i==start_layer+6
-        ifc=1;
-      end
-    end  
+%    if xmid<0.02
+%      if i==start_layer+1
+%        ifc=1;
+%      end
+%    end  
 
     
 %   Skip first n layers      
-    if i<start_layer
+    if i<=skip_layers
       ifc=0;
     end  
 
