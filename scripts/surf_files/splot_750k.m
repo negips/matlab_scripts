@@ -1,6 +1,6 @@
 % Just plotting
 
-%load('re750k_surface.mat');
+load('re750k_surface.mat');
 
 
 % Flags/parameters
@@ -15,7 +15,7 @@ axfs = 16;               % axis fontsize
 %tstart0 = tlast;
 %tend = 100;             % stop at this time
 destn = 'plots_test/';
-ifcontour=0;            % make contour plot for zero shear stress.
+ifcontour=1;            % make contour plot for zero shear stress.
 iftr = 0;               % overlay transition points on shear stress space-time plot
 iftrportrait=0;         % Plot transition phase portrait
 ifxfoil=0;                    % plot xfoil transition location data
@@ -106,6 +106,7 @@ if ~ifflip
   ylblpos = get(ylbl,'Position');
   set(ylbl, 'Position', ylblpos + [-0.01 0 0])
 end
+colormap(jet);
 
 
 svfname = ['cf_time_surf750k.eps'];
@@ -253,14 +254,15 @@ end
 
 
 set(ax3, 'YTickMode', 'manual')
-yticks = [0:20]*0.25;
+nphase=2;
+yticks = [0:100]*1/nphase;
 set(ax3, 'YTick', yticks);
 set(ax3, 'FontSize', 15)
 
 lncol1 = 'blue';
 lncol2 = 'red';
 
-nlines = floor((tlast-tstart0)/Tosc*4);
+nlines = floor((tlast-tstart0)/Tosc*nphase);
 for i=1:nlines
   if (mod(i,2)==1)
     icol = lncol1;
@@ -273,7 +275,7 @@ for i=1:nlines
     zpts= [2 2];
   end
 
-  ypts = [i i]*0.25;
+  ypts = [i i]*1/nphase;
   iln(i) = line([0 1], ypts, zpts, 'LineStyle', '--', 'LineWidth', 1.0, 'Color', icol, 'Parent', ax4);
 
 end
@@ -282,7 +284,7 @@ set(ax4,'YAxisLocation', 'right');
 set(ax4, 'XTick', []);
 set(ax4, 'Color', 'none')
 set(ax4, 'YTickMode', 'manual')
-yticks = [0:nlines]*0.25;
+yticks = [0:nlines]*1/nphase;
 set(ax4, 'YTick', yticks);
 %ylbl = {'3p/2', '0', 'p/2', 'p'};
 %set(ax4, 'YTickLabel', ylbl, 'FontName', 'symbol', 'FontSize', axfs);
@@ -347,12 +349,13 @@ if (npts9>0)
 
 end
 
-
+colormap(jet);
 colorbar;
 axis tight
 hold on
 set(ax1, 'YTickMode', 'manual')
-yticks = [0:20]*0.25;
+nphase=2;
+yticks = [0:30]*1/nphase;
 set(ax1, 'YTick', yticks);
 set(ax1, 'FontSize', axfs)
 %set(ax1, 'PlotBoxAspectRatio', [1 1.5 1])

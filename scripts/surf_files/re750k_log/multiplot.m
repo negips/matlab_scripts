@@ -22,7 +22,7 @@ lafs = 24;        % latex fontsize
 
 pcol = 4;         % plot variable
 
-fileind = [1];
+fileind = [1,2];
 
 files = fnames(fileind);
 ylbl = ylbls(fileind);
@@ -54,7 +54,7 @@ for ii=1:nfiles
   ind = find(pvar.data(:,2)>60.0);  % Only plotting for after pitching start
   pvar.data(ind,:) = [];
 
-  nfigs=nfigs+1;
+  nfigs=nfigs+1
   figure(nfigs); 
   plot((pvar.data(:,2) -ptch_start)/Tosc,pvar.data(:,pcol)/norm,'b', 'LineWidth', 2,'Parent', ax2); hold on
   %set(ax2, 'YLim', [1.1 1.6])

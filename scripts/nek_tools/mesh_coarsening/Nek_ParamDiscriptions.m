@@ -89,7 +89,7 @@ function [p,c] = Nek_ParamDiscriptions;
       c{29}  = '[==Magnetic Re if <0. Otherwise ==Magnetic viscosity if >0]';
 
       p{30}  = 'USERVP';
-      c{30}  = '[0: Constant properties; 1/2: user-defined properties]';
+      c{30}  = '[0: Constant properties; 1,2: user-defined properties]';
 
       p{31}  = 'NPERT';
       c{31}  = '[No. of perturbation modes. if >0 then time advance base flow.]';

@@ -421,6 +421,7 @@ end
 
 
 if ifdatasave
+  disp(['Saving file ' datafile])
   save(datafile)
 end
 

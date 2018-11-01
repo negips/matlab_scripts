@@ -10,13 +10,13 @@ U0 = 1.0;
 D=1.0;
 
 % Reduced velocity
-U_star = 11.6;
+U_star = inf;
 
 % Dimensionless Damping ratio
-Xi_star = 0.007;
+Xi_star = 0.000;
 
 % Density ratio
-m_star = 10.00;
+m_star = 1.01;
 
 % Splitter plate dimensions
 a = D;            % Length
@@ -55,7 +55,7 @@ K_star = MI_00*(2*pi*Fn)^2;
 % Dimensional Damping ratio
 Kai_star = Xi_star*2*sqrt(K_star*MI_00);
 
-disp('Lu et al. (2016) Numerical investigation of flow-induced rotary oscillation of circular cylinder with rigid splitter plate. Phy. of Fluids')
+disp('Lacis et al. (2014) Passive appendeges generate drift through symmetry breaking. Nature Communications')
 disp('  ')
 
 disp(['Density Ration:              ', num2str(m_star,7)])
