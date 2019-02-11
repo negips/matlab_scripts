@@ -22,7 +22,7 @@ lafs = 24;        % latex fontsize
 
 pcol = 4;         % plot variable
 
-fileind = [1,2];
+fileind = [1];
 
 files = fnames(fileind);
 ylbl = ylbls(fileind);
@@ -39,9 +39,7 @@ alpha_0=3.4;
 dalpha=1.0;
 Tosc=2*pi/omega;
 
-ax2=axes;
 nfigs=0;
-
 for ii=1:nfiles
 
   file=files{ii};
@@ -51,19 +49,25 @@ for ii=1:nfiles
   ind = find(pvar.data(:,2)<6.0,1,'last');  % Only plotting for after pitching start
   pvar.data(1:ind,:) = [];
 
-  ind = find(pvar.data(:,2)>60.0);  % Only plotting for after pitching start
+  ind = find(pvar.data(:,2)>70.0);  % Only plotting for after pitching start
   pvar.data(ind,:) = [];
 
-  nfigs=nfigs+1
-  figure(nfigs); 
-  plot((pvar.data(:,2) -ptch_start)/Tosc,pvar.data(:,pcol)/norm,'b', 'LineWidth', 2,'Parent', ax2); hold on
+  nfigs=nfigs+1;
+  figure(nfigs);
+  ax2=axes;
+
+  ind1=find(pvar.data(:,2)<31.5);
+
+  plot((pvar.data(ind1,2) -ptch_start)/Tosc,pvar.data(ind1,pcol)/norm,'b', 'LineWidth', 2,'Parent', ax2); hold on
   %set(ax2, 'YLim', [1.1 1.6])
 
-  ind3=find(pvar.data(:,2)>31.5);
-  plot((pvar.data(ind3,2)-ptch_start)/Tosc,pvar.data(ind3,pcol)/norm, 'r', 'LineWidth', 2, 'Parent',ax2)
+  ind2=pvar.data(:,2)>31.5;
+  ind3=pvar.data(:,2)<44.85;
+  ind4 = find(ind2.*ind3);
+  plot((pvar.data(ind4,2)-ptch_start)/Tosc,pvar.data(ind4,pcol)/norm, 'r', 'LineWidth', 2, 'Parent',ax2)
 
-  ind4=find(pvar.data(:,2)>44.85);
-  plot((pvar.data(ind4,2)-ptch_start)/Tosc,pvar.data(ind4,pcol)/norm, 'g', 'LineWidth', 2, 'Parent',ax2)
+  ind5=find(pvar.data(:,2)>=44.85);
+  plot((pvar.data(ind5,2)-ptch_start)/Tosc,pvar.data(ind5,pcol)/norm, 'g', 'LineWidth', 2, 'Parent',ax2)
 
   set(ax2, 'Xlim', [min(pvar.data(:,2))-ptch_start max(pvar.data(:,2))-ptch_start]/Tosc)
 %  set(ax2, 'Ylim', [1.1 1.42])
@@ -91,9 +95,9 @@ for ii=1:nfiles
   nfigs=nfigs+1;    
   figure(nfigs)
   ax3=axes;
-  ind2=find(pvar.data(:,2)>0.0*pi);
-  pvar2=pvar.data(ind2,pcol);
-  alpha2=alpha(ind2);
+%  ind2=find(pvar.data(:,2)>0.0*pi);
+  pvar2=pvar.data(ind1,pcol);
+  alpha2=alpha(ind1);
   plot(alpha2,pvar2/norm, 'LineWidth',1.5, 'Parent',ax3)
 
   smoothpvar=pvar2/norm;
@@ -106,17 +110,17 @@ for ii=1:nfiles
   ylabel(ax3,ylbl{ii}, 'FontSize', lafs)
   hold on    
 
-  ind3=find(pvar.data(:,2)>31.5);
-  pvar3=pvar.data(ind3,pcol);
-  alpha3=alpha(ind3);
+%  ind3=find(pvar.data(:,2)>31.5);
+  pvar3=pvar.data(ind4,pcol);
+  alpha3=alpha(ind4);
   plot(alpha3,pvar3/norm, 'r', 'LineWidth', 2, 'Parent',ax3)
 
-  ind4=find(pvar.data(:,2)>44.85);
-  pvar4=pvar.data(ind4,pcol);
-  alpha4=alpha(ind4);
+%  ind4=find(pvar.data(:,2)>44.85);
+  pvar4=pvar.data(ind5,pcol);
+  alpha4=alpha(ind5);
   plot(alpha4,pvar4/norm, 'g', 'LineWidth', 2, 'Parent',ax3)
 
-%  set(ax3, 'Ylim', [1.1 1.42])
+  set(ax3, 'Ylim', [1.08 1.42])
 
   axpos = get(gca,'Position');    
 %  set(gca,'Position', axpos + [0.02 0 -0.02 -0.02])
