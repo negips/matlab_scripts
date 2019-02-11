@@ -4,7 +4,7 @@ close all
 
 iaf.designation='0012';
 % designation='0008';
-iaf.n=1000;
+iaf.n=500;
 iaf.HalfCosineSpacing=1;
 iaf.wantFile=0;
 iaf.datFilePath='./'; % Current folder

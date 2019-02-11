@@ -7,7 +7,7 @@ close all
 % addpath '/home/prabal/workstation/git_kth/matlabscripts/scripts/'
 addpath '/scratch/negi/git_repos/matlabscripts/scripts/'
 
-fol = 'test';
+fol = 're750k_aoa34';
 ifhdr = 1;
 fs = 16;                % fontsize
 lfs = 16;               % legend fontsize
@@ -18,7 +18,7 @@ destn = 'plots/';
 [sfiles tout] = LoadSurfFiles(fol);
 
 nfiles = length(sfiles);
-tlast = 0.00;
+tlast = 0.30;
 tmax = 500.00001;
 maxframes = nfiles*100;
 
@@ -33,7 +33,7 @@ cfavgy = [];
 ncf_pts = 0;
 cf_start=531.25;
 cf_end = 538.04;
-ifcfplot = 0;
+ifcfplot = 1;
 nplots = 0;
 for i = 1:nfiles
   if (tout(i)>=tlast)
@@ -128,7 +128,7 @@ for i = 1:nfiles
 %         ylim([-1.1 1.1]);
          xlim ([0. 1]);
 %         xlim([-0.01 1.000])
-         ylim([-0.010 0.0100])    
+         ylim([-0.001 0.002500])    
          grid on   
          hold on
          lgs{1} =  ['T=' num2str(tstamps(it))]; 
@@ -146,7 +146,7 @@ for i = 1:nfiles
 %         SaveFig(gcf, svfname, destn, 1)
       end
       tlast = tstamps(it);
-      pause(0.01)
+      pause(0.001)
     end           % it
   end
 end           

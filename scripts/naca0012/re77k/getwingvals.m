@@ -506,7 +506,7 @@ epsilon_nek = epsilon_norm/(nu/1^4);
 eta=((nu_nek^3)./epsilon_nek).^(1/4);
 
 st_pt = 1.0;
-en_pt = 5.2;
+en_pt = 25.0;
 
 intp_pts = 1000;
 xvec = linspace(st_pt,en_pt,intp_pts);
@@ -595,6 +595,12 @@ display(['delta x @x=4.0 == ' num2str(val1)])
 
 val1 = interp1(X2(1,:),el_s_x,5.2);
 display(['delta x @x=5.2 == ' num2str(val1)])
+
+val1 = interp1(X2(1,:),el_s_x,10.);
+display(['delta x @x=10 == ' num2str(val1)])
+
+val1 = interp1(X2(1,:),el_s_x,20.);
+display(['delta x @x=20 == ' num2str(val1)])
 
 figure
 plot(X2(1,:),el_s_x);

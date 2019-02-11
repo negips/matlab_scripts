@@ -12,7 +12,7 @@ D_s     = 0.002;              % Approx Struc. Dissipation (N-m-s)
 c       = 0.156;              % Chord (m)
 S       = 0.61;               % Span  (m)
 
-different_re = 1.5E+05;       % Get values for a different Reynolds number
+different_re = -1.5E+05;       % Get values for a different Reynolds number
 
 U_inf   = 7.5;                % Free-stream velocity (m/s)
 Re      = 7.7E+04;            % Reynolds Number
