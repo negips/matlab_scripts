@@ -5,9 +5,9 @@ clc
 close all
 
 % addpath '/home/prabal/workstation/git_kth/matlabscripts/scripts/'
-addpath '/scratch/negi/git_repos/matlabscripts/scripts/'
+% addpath '/scratch/negi/git_repos/matlabscripts/scripts/'
 
-fol = 'test';
+fol = 're750k_aoa34';
 ifhdr = 1;
 fs = 16;                % fontsize
 lfs = 16;               % legend fontsize
@@ -18,7 +18,7 @@ destn = 'plots/';
 [sfiles tout] = LoadSurfFiles(fol);
 
 nfiles = length(sfiles);
-tlast = 0.00;
+tlast = 2.70;
 tmax = 500.00001;
 maxframes = nfiles*100;
 
@@ -128,7 +128,7 @@ for i = 1:nfiles
 %         ylim([-1.1 1.1]);
          xlim ([0. 1]);
 %         xlim([-0.01 1.000])
-         ylim([-0.010 0.0100])    
+         ylim([-0.004 0.004])    
          grid on   
          hold on
          lgs{1} =  ['T=' num2str(tstamps(it))]; 

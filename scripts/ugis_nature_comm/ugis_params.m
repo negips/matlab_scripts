@@ -10,7 +10,7 @@ U0 = 1.0;
 D=1.0;
 
 % Reduced velocity
-U_star = inf;
+U_star = 20;
 
 % Dimensionless Damping ratio
 Xi_star = 0.000;

@@ -4,8 +4,10 @@ clear
 clc
 close all
 
-lafs = 16;
-lgfs = 12;
+lafs = 20;
+lgfs = 16;
+
+destn = '/home/prabal/workstation/phd_presentations/stability/fsi_linearization/imgs2/';
 
 fname1 = 'fsi_io.out';
 fname2 = '/scratch/negi/git_repos/fsi/stability/baseflow_solve/run_cossu/big_domain/npert_1/fsi_io.out';
@@ -74,16 +76,31 @@ legen{i}='Re50; All; npert=1';
 
 i=i+1; % 15
 file{i}='fsi_cossu_re23.out';
-legen{i}='Re23.512; npert=1';
+legen{i}='Re23.512; Lin';
 
-ind=[15];
+i=i+1; % 16
+file{i}='fsi_cossu_re23_nl.out';
+legen{i}='Re23.512; NL';
+
+i=i+1; % 17
+file{i}='fsi_lu_re45_ugis_pert.out';
+legen{i}='Ugis Re45; Lin';
+
+i=i+1; % 18
+file{i}='fsi_lu_re45_ugis_NL.out';
+legen{i}='Ugis Re45; NL';
+
+ind=[17,18];
+svfname='lurot_comp.eps';
+
 
 file=file(ind);
 legen=legen(ind);
 
 cols = ['b','r','k','m','c','g','y'];
+linst= {'-','--','-','-','-','-','-'};
 
-iskip=4;          % no of initial peaks to skip
+iskip=10;          % no of initial peaks to skip
 eskip=0;          % no of end peaks to skip
 tstart=-700;
 tend  =-920;
@@ -104,7 +121,7 @@ for i=1:nfiles
   fname = file{i};
   fsi = importdata(fname);
   time=fsi.data(:,2);
-  eta =fsi.data(:,4);
+  eta =abs(fsi.data(:,4)) + 1e-15;
   etav=fsi.data(:,5);
 
   if (tstart>0)
@@ -124,7 +141,7 @@ for i=1:nfiles
   etav= etav(ind3);
  
   figure(1)
-  ts(i) = plot(time,eta, 'LineWidth', 2, 'Color', cols(i)); hold on
+  ts(i) = plot(time,eta, 'LineWidth', 2, 'Color', cols(i), 'LineStyle', linst{i}); hold on
   xlabel('Time', 'FontSize', lafs)
   ylabel('$\eta$', 'FontSize', lafs)
   
@@ -136,7 +153,7 @@ for i=1:nfiles
   figure(1)  
   pks2 = pks(iskip+1:l1-eskip);
   pks_time2 = time(locs2);
-  ts_pks(i)=plot(pks_time2,pks2, 'o ', 'Color', cols(i), 'MarkerSize', 6); hold on
+%  ts_pks(i)=plot(pks_time2,pks2, 'o ', 'Color', cols(i), 'MarkerSize', 6); hold on
   
   tosc = diff(pks_time2);
   omg = 2*pi./tosc;
