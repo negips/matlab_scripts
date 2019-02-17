@@ -22,10 +22,10 @@ Nek_WriteRea(rea2d,ifre2);
 
 
 % Generate 3D mesh
-nz0=16;
-Lz=0.40;
+nz0=8;
+Lz=0.20;
 ifperiodic=1;
-ifvtk=0;
+ifvtk=1;
 rea3d = Generate3DCoarse(rea2d,nz0,Lz,ifperiodic,ifvtk); 
 
 ifre2 = 1;

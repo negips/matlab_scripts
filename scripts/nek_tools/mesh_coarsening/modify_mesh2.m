@@ -13,8 +13,8 @@ ifplot = 0;
 %casename = 'stretched';
 %casename = 'saab600k';
 %casename = 'naca0012_5_15';
-%casename = 'naca0012_5_15_2';
-casename = 'naca0009_3p5c_c';
+casename = 'naca0012_5_15_2';
+%casename = 'naca0009_3p5c_c';
 
 svfname  = [casename '.mat'];
 

@@ -85,7 +85,9 @@ function [mesh3d] = Generate3D(mesh2d,nlayers,nz0,Lz,ifperiodic);
 %    ifcl = CoarsenZLayerSaab600k(il,nz,nlayers,LX,LY,LE,mesh2d,cz_pl);
 %    ifcl = CoarsenZLayerKDJ(il,nz,nlayers,LX,LY,LE,mesh2d,cz_pl);
 %    ifcl = CoarsenZLayerNaca(il,nz,nlayers,LX,LY,LE,mesh2d,cz_pl);
-    ifcl = CoarsenZLayerNaca_2(il,nz,nlayers,LX,LY,LE,mesh2d,cz_pl);
+%    ifcl = CoarsenZLayerNaca_2(il,nz,nlayers,LX,LY,LE,mesh2d,cz_pl);
+    ifcl = CoarsenZLayerNaca77k1(il,nz,nlayers,LX,LY,LE,mesh2d,cz_pl);
+
 %    ifcl = CoarsenZLayerSkern(il,nz,nlayers,LX,LY,LE,mesh2d,cz_pl);
 
     if ifcl==0
