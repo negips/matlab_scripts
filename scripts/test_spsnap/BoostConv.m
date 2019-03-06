@@ -2,7 +2,7 @@ function [xi_o,x0_o,dv_o,vin_o,vout_o,vol1_o,vold_o,rnorm_o,ifinit_o,ib_o] = Boo
 % BoostConv
 
    dv = [];
-   rnorm = 0.;
+   rnorm = 1.;
    c   = zeros(bkryl,1);
 
    if (ifboost)

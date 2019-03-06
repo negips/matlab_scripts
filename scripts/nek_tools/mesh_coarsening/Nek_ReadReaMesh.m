@@ -62,6 +62,10 @@ tline = fgetl(fid);  %***** CURVED SIDE DATA *****
 tline = fgetl(fid);  % 36 Curved sides follow IEDGE,IEL,CURVE(I),I=1,5, CCURVE
 cell =textscan(tline, '%f');
 NCurve = cell{1};
+iedge = [];
+ieg   = [];
+CurveParams = [];
+CurveType   = [];
 
 for i=1:NCurve
   tline = fgetl(fid);             % Read curved data
