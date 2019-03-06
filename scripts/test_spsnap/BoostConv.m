@@ -1,4 +1,4 @@
-function [xi_o,x0_o,dv_o,vin_o,vout_o,vol1_o,vold_o,rnorm_o,ifinit_o,ib_o] = BoostConv(xi,x0,i,vol1,vold,vin,vout,ifboost,bfreq,ifinit,ib,bkryl,vlen)
+function [xi_o,x0_o,dv_o,vin_o,vout_o,vol1_o,vold_o,rnorm_o,ifinit_o,ib_o,ksize_o] = BoostConv(xi,x0,i,vol1,vold,vin,vout,ifboost,bfreq,ifinit,ib,bkryl,ksize,vlen)
 % BoostConv
 
    dv = [];
@@ -21,6 +21,7 @@ function [xi_o,x0_o,dv_o,vin_o,vout_o,vol1_o,vold_o,rnorm_o,ifinit_o,ib_o] = Boo
      if mod(i,bfreq)==0
        if (~ifinit)
           ib = 1;
+          ksize = 1;
           dv = (xi - vol1);
 
           vin(:,1)=dv;
@@ -35,14 +36,16 @@ function [xi_o,x0_o,dv_o,vin_o,vout_o,vol1_o,vold_o,rnorm_o,ifinit_o,ib_o] = Boo
           vout(:,ib) = vout(:,ib)-dv;             % vout = rn_1 - rn
           vin(:,ib)  = vin(:,ib)-vout(:,ib);      % vin  = rn
 
-          c_bc  = vout(:,1:ib)'*dv;
-          dd_bc = vout(:,1:ib)'*vout(:,1:ib);
+          c_bc  = vout(:,1:ksize)'*dv;
+          dd_bc = vout(:,1:ksize)'*vout(:,1:ksize);
           c2    = dd_bc\c_bc;               % invert dd_bc
           c(1:length(c2),1) = c2;
 
           ib = mod(ib,bkryl)+1;
           vout(:,ib) = dv;                  % vout+1 = rn
 
+          ksize = ksize+1; 
+          ksize = min(ksize,bkryl);
 %          dbstop in BoostConv at 46
 
 %         New residual
@@ -74,6 +77,7 @@ function [xi_o,x0_o,dv_o,vin_o,vout_o,vol1_o,vold_o,rnorm_o,ifinit_o,ib_o] = Boo
    rnorm_o=rnorm;
    ifinit_o=ifinit;
    ib_o=ib;
+   ksize_o=ksize;
 
 
 return

@@ -1,4 +1,4 @@
-function [xi_o,x0_o,vin_o,vout_o,vol1_o,vold_o,rnorm_o,ifinit_o,ik_o] = SpSnap(xi,x0,i,vol1,vold,vin,vout,ifsnap,sfreq,ifinit,ik,skryl,vlen)
+function [xi_o,x0_o,vin_o,vout_o,wout_o,vol1_o,vold_o,rnorm_o,ifinit_o,ik_o] = SpSnapOrtho(xi,x0,i,vol1,vold,vin,vout,wout,ifsnap,sfreq,ifinit,ik,skryl,vlen)
 % SPSNAP
 
    rnorm = norm(xi);
@@ -8,6 +8,7 @@ function [xi_o,x0_o,vin_o,vout_o,vol1_o,vold_o,rnorm_o,ifinit_o,ik_o] = SpSnap(x
      x0_o=x0;
      vin_o=vin;
      vout_o=vout;
+     wout_o=wout;
      vol1_o=vol1;
      vold_o=vold;
      rnorm_o=rnorm;
@@ -25,12 +26,9 @@ function [xi_o,x0_o,vin_o,vout_o,vol1_o,vold_o,rnorm_o,ifinit_o,ik_o] = SpSnap(x
      vout(:,1)=zeros(vlen,1);
     
      vol1  = xi;
-     x0    = xi;
      ifinit = 0;
    else
      if (~ifinit)
-       vin(:,1)  = xi;
-       vout(:,1) = zeros(vlen,1);
        ik = 1;
        vol1 = xi;
 
@@ -42,6 +40,7 @@ function [xi_o,x0_o,vin_o,vout_o,vol1_o,vold_o,rnorm_o,ifinit_o,ik_o] = SpSnap(x
        x0_o=x0;
        vin_o=vin;
        vout_o=vout;
+       wout_o=wout;
        vol1_o=vol1;
        vold_o=vold;
        rnorm_o=rnorm;
@@ -57,8 +56,11 @@ function [xi_o,x0_o,vin_o,vout_o,vol1_o,vold_o,rnorm_o,ifinit_o,ik_o] = SpSnap(x
    if mod(i,sfreq)==0
      if (ifinit)
 
-        dv = (xi - vol1);
-        vout(:,ik) = dv;          % vout = (A-I)x
+        beta = vol1'*vol1;
+        vortho = vol1*(vol1'*xi)/beta;
+        vin(:,ik)  = xi;              % vin  = Ax
+        vout(:,ik) = vortho;          % vout = vortho
+        wout(:,ik) = xi - vortho;     % wout = (I - xx^T/||x||^2)Ax
 
         if ik==1
 %         Nothing to be done
@@ -66,18 +68,15 @@ function [xi_o,x0_o,vin_o,vout_o,vol1_o,vold_o,rnorm_o,ifinit_o,ik_o] = SpSnap(x
           vol1 = xi;
         else
 
-          [Q,R]=qr(vout(:,1:ik),0);               % economy size
-
-          [U,S,V] = svd(R);       % gives V nor VT
-          U = Q*U;
+          [U,S,V] = svd(wout(:,1:ik),'econ');       % gives V nor VT
           s = diag(S);
           [smin ind] = min(s);
           v1  = V(:,ind);
           us1 = U(:,ind)*smin;
           x1  = vin(:,1:ik)*v1;
 
-          x0  = x1 + us1;
-          vol1 = x0;
+          x0  = x1;
+          vol1 = x0;          
 
 %         New residual
           rnorm = smin;
@@ -88,10 +87,7 @@ function [xi_o,x0_o,vin_o,vout_o,vol1_o,vold_o,rnorm_o,ifinit_o,ik_o] = SpSnap(x
 
         if mod(ik,skryl)==0
 %         Restart                
-          vin(:,1)  = x0;
           ik = 1;
-        else  
-          vin(:,ik)  = x0;
         end
 
      end        % if ~ifinit
@@ -106,6 +102,7 @@ function [xi_o,x0_o,vin_o,vout_o,vol1_o,vold_o,rnorm_o,ifinit_o,ik_o] = SpSnap(x
    x0_o=x0;
    vin_o=vin;
    vout_o=vout;
+   wout_o=wout;
    vol1_o=vol1;
    vold_o=vold;
    rnorm_o=rnorm;

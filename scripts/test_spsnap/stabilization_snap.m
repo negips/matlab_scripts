@@ -77,11 +77,12 @@ ksize = 0;
 
 % SPSNAP parameters
 ifsnap = 1;
-skryl = 10;
+skryl = 100;
 sfreq = 1;
 ifinit = 0;
 vin   = zeros(neig,skryl);
 vout  = zeros(neig,skryl);
+wout  = zeros(neig,skryl);
 vold  = zeros(neig,1);
 vol1 = zeros(neig,1);
 %
@@ -93,6 +94,8 @@ plotio  = 100;
 
 niters = 2000;
 residuals = zeros(niters,1);
+x0norm    = zeros(niters,1);
+
 for i=1:niters
 
    xi = A*x0;
@@ -104,7 +107,7 @@ for i=1:niters
      [xi_o,x0_o,dv_o,vin_o,vout_o,vol1_o,vold_o,rnorm_o,ifinit_o,ik_o,ksize_o] = BoostConv(xi,x0,i,vol1,vold,vin,vout,ifboost,bfreq,ifinit,ik,bkryl,ksize,vlen);
       
    else
-    [xi_o,x0_o,vin_o,vout_o,vol1_o,vold_o,rnorm_o,ifinit_o,ik_o] = SpSnap(xi,x0,i,vol1,vold,vin,vout,ifsnap,sfreq,ifinit,ik,skryl,vlen);
+    [xi_o,x0_o,vin_o,vout_o,wout_o,vol1_o,vold_o,rnorm_o,ifinit_o,ik_o] = SpSnapOrtho(xi,x0,i,vol1,vold,vin,vout,wout,ifsnap,sfreq,ifinit,ik,skryl,vlen);
     dv_o = [];
     ksize_o = 0;
    end 
@@ -113,6 +116,7 @@ for i=1:niters
    dv=dv_o;
    vin=vin_o;
    vout=vout_o;
+   wout=wout_o;
    vol1=vol1_o;
    vold=vold_o;
    rnorm=rnorm_o;
@@ -127,6 +131,7 @@ for i=1:niters
    end  
 
    residuals(i)=rnorm;
+   x0norm(i) = norm(x0);
 
    if mod(i,plotio)==0
      if (ifboost)         
@@ -138,7 +143,7 @@ for i=1:niters
      pause(0.01)
    end
 
-   if i>10 && rnorm<1e-12
+   if i>10 && rnorm<1e-20
      break
    end  
   
@@ -147,6 +152,7 @@ end
 
 figure(2)
 semilogy(residuals(1:i)); hold on
+semilogy(x0norm(1:i)); hold on
 
 if (ifboost)         
   figure(3)
