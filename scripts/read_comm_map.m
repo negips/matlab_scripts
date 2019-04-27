@@ -3,7 +3,7 @@
 clear
 clc
 
-filename = ['surf_map_01024.out'];
+filename = ['surf_map_00024.out'];
 fid = fopen(filename);
 s = str2double(filename(10:14));
 

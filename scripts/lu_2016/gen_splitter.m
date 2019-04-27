@@ -16,7 +16,7 @@ lw3 = 0.5;
 
 lafs = 20;
 
-th = 0.02; % half thickness
+th = 0.01; % half thickness
 rad = 0.5;
 
 theta = asin(th/rad);

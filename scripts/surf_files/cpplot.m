@@ -7,7 +7,7 @@ close all
 % addpath '/home/prabal/workstation/git_kth/matlabscripts/scripts/'
 % addpath '/scratch/negi/git_repos/matlabscripts/scripts/'
 
-fol = 're750k_aoa34';
+fol = 'simon';
 ifhdr = 1;
 fs = 16;                % fontsize
 lfs = 16;               % legend fontsize
@@ -18,7 +18,7 @@ destn = 'plots/';
 [sfiles tout] = LoadSurfFiles(fol);
 
 nfiles = length(sfiles);
-tlast = 2.70;
+tlast = 0.00;
 tmax = 500.00001;
 maxframes = nfiles*100;
 
@@ -120,15 +120,15 @@ for i = 1:nfiles
          
          figure(h1)      
 %         pvar = plot(x(:)/Chord,dtmp_v(:), 'b.', 'MarkerSize', 10);
-%         pvar = plot(xsort/Chord,cp, 'b.', 'MarkerSize', 10);
-         pvar = plot(xsort/Chord,cf, 'b.', 'MarkerSize', 10);
+         pvar = plot(xsort/Chord,cp, 'b.', 'MarkerSize', 10);
+%         pvar = plot(xsort/Chord,cf, 'b.', 'MarkerSize', 10);
 %         pvar = plot(xsort,ysort, 'b.', 'MarkerSize', 10);
         
-%         set(gca,'Ydir', 'reverse')
-%         ylim([-1.1 1.1]);
+         set(gca,'Ydir', 'reverse')
+         ylim([-0.4 0.6]);
          xlim ([0. 1]);
 %         xlim([-0.01 1.000])
-         ylim([-0.001 0.002500])    
+%         ylim([-0.006 0.01000])    
          grid on   
          hold on
          lgs{1} =  ['T=' num2str(tstamps(it))]; 
