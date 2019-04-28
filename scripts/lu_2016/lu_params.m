@@ -10,10 +10,10 @@ U0 = 1.0;
 D=1.0;
 
 % Reduced velocity
-U_star = 11.6;
+U_star = 10.0;
 
 % Dimensionless Damping ratio
-Xi_star = 0.000;
+Xi_star = 0.007;
 
 % Density ratio
 m_star = 10.00;
@@ -49,6 +49,9 @@ Fn = 1/U_star;          % dimensionless
 % Spring-mass frequency
 fn = Fn*(U0/D);         % dimensional
 
+% Spring-mass angular frequency
+omega_n = 2*pi*fn;
+
 % Non-dimensional stiffness
 K_star = MI_00*(2*pi*Fn)^2;
 
@@ -71,6 +74,8 @@ disp(['Normalized stiffness:        ', num2str(K_star,7)])
 disp(['Damping ratio:               ', num2str(Xi_star,7)])
 disp(['Critical Damping:            ', num2str(critical_damping,7)])
 disp(['Normalized Damping:          ', num2str(Kai_star,7)])
+
+lambda_s = -1/2*(Kai_star/MI_00) + sqrt(-1)*sqrt(omega_n^2 - 1/4*(Kai_star/MI_00)^2)
 
 
 

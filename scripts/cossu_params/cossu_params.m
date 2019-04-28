@@ -14,7 +14,6 @@ Re2=47.024;
 Re=Re1;
 caseno=1;
 
-
 tol=1.0e-7;
 if abs(Re-Re1)<tol
   switch (caseno)
@@ -39,13 +38,13 @@ else abs(Re-Re2)<tol
 end
 
 % Cylinder area
-A0 = 1/4*pi*D^2
+A0 = 1/4*pi*D^2;
 %A0 = 1;
 
 % Density ratio (solid to fluid)
 m_star = 1/n*A0;
-
 Gamma = -2*real(Lambda_s);
+damping = m_star*Gamma;
 
 omega_damped = imag(Lambda_s);
 omega_damped_squared = omega_damped^2;
@@ -53,11 +52,12 @@ omega_damped_squared = omega_damped^2;
 omega_undamped_squared = omega_damped_squared + (Gamma/2)^2;
 omega_undamped = sqrt(omega_undamped_squared);
 
-K_star = m_star*omega_damped_squared;           % Stiffness
+K_star = m_star*omega_undamped_squared;           % Stiffness
 
-critical_damping = 2*sqrt(K_star*m_star);       % 2*sqrt(k*m) Critical Damping coefficient
+critical_damping = 2*sqrt(K_star*m_star);         % 2*sqrt(k*m) Critical Damping coefficient
 
-Kai_star = Gamma/2/omega_undamped;              % Damping
+%Kai_star = Gamma/2/omega_undamped;              % Damping
+Kai_star = Gamma*m_star;              % Damping
 
 % Spring-mass frequency
 fn = omega_undamped/(2*pi);
@@ -77,7 +77,7 @@ disp(['Normalized stiffness:              ', num2str(K_star,7)])
 disp(['Normalized Damping:                ', num2str(Kai_star,7)])
 disp(['Critical Damping coefficient:      ', num2str(critical_damping,7)])
 
-
+lambda_s = -1/2*(Kai_star/m_star) + sqrt(-1)*sqrt(K_star/m_star - 1/4*(Kai_star/m_star)^2 )
 
 
 

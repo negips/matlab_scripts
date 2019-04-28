@@ -14,6 +14,7 @@ surf_p9 = log10(abs(surf_p9)+1.0e-15);
 
 %fol = 're750k_pitch';
 %ifhdr = 1;
+tlfs = 16;               % title font size
 axfs = 16;               % axis fontsize
 %lfs = 16;               % legend fontsize
 %ifcols = 1;
@@ -35,7 +36,7 @@ ifpressure = 1;
 %ifcp = 0;
 lafs=16;                % Latex font size
 ifflip=0;
-cbloc='Northoutside';
+cbloc='Eastoutside';
 cbheight = 0.75;
 %Tosc=1;                 % temporary
 %ptch_start=6.0;
@@ -203,10 +204,11 @@ if ifpressure
     hold on
   
   end
+  title('$k=1.0$','FontSize',tlfs)
   
   colormap(jet);
-%  cb2=colorbar('peer', ax2);
-%  set(cb2,'Location', cbloc);
+  cb2=colorbar('peer', ax2);
+  set(cb2,'Location', cbloc);
   axis tight
   hold on
 %  set(ax2, 'YTickMode', 'manual')

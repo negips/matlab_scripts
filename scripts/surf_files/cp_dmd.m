@@ -153,32 +153,34 @@ for i = 1:nfiles
 %          Truncate space to top surface
            ind2=find(topind);   
  
-           cfall = [cfall cf(ind2)];
+%           cfall = [cfall cf(ind2)];
+%           tall = [tall tstamps(it)];
+           cfall = [cfall cf];
            tall = [tall tstamps(it)];
- 
+
            xnew = xsort;
            ynew = ysort;
          end    
 %%
-         figure(h1)      
+%         figure(h1)      
 %         pvar = plot(x(:)/Chord,dtmp_v(:), 'b.', 'MarkerSize', 10);
 %         pvar = plot(xsort/Chord,cf, 'b.', 'MarkerSize', 15);
-         pvar = plot(xnew,cf, 'b.', 'MarkerSize', 15);
+%         pvar = plot(xnew,cf, 'b.', 'MarkerSize', 15);
 %         set(gca,'Ydir', 'reverse')
 %         ylim([-3.5 1.1]);
 %         xlim([-0.01 1.0])
 %         ylim([-0.003 0.0040])    
-         grid on   
-         hold on
-         lgs{1} =  ['T=' num2str(tstamps(it))]; 
-         lg = legend(pvar,lgs, 'FontSize', lfs, 'Location', 'North', 'Fontsize', lfs, 'Box', 'off');
+%         grid on   
+%         hold on
+%         lgs{1} =  ['T=' num2str(tstamps(it))]; 
+%         lg = legend(pvar,lgs, 'FontSize', lfs, 'Location', 'North', 'Fontsize', lfs, 'Box', 'off');
 
-
-         if nplots == 0 
-           ylabel('\tau_{w}', 'Interpreter', 'tex', 'Fontsize', fs);
-           xlabel('x/C', 'Interpreter', 'tex', 'Fontsize', fs);
-         end
-         nplots = nplots+1;   
+%
+%         if nplots == 0 
+%           ylabel('\tau_{w}', 'Interpreter', 'tex', 'Fontsize', fs);
+%           xlabel('x/C', 'Interpreter', 'tex', 'Fontsize', fs);
+%         end
+%         nplots = nplots+1;   
 %         mov(nplots) = getframe(gcf);
 
          svfname = sprintf('%0.4d', nplots);   

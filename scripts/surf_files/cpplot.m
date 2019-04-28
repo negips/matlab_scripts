@@ -120,13 +120,12 @@ for i = 1:nfiles
          
          figure(h1)      
 %         pvar = plot(x(:)/Chord,dtmp_v(:), 'b.', 'MarkerSize', 10);
-%         pvar = plot(xsort/Chord,cp, 'b.', 'MarkerSize', 10);
+         pvar = plot(xsort/Chord,cp, 'b.', 'MarkerSize', 10);
 %         pvar = plot(xsort/Chord,cf, 'b.', 'MarkerSize', 10);
-         pvar = plot(xsort/Chord,cf/max(abs(cf)), 'b.', 'MarkerSize', 10);
 %         pvar = plot(xsort,ysort, 'b.', 'MarkerSize', 10);
         
-%         set(gca,'Ydir', 'reverse')
-%         ylim([-1.1 1.1]);
+         set(gca,'Ydir', 'reverse')
+         ylim([-0.4 0.6]);
          xlim ([0. 1]);
 %         xlim([-0.01 1.000])
          ylim([-1.1 1.1])    

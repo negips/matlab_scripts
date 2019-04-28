@@ -4,10 +4,31 @@ clear
 clc
 close all
 
-lafs = 20;
-lgfs = 16;
+dstn2='/home/prabal/workstation/git_kth/fsi-paper/JFM-latex/imgs';
 
+ifsave = 0;
+%svname1='cossu_evol.eps';
+%svname2='cossu_peaks.eps';
+%svname3='cossu_growth.eps';
+%svname4='cossu_omega.eps';
+
+svname1='lu_evol.eps';
+svname2='lu_peaks.eps';
+svname3='lu_growth.eps';
+svname4='lu_omega.eps';
+
+
+outpos = [0.10 0.30 0.40 0.60];
+
+axfs=24;
+set(groot,'DefaultAxesFontSize',axfs)
+disp(['Default Axes font  size ' num2str(axfs)])
+
+lafs = 30;
+lgfs = 24;
+mkrsz = 8;
 destn = '/home/prabal/workstation/phd_presentations/stability/fsi_linearization/imgs2/';
+dstn2 = '/home/prabal/workstation/git_kth/fsi-paper/JFM-latex/imgs/';
 
 fname1 = 'fsi_io.out';
 fname2 = '/scratch/negi/git_repos/fsi/stability/baseflow_solve/run_cossu/big_domain/npert_1/fsi_io.out';
@@ -32,7 +53,8 @@ legen{i}='NL';
 % Re=50
 i=i+1; % 5
 file{i}='fsi_lu_re45_pert.out';
-legen{i}='Re50; Pert';
+%legen{i}='Re50; Pert';
+legen{i}='Linear';
 
 i=i+1; % 6
 file{i}='fsi_lu_re45_base_pert.out';
@@ -40,7 +62,8 @@ legen{i}='Re50; Base+Pert';
 
 i=i+1; % 7
 file{i}='fsi_lu_re45_nl.out';
-legen{i}='Re50; NL';
+%legen{i}='Re50; NL';
+legen{i}='Nonlinear';
 
 % After pressure bug change
 i=i+1; % 8
@@ -76,11 +99,11 @@ legen{i}='Re50; All; npert=1';
 
 i=i+1; % 15
 file{i}='fsi_cossu_re23.out';
-legen{i}='Re23.512; Lin';
+legen{i}='Linear'; % Re23.512
 
 i=i+1; % 16
 file{i}='fsi_cossu_re23_nl.out';
-legen{i}='Re23.512; NL';
+legen{i}='Nonlinear';% Re23.512
 
 i=i+1; % 17
 file{i}='fsi_lu_re45_ugis_pert.out';
@@ -90,20 +113,37 @@ i=i+1; % 18
 file{i}='fsi_lu_re45_ugis_NL.out';
 legen{i}='Ugis Re45; NL';
 
-ind=[17,18];
-svfname='lurot_comp.eps';
+i=i+1; % 19
+file{i}='fsi_cossu23_n7.out';
+legen{i}='Linear'; % Re23.512 n=1/7
 
+i=i+1; % 20
+file{i}='fsi_cossu23_n7_nl.out';
+legen{i}='Nonlinear';% Re23.512 n=1/7
+
+i=i+1; % 21
+file{i}='fsi_ugis_re45_pert.out';
+legen{i}='Linear';% Re23.512 n=1/7
+
+i=i+1; % 22
+file{i}='fsi_ugis_re45_nl.out';
+legen{i}='Nonlinear';% Re23.512 n=1/7
+
+ind=[21,22];
 
 file=file(ind);
 legen=legen(ind);
 
-cols = ['b','r','k','m','c','g','y'];
-linst= {'-','--','-','-','-','-','-'};
+cols = ['k','k','k','m','c','g','y'];
+linst= {'-','none','-','-','-','-','-'};
+mkr= {'none','o','.','s','x','*','pentagram'};
+mkr_step=1000;
+
 
 iskip=10;          % no of initial peaks to skip
 eskip=0;          % no of end peaks to skip
 tstart=-700;
-tend  =-920;
+tend  =650;
 
 %re45
 %tstart=950;
@@ -116,13 +156,17 @@ for i=1:nfiles
 
   if ind(i)==4
     eskip=8;
+  elseif ind(i)==16
+    eskip=53;
   end    
 
   fname = file{i};
   fsi = importdata(fname);
   time=fsi.data(:,2);
-  eta =abs(fsi.data(:,4)) + 1e-15;
-  etav=fsi.data(:,5);
+  time=time-min(time);
+  eta1 = fsi.data(:,4);
+  eta  = abs(fsi.data(:,4)); % + 1e-15;
+  etav = fsi.data(:,5);
 
   if (tstart>0)
     ind1=time>=tstart;
@@ -137,23 +181,46 @@ for i=1:nfiles
   end
   ind3=find(ind1.*ind2);
   time=time(ind3);
+  eta1=eta1(ind3);
   eta = eta(ind3);
   etav= etav(ind3);
  
   figure(1)
-  ts(i) = plot(time,eta, 'LineWidth', 2, 'Color', cols(i), 'LineStyle', linst{i}); hold on
+  set(gcf,'Units','Normalized')
+  set(gcf,'OuterPosition',outpos);
+  set(gcf,'Renderer','painters');
+  ts(i) = plot(time,eta1, 'LineWidth', 2, 'Color', cols(i), 'LineStyle', linst{i}, 'Marker', mkr{i}, 'MarkerSize', mkrsz); hold on
   xlabel('Time', 'FontSize', lafs)
-  ylabel('$\eta$', 'FontSize', lafs)
+  ylabel('$\eta$', 'FontSize', lafs+4)
+  mind = get(ts(i),'MarkerIndices');
+  mind2 = mind(1):mkr_step:mind(end);
+  set(ts(i),'MarkerIndices',mind2);
+
+  xlim([0 65]);
+%  ylim([-2.0 2.0]*10^-6)
   
   [pks locs] = findpeaks(eta);
+% Skip negative peaks  
+  pks  =  pks(1:2:end);
+  locs = locs(1:2:end);
   
   l1 = length(locs);
   locs2 = locs(iskip+1:l1-eskip);
 
-  figure(1)  
+  figure(2)  
+  set(gcf,'Units','Normalized')
+  set(gcf,'OuterPosition',outpos);
+  set(gcf,'Renderer','painters');
   pks2 = pks(iskip+1:l1-eskip);
   pks_time2 = time(locs2);
-%  ts_pks(i)=plot(pks_time2,pks2, 'o ', 'Color', cols(i), 'MarkerSize', 6); hold on
+  ts_pks(i)=semilogy(pks_time2,pks2, 'LineWidth', 2, 'Color', cols(i), 'LineStyle', linst{i}, 'Marker', mkr{i}, 'MarkerSize', mkrsz); hold on
+  mind = get(ts_pks(i),'MarkerIndices');
+  mind2 = mind(1):4:mind(end);
+  set(ts_pks(i),'MarkerIndices',mind2);
+ 
+  xlabel('Time', 'FontSize', lafs)
+  ylabel('$\eta^{pks}$', 'FontSize', lafs+4)
+ 
   
   tosc = diff(pks_time2);
   omg = 2*pi./tosc;
@@ -166,16 +233,28 @@ for i=1:nfiles
   growth2 = log(pks2(2:end)./pks2(1:end-1));
  
   time_growth = pks_time2(2:end); 
-  figure(2)
-  plot(time_growth,growth, 'o-', 'Color', cols(i)); hold on
+  figure(3)
+  set(gcf,'Units','Normalized')
+  set(gcf,'OuterPosition',outpos);
+  set(gcf,'Renderer','painters'); 
+  plot(time_growth,growth,'LineWidth', 1, 'Color', cols(i), 'LineStyle', linst{i}, 'Marker', mkr{i}, 'MarkerSize', mkrsz); hold on
   ylabel('Growth rate')
   xlabel('Time')
 
+%  xlim([0 1000]);
+%  ylim([-14 6]*10^-3)
+ 
+
   time_osc = pks_time2(2:end); 
-  figure(3)
-  plot(time_osc,omg, 'o-', 'Color', cols(i)); hold on
+  figure(4)
+  set(gcf,'Units','Normalized')
+  set(gcf,'OuterPosition',outpos);
+  set(gcf,'Renderer','painters');
+  plot(time_osc,omg,'LineWidth', 1, 'Color', cols(i), 'LineStyle', linst{i}, 'Marker', mkr{i}, 'MarkerSize', mkrsz); hold on
   ylabel('Angular frequency')
   xlabel('Time')
+
+%  xlim([0 1000]);
 
   disp(fname)
   disp(['Mean Angular frequency:', num2str(Omega,10)])
@@ -191,5 +270,20 @@ figure(2)
 legend(legen,'FontSize',lgfs,'Location','Best')
 figure(3)
 legend(legen,'FontSize',lgfs,'Location','Best')
+figure(4)
+legend(legen,'FontSize',lgfs,'Location','Best')
 
+if (ifsave)
+  figure(1)
+  SaveFig(gcf,svname1,dstn2,0)
+
+  figure(2)
+  SaveFig(gcf,svname2,dstn2,0)
+
+  figure(3)
+  SaveFig(gcf,svname3,dstn2,0)
+
+  figure(4)
+  SaveFig(gcf,svname4,dstn2,0)
+end
 
