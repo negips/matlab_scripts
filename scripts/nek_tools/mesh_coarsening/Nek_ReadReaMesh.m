@@ -88,7 +88,8 @@ for i=1:NCurve
     cpar(j,1)=cell{j};
   end
   CurveParams(:,i) = cpar;
-  CurveType(i) = cell{6};
+  ct = cell{6};
+  CurveType{i} = ct{1};
 
 end
 

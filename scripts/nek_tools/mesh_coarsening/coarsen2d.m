@@ -10,10 +10,11 @@ close all
 %load stretched.mat
 %load saab600k.mat
 %load naca0012_5_15.mat
-load naca0012_5_15_2.mat
+%load naca0012_5_15_2.mat
 %load naca0009_3p5c_c.mat
+load naca0012_5_10_fine2.mat
 
-skiplayers = 2;         % Need to skip some layers since its smaller than the others
+skiplayers = 3;         % Need to skip some layers since its smaller than the others
 curvedef   = 'mv ';
 ifvtk      = 1;
 rea2d = Generate2DCoarse(rea,LayerE,LayerX,LayerY,LayerBC,LayerCEl,MeshC,skiplayers,curvedef,ifvtk);

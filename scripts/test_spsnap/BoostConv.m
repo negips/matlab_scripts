@@ -49,7 +49,7 @@ function [xi_o,x0_o,dv_o,vin_o,vout_o,vol1_o,vold_o,rnorm_o,ifinit_o,ib_o,ksize_
 %          dbstop in BoostConv at 46
 
 %         New residual
-          dv = dv + vin*c;
+          dv = dv + vin(:,1:ksize)*c(1:ksize,1);
           vin(:,ib) = dv;
 
           rnorm = norm(dv);

@@ -137,7 +137,9 @@ elmap = fread(infile,nelt,'*int32').';
 %--------------------------------------------------------------------------
 dtemp = zeros(nelt,npel);
 data = zeros(nelt,npel,nfields);
-datastruc = [];
+d1.data=dtemp;
+datastruc = repmat(d1,1,nfields);
+
 % For X,U           ! stored as vectors
 for ivar = 1:2
     idim0 = sum(var(1:ivar-1));
@@ -161,7 +163,7 @@ for ivar = 3:length(var)
           data(iel,:,idim+idim0) = dtemp;
           datastruc(nflds).data(iel,:)=dtemp;
       end
-    end
+  end
 end
 
 

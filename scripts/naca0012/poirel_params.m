@@ -4,7 +4,7 @@
 clear
 clc
 x_theta = 0.15;               % Distance between Elastic axis and centre of mass
-a_h     = -0.63;              % Non-dimensional location of elastic axis from the mid-chord (Non-dimensionalized by half-chord)
+a_h     = -0.628;              % Non-dimensional location of elastic axis from the mid-chord (Non-dimensionalized by half-chord)
 I_s     = 0.00135;            % Mass moment of Inertial of rotating parts (Kg-m^2)
 m_theta = 0.771;              % Mass of parts in rotation (Kg)
 K_s     = 0.30;               % Structural Stiffness (N-m/rad)
@@ -52,6 +52,16 @@ disp(['Stiffness   (K*)  :          ', num2str(K_star,7)])
 disp(['Axis       (X0*)  :          ', num2str(X0_star,7)])
 disp(['-----------------------------'])
 
+
+% Experimental Frequencies
+eig_struc = -1/2*(D_s/I_s) + sqrt(-K_s/I_s + 1/4*(D_s/I_s)^2);
+sfreq = imag(eig_struc)/2/pi;
+Flow_through_freq = U_inf/c;
+
+sfreq/Flow_through_freq;
+
+%
+norm_struc = -1/2*(D_star/I_star) + sqrt(-K_star/I_star + 1/4*(D_star/I_star)^2)
 
 
 

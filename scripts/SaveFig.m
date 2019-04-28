@@ -1,10 +1,10 @@
 function SaveFig(h, filename, destn, col)
 % Save and move the figure
 
-reso='-r300';
+reso='-r150';
 
-renderer='-opengl';
-%renderer='-painters';
+%renderer='-opengl';
+renderer='-painters';
 
 
 if ~isempty(strfind(lower(filename), '.eps'))

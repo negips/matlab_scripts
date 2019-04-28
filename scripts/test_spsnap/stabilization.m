@@ -8,10 +8,10 @@ lafs = 20;
 
 rng('default');
 
-n = 50;    % Matrix Size
+n = 100;    % Matrix Size
 
 % No of eigenvalues greater than 1.
-np = 20;
+np = 30;
 % How unstable do we want the eigenvalues?
 uns_range = 0.01;
 
@@ -62,7 +62,7 @@ r = x0;
 rnorm = norm(x0);
 
 % BoostConv parameters
-ifboost = 0;
+ifboost = 1;
 bkryl = 15;
 vin   = zeros(neig,bkryl);
 vout  = zeros(neig,bkryl);
@@ -76,7 +76,7 @@ ksize = 0;
 %
 
 % SPSNAP parameters
-ifsnap = 1;
+ifsnap = 0;
 skryl = 10;
 sfreq = 1;
 ifinit = 0;
