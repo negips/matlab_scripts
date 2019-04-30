@@ -1,4 +1,4 @@
-function [y1, vec, A, B] = PitchingResolvent(uprof,yprof,x0,y0,snx,sny,N,Re,alpha,beta,omega)
+function [y1, vec, A, B] = PitchingResolvent(uprof,yprof,x0,y0,snx,sny,N,Re,alpha,beta,omega,eta0)
 
 %ifmap=0;
 %delta_alpha = 0.2*alpha;
@@ -53,7 +53,7 @@ D(:,:,2) = D(:,:,2)*((1/Jac)^2);
 N1=N+1;
 % first n rows are the divergence equations.
 % First point is the wall point.
-eta0 = 1.;
+%eta0 = 1.;
 eta = eta0; %exp(iwt)
 zi = sqrt(-1.);
 etav = zi*omega*eta0;
@@ -82,7 +82,7 @@ dxpp = dx*snxp + dy*snyp;
 dvypp = dvx*snx + dvy*sny;
 dvxpp = dvx*snxp + dvy*snyp;
 
-dUdy = du(1); 
+dUdy = du(end); 
 ux_w = dvxpp - dypp*dUdy; 
 uy_w = dvypp;
 

@@ -48,8 +48,8 @@ mu_x = zeros(npts,nels);
 io = sqrt(-1);    % iota
 
 % \nu(dA/dx)
-U = 0.0;
-cu=0.0;
+U     = 2.0;
+cu    = 0.0;
 nu = U + 2i*cu;
 
 % \gamma(d^2A/dx^2)
