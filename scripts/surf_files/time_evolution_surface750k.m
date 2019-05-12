@@ -206,7 +206,7 @@ for i = 1:nfiles
   if (tout(i)>=tlast) 
     fname = sfiles{i};
         
-    [sdata sintegrals tstamps sno lx1 selt maxtsaves x y timeout hdr] = readsurf(fname,ifhdr);
+    [sdata sintegrals tstamps sno lx1 selt maxtsaves x y timeout hdr] = readsurf(fname,ifhdr,ndim);
 
     if (lx1(1)==6)
       sty_top = sty_top5;

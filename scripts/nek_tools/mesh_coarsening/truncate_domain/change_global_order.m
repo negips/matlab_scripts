@@ -5,18 +5,7 @@ clc
 close all
 
 ifplot = 0;
-%casename = 'saab_wing2d';
-casename = 'saab750k';
-%casename = 'lu';             % Doesn't work
-%casename = 'fluent_plus2';
-%casename = 'saab10k';
-%casename = 'stretched';
-%casename = 'saab600k';
-%casename = 'naca0012_5_15';
-%casename = 'naca0012_5_15_2';
-%casename = 'naca0009_3p5c_c';
-%casename = 'naca0009_outer';
-%casename = 'naca0012_5_10_fine2';
+casename = 'saab_wing2d';
 
 svfname  = [casename '.mat'];
 

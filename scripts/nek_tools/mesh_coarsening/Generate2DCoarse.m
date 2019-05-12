@@ -82,7 +82,7 @@ function [rea2d] = Generate2DCoarse(rea,LayerE,LayerX,LayerY,LayerBC,LayerCEl,Me
 %         ifc(j) = CoarsenNaca2d_2(LX,LY,j,i,iflocked);
 %         ifc(j) = CoarsenNaca77k1(LX,LY,j,i,iflocked);
 %         ifc(j) = CoarsenSkern(LX,LY,j,i,iflocked);
-         ifc(j) = CoarsenNaca77k_5_10_fine2(LX,LY,j,i,iflocked);
+%         ifc(j) = CoarsenNaca77k_5_10_fine2(LX,LY,j,i,iflocked);
 
         end
 

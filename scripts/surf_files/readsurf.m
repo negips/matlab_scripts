@@ -1,4 +1,4 @@
-function [sdata sintegrals tstamps sno lx1 selt maxtsaves x y timeout hdr] = readsurf(fname,ifhdr)
+function [sdata sintegrals tstamps sno lx1 selt maxtsaves x y timeout hdr] = readsurf(fname,ifhdr,ndim)
 
 sdata=[];
 sintegrals = [];
@@ -107,7 +107,7 @@ for i=1:maxtsaves
 end    
 
 %---------------------------------------- 
-ndim=2;
+%ndim=2;
 sintegrals = zeros(maxtsaves,ndim,ns);
 for i=1:ns
   for j=1:ndim

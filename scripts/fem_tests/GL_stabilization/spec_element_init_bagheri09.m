@@ -1,16 +1,16 @@
 % Small test simulation.
 
-clear
-clc
-close all
+%clear
+%clc
+%close all
 
 %addpath 'templates/'
 ifplot = 0;
 
-N=4;
+N=12;
 lx1 = N+1;
 npts=lx1;
-nels = 4;
+nels = 50;
 Nd=ceil(1.5*N);
 Nd2=ceil((4*N+3)/2);
 Nd3=ceil((6*N+3)/2);
@@ -19,8 +19,8 @@ ifboyd=0;
 dof = N*nels+1;
 nnodes = nels+1;
 
-d_start = 0;
-d_end = 20;
+d_start = -50;
+d_end = 50;
 d_len = abs(d_end-d_start);
 
 uniform = 1;
@@ -47,29 +47,26 @@ mu_x = zeros(npts,nels);
 
 io = sqrt(-1);    % iota
 
+%% Sub-critical case
 % \nu(dA/dx)
-U = 0.0;
-cu=0.0;
+U  = 2.0;
+cu = 0.0;
 nu = U + 2i*cu;
 
 % \gamma(d^2A/dx^2)
-cd = -1.;
+cd = -0.0;
 gamma = 1.0 + 1i*cd;
 
-% Source term
-mu00   = 0.52;
+% \mu(x)
+mu00   = 0.999;
 mu0    = (mu00 - cu^2);
-mu2    = -0.01;
+mu2    = -0.00;
+%%
 
-% step for dissipative region
-diss_xs=200;
-diss_xe=300;
-diss_xrise=20;
-diss_xfall=20;
 
 for i=1:nels
 
-     close all;
+%     close all;
 
      xst = el_nodes(i);
      xen = el_nodes(i+1);
@@ -78,7 +75,7 @@ for i=1:nels
 
      El(i).MASS   = MASS; 
      El(i).GRADM1 = gradm1;
-     El(i).CONV   = MASS*gradm1;                % mass matrix included
+     El(i).CONV   = gradm1;                % mass matrix included
      El(i).LAPL   = lpx;                        % mass matrix included
      El(i).INTPM1D  = GLL2Dealias;
      El(i).INTPM1D2 = GLL2Dealias2;  
@@ -95,12 +92,12 @@ for i=1:nels
      El(i).xm1    = xm1; 
      El(i).xm1d   = xm1d; 
      El(i).xm1d2  = xm1d2;
-     El(i).mu     = mu0 - mu1*xm1;
-     El(i).mud    = mu0 - mu1*xm1d;
+     El(i).mu     = mu0 + mu2*(xm1.^2)/2;
+     El(i).mud    = mu0 + mu2*(xm1d.^2)/2;
 
      nek_mass(:,:,i)     = MASS;
      nek_gradm1(:,:,i)   = gradm1;
-     nek_conv(:,:,i)     = MASS*gradm1;
+     nek_conv(:,:,i)     = nu*MASS*gradm1;
      nek_intpm1d(:,:,i)  = GLL2Dealias;
      nek_intpm1d2(:,:,i) = GLL2Dealias2;
      nek_intpm1d3(:,:,i) = GLL2Dealias3;
@@ -108,9 +105,9 @@ for i=1:nels
      nek_intgd2(:,:,i)   = intgd2;
      nek_intgd3(:,:,i)   = intgd3;
 
-     nek_lp(:,:,i)       = lpx;
-     nek_mu(:,:,i)       = mu0*eye(length(xm1));
-     nek_mud(:,:,i)      = mu0*eye(length(xm1d));
+     nek_lp(:,:,i)       = gamma*lpx;          % Since it is integrated by parts
+     nek_mu(:,:,i)       = diag(El(i).mu);
+     nek_mud(:,:,i)      = diag(El(i).mud);
 
 %    Time and space varying convective region      
      nek_mu_conv(:,:,i)  = diag(xm1);
@@ -118,27 +115,7 @@ for i=1:nels
 %    On over-integration grid 
      nek_mud_conv(:,:,i) = diag(xm1d);
 
-%    Add dissipative region at the end 
-     s1                  =  smoothstep(xm1,diss_xs,diss_xs+diss_xrise); 
-     s2                  = -smoothstep(xm1,diss_xe,diss_xe+diss_xfall); 
-     diss_x              = s1+s2;     
-     nek_mu(:,:,i)       = nek_mu(:,:,i) + mu_diss*diag(diss_x);
-%    On over-integration grid 
-     s1d                 =  smoothstep(xm1d,diss_xs,diss_xs+diss_xrise); 
-     s2d                 = -smoothstep(xm1d,diss_xe,diss_xe+diss_xfall); 
-     diss_xd             = s1d+s2d;     
-     nek_mud(:,:,i)      = nek_mud(:,:,i) + mu_diss*diag(diss_xd);
-
      xgll(:,i) = xm1;
-
-%    Just saving 
-     s1                  =  smoothstep(xm1,step_xs,step_xs+step_xrise); 
-     s2                  = -smoothstep(xm1,step_xe,step_xe+step_xfall);
-     ds1                 =  smoothstep(xm1,diss_xs,diss_xs+diss_xrise); 
-     ds2                 = -smoothstep(xm1,diss_xe,diss_xe+diss_xfall); 
-     mu_x(:,i)           =  mu0*ones(length(xm1),1) + mu2/2*;
-     mu_xdiss(:,i)       =  ds1 + ds2;
-     mu_xabs(:,i)        =  s1 + s2; 
 
      gl_pos_j1 = (i-1)*N + 1;
      gl_pos_i1 = (i-1)*N + 1;

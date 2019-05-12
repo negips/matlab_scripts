@@ -38,7 +38,7 @@ for i = 1:nfiles
   if (tout(i)>=tlast)
     fname = sfiles{i};
         
-    [sdata sintegrals tstamps sno lx1 selt maxtsaves x y timeout hdr] = readsurf(fname,ifhdr);
+    [sdata sintegrals tstamps sno lx1 selt maxtsaves x y timeout hdr] = readsurf(fname,ifhdr,ndim);
 
     if (tstamps(1)>tmax)
        break
