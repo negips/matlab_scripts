@@ -62,8 +62,14 @@ Ov = zeros(1,4*N);
 
 % u
 % far-field Dirichlet
+%A(N+1,:) = Ov;
+%A(N+1,1) = 1;
+%B(N+1,:) = Ov;
+
+% far-field Neumann
 A(N+1,:) = Ov;
-A(N+1,1) = 1;
+A(N+1,1:N) = D1(1,:);
+%A(N+1,1) = 1;
 B(N+1,:) = Ov;
 
 % wall Dirichlet
@@ -73,9 +79,16 @@ B(2*N,:) = Ov;
 
 %v
 % far-field Dirichlet
+%A(2*N+1,:) = Ov;
+%A(2*N+1, N+1) = 1;
+%B(2*N+1,:) = Ov;
+
+% far-field Neumann
 A(2*N+1,:) = Ov;
-A(2*N+1, N+1) = 1;
+A(2*N+1,N+1:2*N) = D1(1,:);
+%A(2*N+1, N+1) = 1;
 B(2*N+1,:) = Ov;
+
 
 % wall Dirichlet
 A(3*N,:) = Ov;

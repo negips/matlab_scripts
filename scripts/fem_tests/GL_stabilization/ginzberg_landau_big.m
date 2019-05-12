@@ -148,7 +148,6 @@ for i = 1:nsteps
       mu_conv_term(:,els) = mu_c*nek_mass(:,:,els)*nek_mu_conv(:,:,els)*un(:,els); 
     end
 
-
     source_term(:,els) = mu_term(:,els); 
     b_source = deltat*(extk(2)*source_term(:,els) + extk(3)*source_lag1(:,els) + extk(4)*source_lag2(:,els));
 

@@ -13,19 +13,20 @@ np = 2;
 % How unstable do we want the eigenvalues?
 uns_range = 0.1;
 
-theta = pi/2*rand(np,1);
+theta = pi/4*rand(np,1);
 e1  = (cos(theta) + uns_range*rand(np,1)) + 1i*sin(theta);
 uns_e = [e1; conj(e1)];
-% Set first eigenvector = 1 signifying beseflow
 
 ne2 = n-length(e1);
 st_range = 0.5;
-theta = 2*pi*rand(ne2,1);
-damp = 0.1 + 0.85*rand(ne2,1);
+theta = pi/3*rand(ne2,1);
+damp = 0.75 + 0.25*rand(ne2,1);
 e2  = damp.*cos(theta) + 1i*sin(theta);
 stb_e = [e2; conj(e2)];
 
-Aeig = [1.0; uns_e; stb_e];
+
+% Set first eigenvalue = 1 signifying beseflow
+Aeig = [uns_e; stb_e];
 lr = real(Aeig);
 li = imag(Aeig);
 

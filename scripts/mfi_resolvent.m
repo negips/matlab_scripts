@@ -114,23 +114,11 @@ for mfi= fileind            % 76 first absolute instability
   surf_yn = [];
   surf_v = [];
 
-  pt_x   = [];      
-  pt_y   = [];      
-  pt_yn  = [];
-  pt_v   = []; 
-
-  ww_x   = [];      
-  ww_y   = [];      
-  ww_yn  = [];
-  ww_v   = [];
-
   bb_profile = [];
   bb_yn = [];
 
   ind_pick = [1:100];
 
-  ubtmp = 100;
-  uetmp = 1;
   for ix = 1:npos
 
     total_p = 0.5*(lesdata(ix).UU + lesdata(ix).VV + lesdata(ix).WW) + lesdata(ix).P;
@@ -146,16 +134,19 @@ for mfi= fileind            % 76 first absolute instability
   end       % npos
 %----------------------------------------
 
-  for ind=[100] %1:50:npos    
+  for ind=[500] %1:50:npos    
 
 %    ind=length(lesdata);
-    u_prof = lesdata(ind).U;
-    yn_prof = lesdata(ind).yn;
+    trn =[1:151];
+    u_prof = lesdata(ind).U(trn);
+    yn_prof = lesdata(ind).yn(trn);
     
     disp([num2str(ind), ' xa: ', num2str(lesdata(ind).xa, 4)])
 
     figure(1)
-    plot(u_prof,yn_prof,'Color', cols_mfi(cnt,:), 'Marker', '.'); hold on
+    set(gcf,'Units','normalized');
+    set(gcf,'OuterPosition', [0.55 0.30 0.35 0.5]);
+    plot(u_prof,yn_prof,'Color', cols_mfi(cnt,:), 'Marker', 'none', 'LineWidth', 2); hold on
     xlabel('$U$')
     ylabel('$y_{n}$')
     grid on
@@ -164,68 +155,103 @@ for mfi= fileind            % 76 first absolute instability
 
     yinf = yn_prof(end);
 
-    beta=000;
-    alpha=0.5;
-    alpha_min=0.5;
-    alpha_max=5;
+%   beta    
+    beta=0.0;
+    beta_min=0;
+    beta_max=100;
+
+    if_betamap=0;
+    if (if_betamap)
+      nbeta=10;
+      beta_range = linspace(beta_min,beta_max,nbeta);
+    else
+      beta_range= [beta];
+      nbeta=1;
+    end
+
+%   alpha
+    alpha=500.0;
+    alpha_min=50;
+    alpha_max=500;
 
     if_alphamap=0;
     if (if_alphamap)
       nalpha=10;
       alpha_range = linspace(alpha_min,alpha_max,nalpha);
-%      alpha_range = 10.^(linspace(alpha_min,alpha_max,nalpha))
     else
       alpha_range= [alpha];
       nalpha=1;
     end
     
-    omega=1.0;
-    omega_min=1.0;
-    omega_max=50.;
+%   omega    
+    omega=0.01;
+    omega_min=0.010;
+    omega_max=2.;
    
     if_omegamap=1;
     if (if_omegamap)
-      nomega=5;
+      nomega=10;
       omega_range = linspace(omega_min,omega_max,nomega);
     else
       omega_range= [omega];
       nomega=1;
     end
 
+%   eta
+    eta=1.00;
+    eta_min=1.00;
+    eta_max=100.00;
+   
+    if_etamap=0;
+    if (if_etamap)
+      neta=10;
+      eta_range = linspace(eta_min,eta_max,neta);
+    else
+      eta_range= [eta];
+      neta=1;
+    end
+
     ifOS = 0;
-    N=250;
+    N=768;
     N1=N+1;
-
         
-    cols_ios = lines(nalpha*nomega);
-    for ios = 1:nalpha
-      for iw = 1:nomega
-        omega = omega_range(iw);
-        alpha = alpha_range(ios);
-        x0 = lesdata(ind).xa;
-        y0 = lesdata(ind).ya;
-        snx = lesdata(ind).snx;
-        sny = lesdata(ind).sny;
+    cols_ios = lines(neta*nalpha*nbeta*nomega);
+    for e0  = 1:neta
+    for ia  = 1:nalpha
+    for ib  = 1:nbeta
+    for iw  = 1:nomega
+      eta   = eta_range(e0);
+      alpha = alpha_range(ia);
+      beta  = beta_range(ib);
+      omega = omega_range(iw);
 
-        [y1, R, A, B] = PitchingResolvent(stab_profile,yn_prof,x0,y0,snx,sny,N,Re,alpha,beta,omega);
-        Rvx = R(1:N1);
-        Rvy = R(N1+1:2*N1);
-        Rvz = R(2*N1+1:3*N1);      
-        Rp  = R(3*N1+1:4*N1);
+      x0 = lesdata(ind).xa;
+      y0 = lesdata(ind).ya;
+      snx = lesdata(ind).snx;
+      sny = lesdata(ind).sny;
 
-        cc = (ios-1)*nomega + iw;
-        figure(2)
-        set(gcf,'Units','normalized');
-        set(gcf,'OuterPosition', [0.25 0.35 0.4 0.6]);
-        r_r(cc) = plot(real(Rvx),y1,'LineStyle','-' , 'Color', cols_ios(cc,:), 'Marker', '.'); hold on
-        r_i(cc) = plot(imag(Rvx),y1,'LineStyle','--', 'Color', cols_ios(cc,:), 'Marker', '.'); hold on
-%        r_r(cc) = semilogx(abs(Rvx),yn_prof,'LineStyle','-' , 'Color', cols_ios(cc,:), 'Marker', '.'); hold on
-%        r_i(cc) = semilogx(abs(Rvy),yn_prof,'LineStyle','--', 'Color', cols_ios(cc,:), 'Marker', '.'); hold on
+      [y1, R, A, B] = PitchingResolvent(stab_profile,yn_prof,x0,y0,snx,sny,N,Re,alpha,beta,omega,eta);
+      Rvx = R(1:N1);
+      Rvy = R(N1+1:2*N1);
+      Rvz = R(2*N1+1:3*N1);      
+      Rp  = R(3*N1+1:4*N1);
 
-        leg_ios{cc} = ['$\alpha=', num2str(alpha), '$; ', '$\omega=',num2str(omega), '$'];
-      end   % iw  
+      cc = (e0-1)*nomega*nalpha*nbeta + (ia-1)*nomega*nbeta + (ib-1)*nomega + iw;
+      figure(2)
+      set(gcf,'Units','normalized');
+      set(gcf,'OuterPosition', [0.25 0.35 0.4 0.6]);
+      r_r(cc) = plot(real(Rvx),y1,'LineStyle','-' , 'Color', cols_ios(cc,:), 'Marker', 'none', 'LineWidth', 2); hold on
+%      r_i(cc) = plot(imag(Rvx),y1,'LineStyle','--', 'Color', cols_ios(cc,:), 'Marker', 'none', 'LineWidth', 2); hold on
 
-    end % ios
+%      Log-scale
+%      r_r(cc) = semilogx(abs(Rvx),yn_prof,'LineStyle','-' , 'Color', cols_ios(cc,:), 'Marker', '.'); hold on
+%      r_i(cc) = semilogx(abs(Rvy),yn_prof,'LineStyle','--', 'Color', cols_ios(cc,:), 'Marker', '.'); hold on
+
+      leg_ios{cc} = ['$\alpha=', num2str(alpha), '$; ', '$\omega=',num2str(omega), '$'];
+    end     % iw
+    end     % ib
+    end     % ia
+    end     % e0  
 
     xlabel('$Rx$', 'FontSize', lafs)
     ylabel('$y_{n}$', 'FontSize', lafs)
@@ -242,6 +268,9 @@ end   % mfi
 
 
 figure(100)
+set(gcf,'Units','normalized');
+set(gcf,'OuterPosition', [0.45 0.10 0.6 0.6]);
+
 surf(surf_x,surf_y,surf_v,'EdgeColor', 'none', 'LineStyle', 'none', 'FaceColor', 'interp'); colorbar
 view(2)
 title(['Time= ' num2str(les.timee)])
