@@ -52,21 +52,27 @@ quintic_lag2 = 0*un;
 forcing_lag1 = 0*un;
 forcing_lag2 = 0*un;
 
+nlconv_term = 0*un;
+nlconv_lag1 = 0*un;
+nlconv_lag2 = 0*un;
+
+
 nek_linear_stiff = -nek_conv - nek_lp;
 %nek_bc = nek_cbc;
 mass = 0*nek_mass;
 stiff = 0*nek_linear_stiff;
 
-ifcubic = 0;
-ifquintic = 0;
+ifcubic   = 0;    % Cubic term
+ifquintic = 0;    % Quintic term
+ifnlconv  = 0;    % Non-linear Convection
 
 % Parameters
-deltat = 0.00005;
+deltat = 0.00001;
 istep = 0;
 time = 0;
 iostep = 1000;
 isave  = 20;
-OMEGA=5.00;
+OMEGA=0.50;
 Tosc=2*pi/OMEGA;
 nsteps=ceil(4*Tosc/deltat);
 %nsteps=100000;
@@ -180,6 +186,27 @@ for i = 1:nsteps
       b_quintic = 0*un(:,els);
     end        
 
+%   Nonlinear Convection
+    
+    if ifnlconv
+      if 1 % ifdealias  
+        nlconv_intp    = nek_intpm1d(:,:,els)*un(:,els);
+        nlconv_gradm1d = nek_gradm1d(:,:,els)*un(:,els);
+
+        nlconv_term(:,els) = nek_intgd(:,:,els)*(nlconv_intp.*nlconv_gradm1d);
+      else
+        nlconv_gradm1 = nek_gradm1(:,:,els)*un(:,els);
+        nlconv_term(:,els) = nek_mass(:,:,els)*(un(:,els).*nlconv_gradm1);
+      end  
+      b_nlconv1 = extk(2)*nlconv_term(:,els);
+      b_nlconv2 = extk(3)*nlconv_lag1(:,els);
+      b_nlconv3 = extk(4)*nlconv_lag2(:,els);
+      b_nlconv = deltat*(b_nlconv1 + b_nlconv2 + b_nlconv3);
+    else
+      b_nlconv = 0*un(:,els);
+    end        
+
+
 %   Forcing term (Initial impulse)
     if (istep==1)
       amp_imp= 0.;
@@ -195,10 +222,10 @@ for i = 1:nsteps
     b_forcing1 = extk(2)*forcing_term(:,els);
     b_forcing2 = extk(3)*forcing_lag1(:,els);
     b_forcing3 = extk(4)*forcing_lag2(:,els);
-    b_forcing = deltat*(b_forcing1 + b_forcing2 + b_forcing3);
+    b_forcing = -deltat*(b_forcing1 + b_forcing2 + b_forcing3);
 
 %   sum for rhs
-    b(:,els) = -b_bdf + b_stiff + b_source + b_cubic + b_quintic + b_forcing;
+    b(:,els) = -b_bdf + b_stiff + b_source + b_cubic + b_quintic + b_nlconv + b_forcing;
 
     gl_pos_j1 = (els-1)*N + 1;
     gl_pos_i1 = (els-1)*N + 1;
@@ -224,6 +251,9 @@ for i = 1:nsteps
   quintic_lag2 = quintic_lag1;
   quintic_lag1 = quintic_term;
 
+  nlconv_lag2 = nlconv_lag1;
+  nlconv_lag1 = nlconv_term;
+
   forcing_lag2 = forcing_lag1;
   forcing_lag1 = forcing_term;
 %%
@@ -238,11 +268,12 @@ for i = 1:nsteps
   gl_mass(1,:) = 0;
   gl_mass(1,1) = 1;             % strong bc
 
-  b(end,end) = A2;
-  big_b(end) = b(end,end); 
-
-  gl_mass(end,:)   = 0;
-  gl_mass(end,end) = 1;             % strong bc
+%% x=h B.C.
+%  b(end,end) = A2;
+%  big_b(end) = b(end,end); 
+%
+%  gl_mass(end,:)   = 0;
+%  gl_mass(end,end) = 1;             % strong bc
  
 
   M=[];                         % preconditioner
@@ -270,20 +301,25 @@ for i = 1:nsteps
     figure(h3)
     plot(ax1,xgll,un, '-b', 'MarkerSize', 16); hold on
 
-    ms_soln0 = ((A2-A0)/L - A/L*sin(OMEGA*time))*xgll + A0 + A*sin(OMEGA*time);
-    ms_soln1 = (A*L^2/nu)*cos(OMEGA*time)*(-1/3*(xgll/L) + 1/2*(xgll/L).^2 - 1/6*(xgll/L).^3);
-    ms_soln2 = -(A*L^4/nu^2)*sin(OMEGA*time)*(1/45*(xgll/L) - 1/18*(xgll/L).^3 + 1/24*(xgll/L).^4  - 1/120*(xgll/L).^5);
-    ms_soln3 = (A*L^6/nu^3)*cos(OMEGA*time)*(2/945*(xgll/L) - 1/270*(xgll/L).^3 + 1/360*(xgll/L).^5 - 1/720*(xgll/L).^6  + 1/5040*(xgll/L).^7);
+%    ms_soln0 = ((A2-A0)/L - A/L*sin(OMEGA*time))*xgll + A0 + A*sin(OMEGA*time);
+%    ms_soln1 = (A*L^2/nu)*cos(OMEGA*time)*(-1/3*(xgll/L) + 1/2*(xgll/L).^2 - 1/6*(xgll/L).^3);
+%    ms_soln2 = -(A*L^4/nu^2)*sin(OMEGA*time)*(1/45*(xgll/L) - 1/18*(xgll/L).^3 + 1/24*(xgll/L).^4  - 1/120*(xgll/L).^5);
+%    ms_soln3 = (A*L^6/nu^3)*cos(OMEGA*time)*(2/945*(xgll/L) - 1/270*(xgll/L).^3 + 1/360*(xgll/L).^5 - 1/720*(xgll/L).^6  + 1/5040*(xgll/L).^7);
+
+    ms_soln0 = A*sin(OMEGA*time)*ones(size(xgll));      
+    ms_soln1 = (A*L^2/nu)*cos(OMEGA*time)*(-xgll/L + 1/2*(xgll/L).^2);
+    ms_soln2 = -(A*L^4/nu^3)*sin(OMEGA*time)*(1/3*xgll/L - 1/6*(xgll/L).^3 + 1/24*(xgll/L).^4);
 
     ms0      = ms_soln0;
     ms1      = ms0 + OMEGA*ms_soln1;
     ms2      = ms1 + (OMEGA^2)*ms_soln2;
-    ms3      = ms2 + (OMEGA^3)*ms_soln3; 
-   
-%    plot(ax1,xgll,ms_soln0, '--r', 'MarkerSize', 16); hold on
-    plot(ax1,xgll,ms2, '--g', 'MarkerSize', 16); hold on
-    plot(ax1,xgll,ms3, '--m', 'MarkerSize', 16); hold off
+  
+%    plot(ax1,xgll,ms0, '--r', 'MarkerSize', 16); hold on
+%    plot(ax1,xgll,ms1, '--g', 'MarkerSize', 16); hold on
+    plot(ax1,xgll,ms2, '--m', 'MarkerSize', 16); hold on
+%    plot(ax1,xgll,ms3, '--k', 'MarkerSize', 16); hold on
     ylim([-1. 1.])
+
 
 %    legend(ax1,{'Numerical', '$0^{th}$','$1^{st}$','$2^{nd}$'}, 'Location', 'NorthEast', 'Interpreter', 'latex', 'FontSize', 12)
     legend(ax1,{'Numerical', 'Theoretical'}, 'Location', 'NorthEast', 'Interpreter', 'latex', 'FontSize', 12)
@@ -291,6 +327,7 @@ for i = 1:nsteps
     ylabel(ax1,'$A$')
     xlabel(ax1,'$x$')
     pause(0.001)
+    hold off
 
     if (ifsave)
       saveno = saveno+1; 

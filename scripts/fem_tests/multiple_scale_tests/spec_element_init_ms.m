@@ -91,6 +91,7 @@ for i=1:nels
 
      nek_mass(:,:,i)     = MASS;
      nek_gradm1(:,:,i)   = gradm1;
+     nek_gradm1d(:,:,i)  = gradm1d;
      nek_conv(:,:,i)     = U0*MASS*gradm1;
      nek_intpm1d(:,:,i)  = GLL2Dealias;
      nek_intpm1d2(:,:,i) = GLL2Dealias2;
