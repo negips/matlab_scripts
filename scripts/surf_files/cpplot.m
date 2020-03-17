@@ -7,7 +7,7 @@ close all
 % addpath '/home/prabal/workstation/git_kth/matlabscripts/scripts/'
 % addpath '/scratch/negi/git_repos/matlabscripts/scripts/'
 
-fol = 're750k_impulse';
+fol = 'test';
 ifhdr = 1;
 fs = 16;                % fontsize
 lfs = 16;               % legend fontsize
@@ -39,7 +39,7 @@ for i = 1:nfiles
   if (tout(i)>=tlast)
     fname = sfiles{i};
         
-    [sdata sintegrals tstamps sno lx1 selt maxtsaves x y timeout hdr] = readsurf(fname,ifhdr);
+    [sdata sintegrals tstamps sno lx1 selt maxtsaves x y timeout hdr] = readsurf(fname,ifhdr,2);
 
     if (tstamps(1)>tmax)
        break
@@ -120,15 +120,15 @@ for i = 1:nfiles
          
          figure(h1)      
 %         pvar = plot(x(:)/Chord,dtmp_v(:), 'b.', 'MarkerSize', 10);
-         pvar = plot(xsort/Chord,cp, 'b.', 'MarkerSize', 10);
-%         pvar = plot(xsort/Chord,cf, 'b.', 'MarkerSize', 10);
+%         pvar = plot(xsort/Chord,cp, 'b.', 'MarkerSize', 10);
+         pvar = plot(xsort/Chord,cf, 'b.', 'MarkerSize', 10);
 %         pvar = plot(xsort,ysort, 'b.', 'MarkerSize', 10);
         
          set(gca,'Ydir', 'reverse')
-         ylim([-0.4 0.6]);
+%         ylim([-0.4 0.6]);
          xlim ([0. 1]);
-%         xlim([-0.01 1.000])
-         ylim([-1.1 1.1])    
+         xlim([-0.01 1.000])
+%         ylim([-1.1 1.1])    
          grid on   
          hold on
          lgs{1} =  ['T=' num2str(tstamps(it))]; 

@@ -1,6 +1,6 @@
 % Just plotting
 
-load('re750k_surface.mat');
+load('re750k_surfaceN9.mat');
 
 
 % Flags/parameters
@@ -16,17 +16,23 @@ axfs = 16;               % axis fontsize
 %tend = 100;             % stop at this time
 destn = 'plots_test/';
 ifcontour=1;            % make contour plot for zero shear stress.
-iftr = 0;               % overlay transition points on shear stress space-time plot
+iftr = 1;               % overlay transition points on shear stress space-time plot
+  trfile='tr750k_n9_2.mat';
 iftrportrait=0;         % Plot transition phase portrait
 ifxfoil=0;                    % plot xfoil transition location data
+
+ifseparated=0;
+ifpressure=0;
+
 ifsave = 0;             % Save space-time plots
 ifczplot = 0;           % plot normal force variation
 ifczsave = 0;
 
 
+
 %ifcp = 0;
 lafs=30;                % Latex font size
-ifflip=0;
+ifflip=1;
 cbloc='Northoutside';
 cbheight = 0.75;
 %Tosc=1;                 % temporary
@@ -144,7 +150,7 @@ end
 
 
 if (iftr)
-  tr = load('tr750k.mat');
+  tr = load(trfile);
   figure(2)
   if npts9>0
     cfmax = max(max(surf_v9));
@@ -182,194 +188,201 @@ end
 %svfname = ['cf_time_surf_contour.eps'];
 %SaveFig(gcf, svfname, destn, 1)
 
-figure(3)
-ax3=axes;
-ax4=axes;
-axes(ax3);
-j=0;
-if (npts5>0)
-  axes(ax3)
-  j=j+1;
-  gplot(j)=surf(ax3,surf_x5,(surf_t5-ptch_start)/Tosc-0.0,surf_c5,surf_c5,'EdgeColor', 'none', 'LineStyle', 'none', 'FaceColor', 'interp'); hold on
-  set(ax3,'Color', 'none')
-  view(2)
-  colormap(ax3,'gray');
-  %ylabel('t/T_{osc}', 'FontSize', 16)
-  xlabel('$x/c$', 'FontSize', lafs)
-  xlim([0 1])
-  axis tight
-  hold on
 
-  axes(ax4)
-  gplot2(j)=surf(ax4,surf_x5,(surf_t5-ptch_start)/Tosc,surf_c5,surf_c5,'EdgeColor', 'none', 'LineStyle', 'none', 'FaceColor', 'interp'); hold on
-  view(2)
-  xlim([0 1])
-  axis tight
-  colormap(ax4,'gray');
-
-end
-
-if (npts8>0)
-  axes(ax3)    
-  j=j+1;
-  gplot(j)=surf(ax3,surf_x8,(surf_t8-ptch_start)/Tosc-0.0,surf_c8,surf_c8,'EdgeColor', 'none', 'LineStyle', 'none', 'FaceColor', 'interp'); hold on
-  set(ax3,'Color', 'none')
-  view(2)
-  colormap(ax3,'gray');
-  %ylabel('t/T_{osc}', 'FontSize', 16)
-  xlabel('$x/c$', 'FontSize', lafs)
-  xlim([0 1])
-  axis tight
-  hold on
-
-  axes(ax4)
-  gplot2(j)=surf(ax4,surf_x8,(surf_t8-ptch_start)/Tosc,surf_c8,surf_c8,'EdgeColor', 'none', 'LineStyle', 'none', 'FaceColor', 'interp'); hold on
-  view(2)
-  xlim([0 1])
-  axis tight
-  colormap(ax4,'gray');
- 
-end
-
-if (npts9>0)
-  axes(ax3)    
-  j=j+1;
-  gplot(j)=surf(ax3,surf_x9,(surf_t9-ptch_start)/Tosc-0.0,surf_c9,surf_c9,'EdgeColor', 'none', 'LineStyle', 'none', 'FaceColor', 'interp'); hold on
-  set(ax3,'Color', 'none')
-  view(2)
-  colormap(ax3,'gray');
-  %ylabel('t/T_{osc}', 'FontSize', 16)
-  xlabel('$x/c$', 'FontSize', lafs)
-  xlim([0 1])
-  axis tight
-  hold on
-
-  axes(ax4)
-  gplot2(j)=surf(ax4,surf_x9,(surf_t9-ptch_start)/Tosc,surf_c9,surf_c9,'EdgeColor', 'none', 'LineStyle', 'none', 'FaceColor', 'interp'); hold on
-  view(2)
-  xlim([0 1])
-  axis tight
-  colormap(ax4,'gray');
- 
-end
-
-
-set(ax3, 'YTickMode', 'manual')
-nphase=2;
-yticks = [0:100]*1/nphase;
-set(ax3, 'YTick', yticks);
-set(ax3, 'FontSize', 15)
-
-lncol1 = 'blue';
-lncol2 = 'red';
-
-nlines = floor((tlast-tstart0)/Tosc*nphase);
-for i=1:nlines
-  if (mod(i,2)==1)
-    icol = lncol1;
-  else
-    icol = lncol2;
+if (ifseparated)
+  figure(3)
+  ax3=axes;
+  ax4=axes;
+  axes(ax3);
+  j=0;
+  if (npts5>0)
+    axes(ax3)
+    j=j+1;
+    gplot(j)=surf(ax3,surf_x5,(surf_t5-ptch_start)/Tosc-0.0,surf_c5,surf_c5,'EdgeColor', 'none', 'LineStyle', 'none', 'FaceColor', 'interp'); hold on
+    set(ax3,'Color', 'none')
+    view(2)
+    colormap(ax3,'gray');
+    %ylabel('t/T_{osc}', 'FontSize', 16)
+    xlabel('$x/c$', 'FontSize', lafs)
+    xlim([0 1])
+    axis tight
+    hold on
+  
+    axes(ax4)
+    gplot2(j)=surf(ax4,surf_x5,(surf_t5-ptch_start)/Tosc,surf_c5,surf_c5,'EdgeColor', 'none', 'LineStyle', 'none', 'FaceColor', 'interp'); hold on
+    view(2)
+    xlim([0 1])
+    axis tight
+    colormap(ax4,'gray');
+  
   end
-  if ifflip
-    zpts=-[2 2];
-  else
-    zpts= [2 2];
+  
+  if (npts8>0)
+    axes(ax3)    
+    j=j+1;
+    gplot(j)=surf(ax3,surf_x8,(surf_t8-ptch_start)/Tosc-0.0,surf_c8,surf_c8,'EdgeColor', 'none', 'LineStyle', 'none', 'FaceColor', 'interp'); hold on
+    set(ax3,'Color', 'none')
+    view(2)
+    colormap(ax3,'gray');
+    %ylabel('t/T_{osc}', 'FontSize', 16)
+    xlabel('$x/c$', 'FontSize', lafs)
+    xlim([0 1])
+    axis tight
+    hold on
+  
+    axes(ax4)
+    gplot2(j)=surf(ax4,surf_x8,(surf_t8-ptch_start)/Tosc,surf_c8,surf_c8,'EdgeColor', 'none', 'LineStyle', 'none', 'FaceColor', 'interp'); hold on
+    view(2)
+    xlim([0 1])
+    axis tight
+    colormap(ax4,'gray');
+   
   end
+  
+  if (npts9>0)
+    axes(ax3)    
+    j=j+1;
+    gplot(j)=surf(ax3,surf_x9,(surf_t9-ptch_start)/Tosc-0.0,surf_c9,surf_c9,'EdgeColor', 'none', 'LineStyle', 'none', 'FaceColor', 'interp'); hold on
+    set(ax3,'Color', 'none')
+    view(2)
+    colormap(ax3,'gray');
+    %ylabel('t/T_{osc}', 'FontSize', 16)
+    xlabel('$x/c$', 'FontSize', lafs)
+    xlim([0 1])
+    axis tight
+    hold on
+  
+    axes(ax4)
+    gplot2(j)=surf(ax4,surf_x9,(surf_t9-ptch_start)/Tosc,surf_c9,surf_c9,'EdgeColor', 'none', 'LineStyle', 'none', 'FaceColor', 'interp'); hold on
+    view(2)
+    xlim([0 1])
+    axis tight
+    colormap(ax4,'gray');
+   
+  end
+  
+  
+  set(ax3, 'YTickMode', 'manual')
+  nphase=2;
+  yticks = [0:100]*1/nphase;
+  set(ax3, 'YTick', yticks);
+  set(ax3, 'FontSize', 15)
+  
+  lncol1 = 'blue';
+  lncol2 = 'red';
+  
+  nlines = floor((tlast-ptch_start)/Tosc*nphase);
+  for i=1:nlines
+    if (mod(i,2)==1)
+      icol = lncol1;
+    else
+      icol = lncol2;
+    end
+    if ifflip
+      zpts=-[2 2];
+    else
+      zpts= [2 2];
+    end
+  
+    ypts = [i i]*1/nphase;
+    iln(i) = line([0 1], ypts, zpts, 'LineStyle', '--', 'LineWidth', 1.0, 'Color', icol, 'Parent', ax4);
+  
+  end
+  
+  set(ax4,'YAxisLocation', 'right');
+  set(ax4, 'XTick', []);
+  set(ax4, 'Color', 'none')
+  set(ax4, 'YTickMode', 'manual')
+  yticks = [0:nlines]*1/nphase;
+  set(ax4, 'YTick', yticks);
+  %ylbl = {'3p/2', '0', 'p/2', 'p'};
+  %set(ax4, 'YTickLabel', ylbl, 'FontName', 'symbol', 'FontSize', axfs);
+  %ylabel('Oscillation phase', 'Font','Helvetica', 'FontSize', 16)
+  %set(ax4, 'PlotBoxAspectRatio', [1 1.5 1])
+  
+  ylbl = {'$3\pi/2$', '$0$', '$\pi/2$', '$\pi$'};
+  set(ax4, 'YTickLabel', ylbl,'FontSize', axfs);
+  
+  
+  %colorbar
+  set(ax3,'OuterPosition', get(ax1,'OuterPosition'));
+  set(ax4,'OuterPosition', get(ax1,'OuterPosition'));
+  
+  set(ax3,'Position', get(ax1,'Position'));
+  set(ax4,'Position', get(ax1,'Position'));
+  
+  figure(3)
+  svfname = ['cf_time_surf_grey750k.eps'];
+  if (ifsave)
+    if ifflip
+      view(ax3,[90 -90])
+      view(ax4,[90 -90])
+    end    
+    SaveFig(gcf, svfname, destn, 1)
+  end
+end         % ifsepratated
 
-  ypts = [i i]*1/nphase;
-  iln(i) = line([0 1], ypts, zpts, 'LineStyle', '--', 'LineWidth', 1.0, 'Color', icol, 'Parent', ax4);
-
-end
-
-set(ax4,'YAxisLocation', 'right');
-set(ax4, 'XTick', []);
-set(ax4, 'Color', 'none')
-set(ax4, 'YTickMode', 'manual')
-yticks = [0:nlines]*1/nphase;
-set(ax4, 'YTick', yticks);
-%ylbl = {'3p/2', '0', 'p/2', 'p'};
-%set(ax4, 'YTickLabel', ylbl, 'FontName', 'symbol', 'FontSize', axfs);
-%ylabel('Oscillation phase', 'Font','Helvetica', 'FontSize', 16)
-%set(ax4, 'PlotBoxAspectRatio', [1 1.5 1])
-
-ylbl = {'$3\pi/2$', '$0$', '$\pi/2$', '$\pi$'};
-set(ax4, 'YTickLabel', ylbl, 'TickLabelInterpreter', 'latex', 'FontSize', axfs);
 
 
-%colorbar
-set(ax3,'OuterPosition', get(ax1,'OuterPosition'));
-set(ax4,'OuterPosition', get(ax1,'OuterPosition'));
-
-set(ax3,'Position', get(ax1,'Position'));
-set(ax4,'Position', get(ax1,'Position'));
-
-figure(3)
-svfname = ['cf_time_surf_grey750k.eps'];
-if (ifsave)
-  if ifflip
-    view(ax3,[90 -90])
-    view(ax4,[90 -90])
-  end    
-  SaveFig(gcf, svfname, destn, 1)
-end
 
 %% pressure
-figure(4)
-k=0;
-ax1=axes;
-if (npts5>0)
-  k=k+1;
-  pplot(i)=surf(ax1,surf_x5,(surf_t5-ptch_start)/Tosc-0.0,surf_p5,'EdgeColor', 'none', 'LineStyle', 'none', 'FaceColor', 'interp');
-  view(2)
-  ylabel('$\frac{t-t_{0}}{T_{osc}}$', 'Interpreter','Latex', 'rot', 0, 'FontSize', lafs+6)
-  xlabel('$x/c$', 'FontSize', lafs)
-  xlim([0 1])
+if (ifpressure)
+  figure(4)
+  k=0;
+  ax1=axes;
+  if (npts5>0)
+    k=k+1;
+    pplot(i)=surf(ax1,surf_x5,(surf_t5-ptch_start)/Tosc-0.0,surf_p5,'EdgeColor', 'none', 'LineStyle', 'none', 'FaceColor', 'interp');
+    view(2)
+    ylabel('$\frac{t-t_{0}}{T_{osc}}$', 'Interpreter','Latex', 'rot', 0, 'FontSize', lafs+6)
+    xlabel('$x/c$', 'FontSize', lafs)
+    xlim([0 1])
+    hold on
+  
+  end
+  
+  if (npts8>0)
+    k=k+1;
+    pplot(k)=surf(ax1,surf_x8,(surf_t8-ptch_start)/Tosc-0.0,surf_p8,'EdgeColor', 'none', 'LineStyle', 'none', 'FaceColor', 'interp');
+    view(2)
+    ylabel('$\frac{t-t_{0}}{T_{osc}}$', 'Interpreter','Latex', 'rot', 0, 'FontSize', lafs+6)
+    xlabel('$x/c$', 'FontSize', lafs)
+    xlim([0 1])
+    hold on
+  
+  end
+  
+  if (npts9>0)
+    k=k+1;
+    pplot(k)=surf(ax1,surf_x9,(surf_t9-ptch_start)/Tosc-0.0,surf_p9,'EdgeColor', 'none', 'LineStyle', 'none', 'FaceColor', 'interp');
+    view(2)
+    ylabel('$\frac{t-t_{0}}{T_{osc}}$', 'Interpreter','Latex', 'rot', 0, 'FontSize', lafs+6)
+    xlabel('$x/c$', 'FontSize', lafs)
+    xlim([0 1])
+    hold on
+  
+  end
+  
+  colormap(jet);
+  colorbar;
+  axis tight
   hold on
-
-end
-
-if (npts8>0)
-  k=k+1;
-  pplot(k)=surf(ax1,surf_x8,(surf_t8-ptch_start)/Tosc-0.0,surf_p8,'EdgeColor', 'none', 'LineStyle', 'none', 'FaceColor', 'interp');
-  view(2)
-  ylabel('$\frac{t-t_{0}}{T_{osc}}$', 'Interpreter','Latex', 'rot', 0, 'FontSize', lafs+6)
-  xlabel('$x/c$', 'FontSize', lafs)
-  xlim([0 1])
-  hold on
-
-end
-
-if (npts9>0)
-  k=k+1;
-  pplot(k)=surf(ax1,surf_x9,(surf_t9-ptch_start)/Tosc-0.0,surf_p9,'EdgeColor', 'none', 'LineStyle', 'none', 'FaceColor', 'interp');
-  view(2)
-  ylabel('$\frac{t-t_{0}}{T_{osc}}$', 'Interpreter','Latex', 'rot', 0, 'FontSize', lafs+6)
-  xlabel('$x/c$', 'FontSize', lafs)
-  xlim([0 1])
-  hold on
-
-end
-
-colormap(jet);
-colorbar;
-axis tight
-hold on
-set(ax1, 'YTickMode', 'manual')
-nphase=2;
-yticks = [0:30]*1/nphase;
-set(ax1, 'YTick', yticks);
-set(ax1, 'FontSize', axfs)
-%set(ax1, 'PlotBoxAspectRatio', [1 1.5 1])
-figure(4)
-svfname = ['cp_time_surf750k.eps'];
-if (ifsave)
-  if ifflip
-    view([90 -90])
-  end    
-
-  SaveFig(gcf, svfname, destn, 1)
-end
-
+  set(ax1, 'YTickMode', 'manual')
+  nphase=2;
+  yticks = [0:30]*1/nphase;
+  set(ax1, 'YTick', yticks);
+  set(ax1, 'FontSize', axfs)
+  %set(ax1, 'PlotBoxAspectRatio', [1 1.5 1])
+  figure(4)
+  svfname = ['cp_time_surf750k.eps'];
+  if (ifsave)
+    if ifflip
+      view([90 -90])
+    end    
+  
+    SaveFig(gcf, svfname, destn, 1)
+  end
+end         % ifpressure
 
 % cz plot
 area=0.15*1;

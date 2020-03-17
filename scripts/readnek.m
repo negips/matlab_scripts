@@ -1,4 +1,5 @@
-function [datastruc,data,lr1,nelt,elmap,time,istep,fields,emode,wdsz,etag,header,status] = readnek(fname)
+function [datastruc] = readnek(fname)
+%function [flddata,data,lr1,nelt,elmap,time,istep,flds,emode,wdsz,etag,header,status] = readnek(fname)
 %
 % This function reads binary data from the nek5000 file format
 %
@@ -13,7 +14,7 @@ function [datastruc,data,lr1,nelt,elmap,time,istep,fields,emode,wdsz,etag,header
 %   - elmap:  reading/writing map of the elements in the file
 %   - time:   simulation time
 %   - istep:  simulation step
-%   - fields: fields saved in the file
+%   - flds:   fields saved in the file
 %   - emode:  endian mode 'le' = little-endian, 'be' = big-endian
 %   - wdsz:   single (4) or double (8) precision
 %   - etag:   tag for endian indentification
@@ -33,9 +34,12 @@ lr1    = [];
 elmap  = [];
 time   = [];
 istep  = [];
-fields = [];
+flds   = [];
 wdsz   = [];
 header = [];
+status = [];
+
+disp(['Reading file: ', fname])
 
 %--------------------------------------------------------------------------
 %  OPEN THE FILE
@@ -110,24 +114,24 @@ fid = str2double(header(70:75)); % TODO: multiple files not supported
 nf = str2double(header(77:82)); % TODO: multiple files not supported
 %
 % getfields [XUPTS]
-fields = strtrim(header(84:end));
+flds = strtrim(header(84:end));
 var=zeros(1,5);
-if sum(fields == 'X') > 0
+if sum(flds == 'X') > 0
   var(1) = ndim;
 end
-if sum(fields == 'U') > 0
+if sum(flds == 'U') > 0
   var(2) = ndim;
 end
-if sum(fields == 'P') > 0
+if sum(flds == 'P') > 0
   var(3) = 1;
 end
-if sum(fields == 'T') > 0
+if sum(flds == 'T') > 0
   var(4) = 1;
 end
-if sum(fields == 'S') > 0
-      var(5) = str2double(fields(end-1:end)); % TODO: scalars not implemented
+if sum(flds == 'S') > 0
+      var(5) = str2double(flds(end-1:end)); % TODO: scalars not implemented
 end
-nfields = sum(var);
+nflds = sum(var);
 %
 % read element map
 elmap = fread(infile,nelt,'*int32').';
@@ -135,10 +139,13 @@ elmap = fread(infile,nelt,'*int32').';
 %--------------------------------------------------------------------------
 % READ DATA
 %--------------------------------------------------------------------------
-dtemp = zeros(nelt,npel);
-data = zeros(nelt,npel,nfields);
-d1.data=dtemp;
-datastruc = repmat(d1,1,nfields);
+
+lx1=lr1(1); ly1=lr1(2); lz1=lr1(3);
+
+dtemp = zeros(npel,nelt);
+data = zeros(lx1,ly1,lz1,nelt,nflds);
+d1.data=reshape(dtemp,lx1,ly1,lz1,nelt);
+flddata = repmat(d1,1,nflds);
 
 % For X,U           ! stored as vectors
 for ivar = 1:2
@@ -146,8 +153,8 @@ for ivar = 1:2
     for iel = elmap
         for idim = (1:var(ivar))+idim0
             dtemp = fread(infile,npel,realtype);  
-            data(iel,:,idim) = dtemp;
-            datastruc(idim).data(iel,:)=dtemp;
+            data(:,:,:,iel,idim) = reshape(dtemp,lx1,ly1,lz1);
+            flddata(idim).data(:,:,:,iel)=reshape(dtemp,lx1,ly1,lz1);
         end
     end
 end
@@ -160,12 +167,27 @@ for ivar = 3:length(var)
       nflds=nflds+1;  
       for iel = elmap
           dtemp = fread(infile,npel,realtype);  
-          data(iel,:,idim+idim0) = dtemp;
-          datastruc(nflds).data(iel,:)=dtemp;
+          data(:,:,:,iel,idim+idim0) = reshape(dtemp,lx1,ly1,lz1);
+          flddata(nflds).data(:,:,:,iel)=reshape(dtemp,lx1,ly1,lz1);
       end
   end
 end
 
+
+
+datastruc.status  =  status   ;
+datastruc.ndim    =  ndim     ;
+datastruc.header  =  header   ;
+datastruc.etag    =  etag     ;
+datastruc.wdsz    =  wdsz     ;
+datastruc.emode   =  emode    ;
+datastruc.flds    =  flds     ;
+datastruc.flddata =  flddata  ;
+datastruc.istep   =  istep    ;
+datastruc.time    =  time     ;
+datastruc.elmap   =  elmap    ;
+datastruc.nelt    =  nelt     ;
+datastruc.lr1     =  lr1      ;
 
 
 

@@ -13,13 +13,12 @@ fs = 16;                % fontsize
 lfs = 16;               % legend fontsize
 ifcols = 1;
 ifplot = 0;             % plot individual wall profiles
-tlast = 6.0;           % start from this time
-tstart0 = 6.00;
+tlast = 46.05;           % start from this time
 tend = 100;             % stop at this time
 destn = 'plots/';
 ifcp = 0;               % plot pressure instead of cf
-ifdatasave=0;           % save data into a mat file
-  datafile='re750k_surface.mat';
+ifdatasave=1;           % save data into a mat file
+  datafile='re750k_surfaceN9.mat';
 lafs = 22;              % Latex font size
 
 U0=1.;
@@ -34,7 +33,6 @@ ptch_start = 6.;
 axis_x0 = 0.35;
 axis_y0 = 0.034;
 phase=-pi/2;
-
 
 [sfiles tout] = LoadSurfFiles(fol);
 
@@ -205,7 +203,8 @@ icalld = 0;
 for i = 1:nfiles
   if (tout(i)>=tlast) 
     fname = sfiles{i};
-        
+    
+    ndim=3;
     [sdata sintegrals tstamps sno lx1 selt maxtsaves x y timeout hdr] = readsurf(fname,ifhdr,ndim);
 
     if (lx1(1)==6)
