@@ -96,7 +96,7 @@ for i=1:nfiles
   set(gcf,'Renderer','painters');
   ts(i) = semilogy(time,abs(eta1), 'LineWidth', 2, 'Color', cols(i), 'LineStyle', linst{i}, 'Marker', mkr{i}, 'MarkerSize', mkrsz); hold on
   xlabel('Time', 'FontSize', lafs)
-  ylabel('$\eta$', 'FontSize', lafs+4)
+  ylabel('$\eta$ (radians)', 'FontSize', lafs+4)
   mind = get(ts(i),'MarkerIndices');
   mind2 = mind(1):mkr_step:mind(end);
   set(ts(i),'MarkerIndices',mind2);

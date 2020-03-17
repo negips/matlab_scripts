@@ -1,13 +1,63 @@
 % Just plotting
 
+clear
+clc
+close all
+
 load('re750k_surfaceN9.mat');
 
+addpath '~/workstation/git_kth/matlabscripts/scripts/surf_files/cbrewer'
+
+LoadCmaps
+%CmapNames'
+cmap = cmaps{1};
+
+
+cover_plot = 1;
+if (cover_plot)
+
+  s = surf_v9(:);
+  sm = mean(s);
+  st = std(s);
+  ind = find(surf_v9<(sm-2*st));
+  surf_v9(ind)=sm-2*st;
+      
+  [col]=cbrewer('div', 'RdGy', 5000, 'pchip');
+  %cmap.colormap=col;
+  
+  npt1 = 1500;
+  [col1]=cbrewer('div', 'RdBu', npt1, 'pchip');
+  
+  npt2 = 5000;
+  %[col2]=cbrewer('div', 'PuOr', npt2, 'pchip');
+  [col2]=cbrewer('div', 'BrBG', npt2, 'pchip');
+  
+  col = [col2(1:npt2/2,:); col1((npt1/2+1):npt1,:)];
+  
+  cmap.colormap=col;
+
+end  
+
+
+[mapsize, ~]=size(cmap.colormap);
+
+l1 = 1:mapsize;
+ncols =5000;
+l2 = linspace(1,mapsize,ncols);
+r = interp1(l1,cmap.colormap(:,1),l2,'pchip');
+g = interp1(l1,cmap.colormap(:,2),l2,'pchip');
+b = interp1(l1,cmap.colormap(:,3),l2,'pchip');
+cmap.colormap = [r' g' b'];
+
+cmap.colormap = flipud(cmap.colormap);
 
 % Flags/parameters
 
+fontfac=0.5;
+
 %fol = 're750k_pitch';
 %ifhdr = 1;
-axfs = 16;               % axis fontsize
+axfs = 28*fontfac;               % axis fontsize
 %lfs = 16;               % legend fontsize
 %ifcols = 1;
 %ifplot = 0;             % plot individual wall profiles
@@ -15,23 +65,40 @@ axfs = 16;               % axis fontsize
 %tstart0 = tlast;
 %tend = 100;             % stop at this time
 destn = 'plots_test/';
+%destn = '~/workstation/git_kth/forced_pitching/paper/imgs2/';
 ifcontour=1;            % make contour plot for zero shear stress.
 iftr = 1;               % overlay transition points on shear stress space-time plot
   trfile='tr750k_n9_2.mat';
+<<<<<<< HEAD
+=======
 iftrportrait=0;         % Plot transition phase portrait
 ifxfoil=0;                    % plot xfoil transition location data
 
 ifseparated=0;
 ifpressure=0;
 
+>>>>>>> aeeda89880074971def49116caf3607c6d079210
 ifsave = 0;             % Save space-time plots
+  
+iftrportrait=1;         % Plot transition phase portrait
+  ifxfoil=1;                          % plot xfoil transition location data
+    xfile='saab750k_N8.5.t1.dat';     % file for Xfoil Data
+      ifportsave = 1;             % Save space-time plots
+
+ifseparated=0;
+ifpressure=0;
+
 ifczplot = 0;           % plot normal force variation
 ifczsave = 0;
 
 
 
 %ifcp = 0;
+<<<<<<< HEAD
+lafs=42*fontfac;                % Latex font size
+=======
 lafs=30;                % Latex font size
+>>>>>>> aeeda89880074971def49116caf3607c6d079210
 ifflip=1;
 cbloc='Northoutside';
 cbheight = 0.75;
@@ -39,16 +106,20 @@ cbheight = 0.75;
 %ptch_start=6.0;
 %phase=0;
 
-
 %npts8=0;                % remove higher order results
 
 close all
 
+if (~ifflip)
+  figpos=[0.25 0.25 0.24 0.50];
+else
+  figpos=[0.15 0.4 0.65 0.60];
+end  
+
 figure(2)
-figpos=[0.25 0.25 0.24 0.50];
 set(gcf, 'Units', 'normalized');
 %set(gcf, 'Renderer', 'Painters')
-set(gcf, 'Position', figpos)
+set(gcf, 'OuterPosition', figpos)
 
 i=0;
 %ax1=axes('Position', [0.25 0.1548 0.6589 0.7702]);
@@ -86,66 +157,101 @@ end
 % N=9
 if (npts9>0)
   i=i+1;
-  splot(i)=surf(ax1,surf_x9,(surf_t9-ptch_start)/Tosc-0.0,surf_v9,'EdgeColor', 'none', 'LineStyle', 'none', 'FaceColor', 'interp');
-  view(2)
-  ylabel(ax1,'$\frac{t-t_{0}}{T_{osc}}$', 'Interpreter','Latex', 'rot', 0, 'FontSize', lafs+6)
-  xlabel(ax1,'$x/c$', 'FontSize', lafs)
-  xlim([0 1])
-  hold on
+  if (ifflip)
+    splot(i)=surf(ax1,(surf_t9-ptch_start)/Tosc-0.0,surf_x9,surf_v9,'EdgeColor', 'none', 'LineStyle', 'none', 'FaceColor', 'interp');
+    view(2)
+    xlabel(ax1,'$\frac{t-t_{0}}{T_{osc}}$', 'Interpreter','Latex', 'rot', 0, 'FontSize', lafs+6)
+    ylabel(ax1,'$x/c$', 'FontSize', lafs)
+    ylim([0 1])
+    hold on
 
-  if (ifcontour)
-    cplot{i}=contour(ax1,surf_x9,(surf_t9-ptch_start)/Tosc,surf_v9, [0 0], 'LineColor', 'k', 'LineWidth', 1.5 );
-  end 
+    if (ifcontour)
+      cplot{i}=contour(ax1,(surf_t9-ptch_start)/Tosc,surf_x9,surf_v9, [0 0], 'LineColor', 'k', 'LineWidth', 1.5 );
+    end 
+
+  else            
+    splot(i)=surf(ax1,surf_x9,(surf_t9-ptch_start)/Tosc-0.0,surf_v9,'EdgeColor', 'none', 'LineStyle', 'none', 'FaceColor', 'interp');
+    view(2)
+    ylabel(ax1,'$\frac{t-t_{0}}{T_{osc}}$', 'Interpreter','Latex', 'rot', 0, 'FontSize', lafs+6)
+    xlabel(ax1,'$x/c$', 'FontSize', lafs)
+    xlim([0 1])
+
+    hold on
+    if (ifcontour)
+      cplot{i}=contour(ax1,surf_x9,(surf_t9-ptch_start)/Tosc,surf_v9, [0 0], 'LineColor', 'k', 'LineWidth', 1.5 );
+    end 
+
+  end  
 
 end
 
-
 axis tight
 hold on
-set(ax1, 'YTickMode', 'manual')
-yticks = [0:20]*0.5;
-set(ax1, 'YTick', yticks);
-set(ax1, 'FontSize', axfs)
-%set(ax1, 'PlotBoxAspectRatio', [1 2.0 1])
+if ~(ifflip)
+  set(ax1, 'YTickMode', 'manual')
+  yticks = [0:20]*0.5;
+  set(ax1, 'YTick', yticks);
+  set(ax1, 'FontSize', axfs)
+else
+  set(ax1,'YDir','reverse')
+  set(ax1, 'XTickMode', 'manual')
+  xticks = [0:40]*0.25;
+  set(ax1, 'XTick', xticks);
+  set(ax1, 'FontSize', axfs);
+  %set(ax1, 'PlotBoxAspectRatio', [1 2.0 1])
+
+  set(ax1, 'YTickMode', 'manual')
+  yticks = [0:5]*0.2;
+  set(ax1, 'YTick', yticks);
+  set(ax1, 'FontSize', axfs)
+end  
 
 if ~ifflip
   ylbl = get(ax1,'YLabel');
   ylblpos = get(ylbl,'Position');
   set(ylbl, 'Position', ylblpos + [-0.01 0 0])
 end
-colormap(jet);
+%colormap(jet);
+colormap(cmap.colormap);
 
 
-svfname = ['cf_time_surf750k.eps'];
+svfname = ['cf_time_surf750kN9.png'];
 if (ifsave)
   if ifflip
-    view([90 -90])
     cb1=colorbar('FontSize', axfs);  
     set(cb1,'Location', cbloc);
     cbpos= get(cb1,'Position');
-%    ax1pos=get(ax1,'Position');   
-%    cbpos(1) = ax1pos(1);
-%%    cbpos(3) = ax1pos(3);
-    cbpos(2) = cbpos(2)-0.02;  
+    ax1pos=get(ax1,'Position'); 
+    cbpos(1) = ax1pos(1);
+%    cbpos(3) = ax1pos(3);
+    cbpos(2) = cbpos(2)+0.01;  
     set(cb1,'Position',cbpos);
+    set(cb1,'FontSize',12);
+
+    ylbl=get(ax1,'Ylabel');
+    set(ylbl,'FontSize', lafs)
+    xlbl=get(ax1,'Xlabel');
+    set(xlbl,'FontSize', lafs+6)
+   
   else
-    cb1=colorbar('FontSize', axfs);  
+    cb1=colorbar('FontSize', axfs);
+    ylbl=get(ax1,'Ylabel');
+    set(ylbl,'FontSize', lafs+6)
+    xlbl=get(ax1,'Xlabel');
+    set(xlbl,'FontSize', lafs)
   end
-  ylbl=get(ax1,'Ylabel');
-  set(ylbl,'FontSize', lafs+6)
-  xlabel(ax1,'$x/c$')
-  xlbl=get(ax1,'Xlabel');
-  set(xlbl,'FontSize', lafs)
 
   if ifflip    
     axpos=get(ax1,'Position');
-    axpos(2)=axpos(2)-0.10;
-    axpos(4)=axpos(4)+0.08;
+    axpos(2)=axpos(2)+0.02;
+    axpos(4)=axpos(4)-0.1;
     set(ax1,'Position', axpos);
   end
 
-  pause(2)   
-  SaveFig(gcf, svfname, destn, 1)
+  pause(2)
+  if ~(iftr)
+    SaveFig(gcf, svfname, destn, 1)
+  end  
 end
 
 
@@ -159,25 +265,19 @@ if (iftr)
   else
     cfmax = max(max(surf_v5));
   end
-  if ifflip
-    cfmax=-cfmax;
-  end  
+%  if ifflip
+%    cfmax=-cfmax;
+%  end  
 
   zdata = zeros(length(tr.tr_time),1)+cfmax;
-  trplot = plot3(ax1,tr.trx_uv, (tr.tr_time-ptch_start)/Tosc,zdata, 'LineWidth', 2, 'Color', 'm');
-  svfname = ['cf_time_surf750k_tr.eps'];
-
+  if ~(ifflip)
+    trplot = plot3(ax1,tr.trx_uv,(tr.tr_time-ptch_start)/Tosc,zdata, 'LineWidth', 2, 'Color', 'r');
+  else
+    trplot = plot3(ax1,(tr.tr_time-ptch_start)/Tosc,tr.trx_uv,zdata, 'LineWidth', 2, 'Color', 'r');
+  end      
+  svfname = ['cf_time_surf750k_trN9.png'];
 
   if (ifsave)
-    if ifflip
-%      view([90 -90])
-%      set(cb1,'Position',cbpos); 
-%      set(cb1,'Location', cbloc); 
-
-      set(ax1,'Position',axpos);
-      set(cb1,'Position',cbpos);
-    end
- 
     SaveFig(gcf, svfname, destn, 1)
   end
 end      
@@ -424,26 +524,30 @@ if ifczplot
 end
 
 if iftrportrait
-  figpos=[0.25 0.25 0.18 0.24];
+ 
+  tr = load(trfile);
+     
+  gr=(1+sqrt(5))/2;
+  figpos=[0.25 0.25 0.35 gr*0.35];
   figure(7)
   set(gcf, 'Units', 'normalized');
-  set(gcf, 'Position', figpos)
+  set(gcf, 'OuterPosition', figpos)
   set(gcf, 'Renderer', 'Painters')
 %  ax1=axes;
 %  axpos=[0.1400 0.1500 0.7650 0.7950];
 %  set(ax1,'Position',axpos)
 %  set(ax1,'FontSize',axfs)
 
-  plot(tr.alpha, tr.trx_uv, 'b', 'LineWidth', 1.5); hold on
+  plot(tr.alpha, tr.trx_uv, 'LineWidth', 1.5); hold on
 %  plot(tr.alpha, tr.trx_ww, 'r', 'LineWidth', 1.5);
-  smoothpvar=tr.trx_ww;
+  smoothpvar=tr.trx_uv;
   for jj=1:5
     span=10;
     smoothpvar = smooth(smoothpvar,span);
   end
-%  ph = arrowh(tr.alpha,smoothpvar,'k',[600,90],[8 15 20 28]);
+  ph = arrowh(tr.alpha,smoothpvar,'r',[400,90],[8 18 35]);
   xlabel('$\alpha[^{\circ}]$')    
-  ylabel('$x/c$')
+  ylabel('$x_{tr}/c$')
   set(gca,'FontSize', axfs)
   xlim([2.2 4.6])
 %  legend({'$\overline{u''v''}$', '$\overline{w''w''}$'}, 'Interpreter', 'latex','FontSize', 22, 'Location', 'Best')
@@ -454,30 +558,41 @@ if iftrportrait
   xlbl=get(gca,'Xlabel');
   set(xlbl,'FontSize', lafs)
 
-  set(gcf,'Position',figpos)
-  pause(2)
+  pause(1)
 
-  svfname = ['750k_transition_alpha.eps'];
-  SaveFig(gcf, svfname, destn, 1)
+  if (ifportsave)
+    svfname = ['750k_transition_alpha.eps'];
+    SaveFig(gcf, svfname, destn, 1)
+  end        
 
 % phase lagged portrait
-  phase_lag=-62.89*pi/180;
+%  phase_lag=-62.89*pi/180;
+  phase_lag=-59.00*pi/180;
+
+  tfine = linspace(tr.tr_time(1),tr.tr_time(end),5000);
+  vfine = interp1(tr.tr_time,tr.trx_uv,tfine,'pchip');
+  ar = areafcn(tfine,vfine,0);
+  
+  lag0 = -60*pi/180;
+  [oplag area exitflag output] = fminsearch(@(lag) areafcn(tfine,vfine,lag),lag0);
+%  phase_lag=oplag;
+  phase_lag=-61*pi/180;
+
   tr.alpha2 = alpha_0 + dalpha*sin(omega*(tr.tr_time-ptch_start) + phase + phase_lag);
+
+% Empirically obtained from stats  
+  tr24 = 0.766;
+  tr34 = 0.659;
+  tr44 = 0.436;
 
   figure(8)
   set(gcf, 'Units', 'normalized');
-  set(gcf, 'Position', figpos)
+  set(gcf, 'OuterPosition', figpos)
   set(gcf, 'Renderer', 'Painters')
-  plot(tr.alpha2, tr.trx_uv, 'b', 'LineWidth', 2); hold on
-%  plot(tr.alpha2, tr.trx_ww, 'r', 'LineWidth', 2);
-  smoothpvar=tr.trx_ww;
-  for jj=1:5
-    span=10;
-    smoothpvar = smooth(smoothpvar,span);
-  end
-%  ph = arrowh(tr.alpha2,smoothpvar,'k',[600,90],[12 17 29]);
+  plot(tr.alpha2, tr.trx_uv, 'LineWidth', 1.5); hold on
+  plot([2.4 3.4 4.4],[tr24 tr34 tr44], 'or', 'MarkerSize', 12, 'LineWidth',3)
   xlabel('$\alpha_{e}[^{\circ}]$', 'FontSize', lafs)    
-  ylabel('$x/c$', 'FontSize', lafs)
+  ylabel('$x_{tr}/c$', 'FontSize', lafs)
   set(gca,'FontSize', axfs)
   ylbl=get(gca,'Ylabel');
   set(ylbl,'FontSize', lafs)
@@ -487,8 +602,9 @@ if iftrportrait
 %  legend({'$\overline{u''v''}$', '$\overline{w''w''}$'}, 'FontSize', 22, 'Location', 'Best')
 
   if ifxfoil
-    re750 = importdata('test_ed36f128+14_re7.5e5.dat');
-    
+%    re750 = importdata('test_ed36f128+14_re7.5e5.dat');
+    re750 = importdata(xfile);
+   
 %    tr_re750_24 = interp1(re750.data(:,1),re750.data(:,7),2.4);
 %    tr_re750_44 = interp1(re750.data(:,1),re750.data(:,7),4.4);
     ind1=re750.data(:,1)>=1.5;
@@ -498,10 +614,11 @@ if iftrportrait
     figure(8)
     plot(re750.data(ind3,1),re750.data(ind3,7), '--k', 'LineWidth', 3); hold on
   end
-  set(gcf,'Position',figpos)
 
-  svfname = ['750k_transition_alpha_e.eps'];
-  SaveFig(gcf, svfname, destn, 1)
+  if (ifportsave)
+    svfname = ['750k_transition_alpha_e.eps'];
+    SaveFig(gcf, svfname, destn, 1)
+  end  
 
 end
 

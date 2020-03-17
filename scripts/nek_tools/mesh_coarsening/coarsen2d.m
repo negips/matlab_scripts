@@ -5,7 +5,7 @@ clc
 close all
 
 %load saab_wing2d.mat
-load saab750k.mat
+%load saab750k.mat
 %load fluent_plus2.mat
 %load stretched.mat
 %load saab600k.mat
@@ -13,6 +13,7 @@ load saab750k.mat
 %load naca0012_5_15_2.mat
 %load naca0009_3p5c_c.mat
 %load naca0012_5_10_fine2.mat
+load nacatrunc.mat
 
 skiplayers = 3;         % Need to skip some layers since its smaller than the others
 curvedef   = 'mv ';

@@ -10,13 +10,13 @@ U0 = 1.0;
 D=1.0;
 
 % Reduced velocity
-U_star = 10.0;
+U_star = 10; %1.01;
 
 % Dimensionless Damping ratio
-Xi_star = 0.007;
+Xi_star = 0.000;
 
 % Density ratio
-m_star = 10.00;
+m_star = 1.001;
 
 % Splitter plate dimensions
 a = D;            % Length

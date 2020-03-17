@@ -2,9 +2,9 @@
 
 clear
 clc
-close all
+%close all
 
-load('re750k_impulsek04.mat');
+load('sec_k04_t025.mat');
 
 surf_v9 = log10(abs(surf_v9)+1.0e-15);
 surf_p9 = log10(abs(surf_p9)+1.0e-15);
@@ -27,7 +27,7 @@ ifcontour=0;            % make contour plot for zero shear stress.
 iftr = 0;               % overlay transition points on shear stress space-time plot
 iftrportrait=0;         % Plot transition phase portrait
 ifxfoil=0;                    % plot xfoil transition location data
-ifsave = 1;             % Save space-time plots
+ifsave = 0;             % Save space-time plots
 ifczplot = 0;           % plot normal force variation
 ifczsave = 0;
 ifcf = 0;
@@ -44,8 +44,6 @@ cbheight = 0.75;
 
 
 %npts8=0;                % remove higher order results
-
-close all
 
 i=0;
 %ax1=axes('Position', [0.25 0.1548 0.6589 0.7702]);
@@ -217,8 +215,8 @@ if ifpressure
 %  set(ax2, 'YTick', yticks);
 %  set(ax2, 'FontSize', axfs)
   %set(ax1, 'PlotBoxAspectRatio', [1 1.5 1])
-  figure(4)
-  svfname = ['cp_time_surfk04.png'];
+%  figure(4)
+  svfname = ['cp_surf_seck04_t0.png'];
   pause(2)
   if (ifsave)
     if ifflip

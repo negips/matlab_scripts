@@ -13,7 +13,7 @@ N = 128; % number of Cehebychev modes
 %alpha=0.1555;
 %beta=0.0;
 
-Re=5000;
+Re=1000;
 alpha=1.0;
 beta=1.0;
 
@@ -45,6 +45,13 @@ eigval=diag(eigval);
 %% Plot spectrum and eigenvectors
 header=strcat({'Re= '},{num2str(Re)},{', alpha= '},{num2str(alpha)},...
               {', beta= '},{num2str(beta)});
-plot_LNS(eigval,eigvec,y,header)
+
+figure(1)
+plot(real(eigval),imag(eigval),'o');
+title(header);
+ylabel('$\omega_{i}$')
+xlabel('$\omega_{r}$')
+
+%plot_LNS(eigval,eigvec,y,header)
 %xlim([0 0.2]);
 %ylim([-0.2 0])

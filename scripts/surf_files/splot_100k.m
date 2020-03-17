@@ -13,10 +13,10 @@ load('re100k_surface.mat');
 % tstart0 = tlast; 
 destn = 'plots_test/';
 % ifcontour=0;
-iftr=1;                 % Plot transition location contour
+iftr=0;                 % Plot transition location contour
 % iftrabs=0;              % plot point of absolute instability
-iftrgrey=1;                 % Plot transition location contour
-ifsave = 1;
+iftrgrey=0;                 % Plot transition location contour
+ifsave = 0;
 axfs=24;                % axis font size
 lafs=36;
 figpos = [0.10 0.10 0.30 0.8];

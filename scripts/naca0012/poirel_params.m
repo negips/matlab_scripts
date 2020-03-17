@@ -7,12 +7,13 @@ x_theta = 0.15;               % Distance between Elastic axis and centre of mass
 a_h     = -0.628;              % Non-dimensional location of elastic axis from the mid-chord (Non-dimensionalized by half-chord)
 I_s     = 0.00135;            % Mass moment of Inertial of rotating parts (Kg-m^2)
 m_theta = 0.771;              % Mass of parts in rotation (Kg)
-K_s     = 0.30;               % Structural Stiffness (N-m/rad)
+%K_s     = 0.30;               % Structural Stiffness (N-m/rad)
+K_s     = 0.15;               % Structural Stiffness (N-m/rad)
 D_s     = 0.002;              % Approx Struc. Dissipation (N-m-s)
 c       = 0.156;              % Chord (m)
 S       = 0.61;               % Span  (m)
 
-different_re = -1.5E+05;       % Get values for a different Reynolds number
+different_re = 5.000E+04;       % Get values for a different Reynolds number
 
 U_inf   = 7.5;                % Free-stream velocity (m/s)
 Re      = 7.7E+04;            % Reynolds Number
@@ -41,6 +42,9 @@ D_star = D_s/(rho*U_inf*c^4);
 
 K_star = K_s/(rho*U_inf^2*c^3);
 
+crit_damping  = 2*sqrt(K_star*I_star);
+damping_ratio = D_star/crit_damping;
+
 disp(['-----------------------------'])
 disp(['Reynolds No (Re)  :          ', num2str(Re,7)])
 disp(['Freestream (U_inf):          ', num2str(U_inf,7)])
@@ -50,6 +54,7 @@ disp(['Inertia     (I*)  :          ', num2str(I_star,7)])
 disp(['Struc Dissip(D*)  :          ', num2str(D_star,7)])
 disp(['Stiffness   (K*)  :          ', num2str(K_star,7)])
 disp(['Axis       (X0*)  :          ', num2str(X0_star,7)])
+disp(['Damping Ratio     :          ', num2str(damping_ratio,7)])
 disp(['-----------------------------'])
 
 

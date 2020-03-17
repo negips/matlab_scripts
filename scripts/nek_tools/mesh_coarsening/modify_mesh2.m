@@ -17,6 +17,8 @@ casename = 'saab750k';
 %casename = 'naca0009_3p5c_c';
 %casename = 'naca0009_outer';
 %casename = 'naca0012_5_10_fine2';
+casename = 'nacatrunc';
+
 
 svfname  = [casename '.mat'];
 

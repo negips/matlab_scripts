@@ -1,4 +1,4 @@
-function Plot3DElement(mesh2d,i,fig)
+function Plot2DElement(mesh2d,i,fig)
 
   figure(fig)
   
