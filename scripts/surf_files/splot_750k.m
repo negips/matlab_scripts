@@ -69,6 +69,15 @@ destn = 'plots_test/';
 ifcontour=1;            % make contour plot for zero shear stress.
 iftr = 1;               % overlay transition points on shear stress space-time plot
   trfile='tr750k_n9_2.mat';
+<<<<<<< HEAD
+=======
+iftrportrait=0;         % Plot transition phase portrait
+ifxfoil=0;                    % plot xfoil transition location data
+
+ifseparated=0;
+ifpressure=0;
+
+>>>>>>> aeeda89880074971def49116caf3607c6d079210
 ifsave = 0;             % Save space-time plots
   
 iftrportrait=1;         % Plot transition phase portrait
@@ -83,8 +92,13 @@ ifczplot = 0;           % plot normal force variation
 ifczsave = 0;
 
 
+
 %ifcp = 0;
+<<<<<<< HEAD
 lafs=42*fontfac;                % Latex font size
+=======
+lafs=30;                % Latex font size
+>>>>>>> aeeda89880074971def49116caf3607c6d079210
 ifflip=1;
 cbloc='Northoutside';
 cbheight = 0.75;

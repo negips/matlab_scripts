@@ -139,9 +139,12 @@ elmap = fread(infile,nelt,'*int32').';
 %--------------------------------------------------------------------------
 % READ DATA
 %--------------------------------------------------------------------------
+
+lx1=lr1(1); ly1=lr1(2); lz1=lr1(3);
+
 dtemp = zeros(npel,nelt);
-data = zeros(npel,nelt,nflds);
-d1.data=dtemp;
+data = zeros(lx1,ly1,lz1,nelt,nflds);
+d1.data=reshape(dtemp,lx1,ly1,lz1,nelt);
 flddata = repmat(d1,1,nflds);
 
 % For X,U           ! stored as vectors
@@ -150,8 +153,8 @@ for ivar = 1:2
     for iel = elmap
         for idim = (1:var(ivar))+idim0
             dtemp = fread(infile,npel,realtype);  
-            data(:,iel,idim) = dtemp;
-            flddata(idim).data(:,iel)=dtemp;
+            data(:,:,:,iel,idim) = reshape(dtemp,lx1,ly1,lz1);
+            flddata(idim).data(:,:,:,iel)=reshape(dtemp,lx1,ly1,lz1);
         end
     end
 end
@@ -164,13 +167,16 @@ for ivar = 3:length(var)
       nflds=nflds+1;  
       for iel = elmap
           dtemp = fread(infile,npel,realtype);  
-          data(:,iel,idim+idim0) = dtemp;
-          flddata(nflds).data(:,iel)=dtemp;
+          data(:,:,:,iel,idim+idim0) = reshape(dtemp,lx1,ly1,lz1);
+          flddata(nflds).data(:,:,:,iel)=reshape(dtemp,lx1,ly1,lz1);
       end
   end
 end
 
+
+
 datastruc.status  =  status   ;
+datastruc.ndim    =  ndim     ;
 datastruc.header  =  header   ;
 datastruc.etag    =  etag     ;
 datastruc.wdsz    =  wdsz     ;

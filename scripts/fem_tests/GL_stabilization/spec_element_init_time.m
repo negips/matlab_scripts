@@ -7,10 +7,10 @@ close all
 %addpath 'templates/'
 ifplot = 0;
 
-N=4;
+N=18;
 lx1 = N+1;
 npts=lx1;
-nels = 4;
+nels = 50;
 Nd=ceil(1.5*N);
 Nd2=ceil((4*N+3)/2);
 Nd3=ceil((6*N+3)/2);
@@ -20,7 +20,7 @@ dof = N*nels+1;
 nnodes = nels+1;
 
 d_start = 0;
-d_end = 20;
+d_end = 200;
 d_len = abs(d_end-d_start);
 
 uniform = 1;
@@ -47,38 +47,21 @@ mu_x = zeros(npts,nels);
 
 io = sqrt(-1);    % iota
 
-% \nu(dA/dx)
-U     = 2.0;
-cu    = 0.0;
-nu = U + 2i*cu;
+%%
 
-% \gamma(d^2A/dx^2)
-cd = -1.;
-gamma = 1.0 + 1i*cd;
-
-% Source term
-mu00   = 0.52;
-mu0    = (mu00 - cu^2);
-mu2    = -0.01;
-
-% step for dissipative region
-diss_xs=200;
-diss_xe=300;
-diss_xrise=20;
-diss_xfall=20;
 
 for i=1:nels
 
-     close all;
+%     close all;
 
      xst = el_nodes(i);
      xen = el_nodes(i+1);
-     [MASS DXM1 DXM1D RXM1 gradm1 lpx FORC x_coeff Dx w1m1 xm1 JACM1 JACM1D xm1d xm1d2 GLL2Dealias Dealias2GLL GLL2Dealias2 Dealias2GLL2 GLL2Dealias3 Dealias2GLL3 gradm1d gradm1d2 gradm1d3 intgd intgd2 intgd3] = MESem1D2(N,Nd,Nd2,Nd3,xst,xen,ifboyd,ifplot);
+     [MASS DXM1 DXM1D RXM1 gradm1 lpx FORC x_coeff Dx w1m1 xm1 JACM1 JACM1D xm1d xm1d2 GLL2Dealias Dealias2GLL GLL2Dealias2 Dealias2GLL2 GLL2Dealias3 Dealias2GLL3 gradm1d gradm1d2 gradm1d3 intgd intgd2 intgd3 LegendreTransform InvLegendreTransform] = MESem1D3(N,Nd,Nd2,Nd3,xst,xen,ifboyd,ifplot);
 
 
      El(i).MASS   = MASS; 
      El(i).GRADM1 = gradm1;
-     El(i).CONV   = MASS*gradm1;                % mass matrix included
+     El(i).CONV   = gradm1;                % mass matrix included
      El(i).LAPL   = lpx;                        % mass matrix included
      El(i).INTPM1D  = GLL2Dealias;
      El(i).INTPM1D2 = GLL2Dealias2;  
@@ -95,8 +78,8 @@ for i=1:nels
      El(i).xm1    = xm1; 
      El(i).xm1d   = xm1d; 
      El(i).xm1d2  = xm1d2;
-     El(i).mu     = mu0 - mu1*xm1;
-     El(i).mud    = mu0 - mu1*xm1d;
+     El(i).mux    = (xm1.^2);
+     El(i).muxd   = (xm1d.^2);
 
      nek_mass(:,:,i)     = MASS;
      nek_gradm1(:,:,i)   = gradm1;
@@ -108,37 +91,17 @@ for i=1:nels
      nek_intgd2(:,:,i)   = intgd2;
      nek_intgd3(:,:,i)   = intgd3;
 
-     nek_lp(:,:,i)       = lpx;
-     nek_mu(:,:,i)       = mu0*eye(length(xm1));
-     nek_mud(:,:,i)      = mu0*eye(length(xm1d));
+     nek_lp(:,:,i)       = lpx;          % Since it is integrated by parts
 
-%    Time and space varying convective region      
-     nek_mu_conv(:,:,i)  = diag(xm1);
+%    Space varying source (x.^2)     
+     nek_mux2(:,:,i)      = diag(El(i).mux).^2;
+     nek_muxd2(:,:,i)     = diag(El(i).muxd).^2;
 
-%    On over-integration grid 
-     nek_mud_conv(:,:,i) = diag(xm1d);
-
-%    Add dissipative region at the end 
-     s1                  =  smoothstep(xm1,diss_xs,diss_xs+diss_xrise); 
-     s2                  = -smoothstep(xm1,diss_xe,diss_xe+diss_xfall); 
-     diss_x              = s1+s2;     
-     nek_mu(:,:,i)       = nek_mu(:,:,i) + mu_diss*diag(diss_x);
-%    On over-integration grid 
-     s1d                 =  smoothstep(xm1d,diss_xs,diss_xs+diss_xrise); 
-     s2d                 = -smoothstep(xm1d,diss_xe,diss_xe+diss_xfall); 
-     diss_xd             = s1d+s2d;     
-     nek_mud(:,:,i)      = nek_mud(:,:,i) + mu_diss*diag(diss_xd);
+%    Space varying source (x)
+     nek_mux(:,:,i)  = diag(xm1);
+     nek_muxd(:,:,i) = diag(xm1d);
 
      xgll(:,i) = xm1;
-
-%    Just saving 
-     s1                  =  smoothstep(xm1,step_xs,step_xs+step_xrise); 
-     s2                  = -smoothstep(xm1,step_xe,step_xe+step_xfall);
-     ds1                 =  smoothstep(xm1,diss_xs,diss_xs+diss_xrise); 
-     ds2                 = -smoothstep(xm1,diss_xe,diss_xe+diss_xfall); 
-     mu_x(:,i)           =  mu0*ones(length(xm1),1) + mu2/2*;
-     mu_xdiss(:,i)       =  ds1 + ds2;
-     mu_xabs(:,i)        =  s1 + s2; 
 
      gl_pos_j1 = (i-1)*N + 1;
      gl_pos_i1 = (i-1)*N + 1;
@@ -156,6 +119,24 @@ for i=1:nels
 end
 
 xall = unique(xgll);
+
+INTP = interp_operator(N,LegendreTransform,10000);
+
+function intp_op = interp_operator(N,LegT,npts)
+
+  z=linspace(-1,1,npts);
+
+  %% Spectral Nx to nodal npts
+  pht = zeros(npts,N+1);
+  for j = 1:npts
+    Lj = legendrePoly(N,z(j));
+    pht(j,:) = transpose(Lj);
+  end
+  
+  intp_op = pht*LegT;              % Nx spectral to Nxd nodal
+
+end
+
 
 
 

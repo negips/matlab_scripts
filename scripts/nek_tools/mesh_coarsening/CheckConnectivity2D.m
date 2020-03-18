@@ -17,6 +17,7 @@ function CheckConnectivity2D(mesh2d)
        end
        ce = mesh2d.cbc(j,i).connectsto;
        of = mesh2d.cbc(j,i).onface;
+%       [j i ce]
        rev_el = mesh2d.cbc(of,ce).connectsto;
        if rev_el~=i
          disp(['Inconsistent Connectivity: ',num2str(j),' ', num2str(i), ' ', num2str(of), ' ', num2str(ce), ' ', num2str(rev_el)])

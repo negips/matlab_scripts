@@ -7,7 +7,7 @@ close all
 % addpath '/home/prabal/workstation/git_kth/matlabscripts/scripts/'
 % addpath '/scratch/negi/git_repos/matlabscripts/scripts/'
 
-fol = 'seck0.4_t0/';
+fol = 'saab_sfd_k0.1/';
 ifhdr = 1;
 fs = 16;                % fontsize
 lfs = 16;               % legend fontsize
@@ -15,19 +15,21 @@ ifcols = 1;
 ifplot = 0;             % plot individual wall profiles
 tlast = 0.00;          % start from this time
 tstart0 = tlast;
-tend = 1.2;             % stop at this time
+tend = 12100.2;             % stop at this time
 destn = 'plots/';
-ifcp = 0;               % plot pressure instead of cf
-ifdatasave=1;           % save data into a mat file
-  datafile='sec_k04_t00.mat';
+ifcp = 1;               % plot pressure instead of cf
+ifint = [2, 3];
+ifdatasave=0;           % save data into a mat file
+  datafile='re750k_impulsek04.mat';
+  surf_save = 0;        % snapshots to generate surface
 lafs = 22;              % Latex font size
 
 U0=1.;
-kred=0.0;
+kred=0.4;
 chord=1.0;
 semichord=chord/2;
 omega=kred*U0/semichord;
-Tosc=1.; %2*pi/omega;
+Tosc=2*pi/omega;
 %Tosc=1;
 ptch_amp = 0.0;
 ptch_start = 0.;
@@ -44,6 +46,10 @@ maxframes = nfiles*100;
 
 if (ifplot)
   h1=figure('units','normalized','outerposition',[0 0 0.4 0.6]);
+end
+
+if (ifint(1)>0 && ifint(2)>0)
+  h2=figure('units','normalized','outerposition',[0.25 0.5 0.4 0.6]);
 end
 
 %mov(1:maxframes) = struct('cdata', [],'colormap', []);            % Just allocating
@@ -202,8 +208,9 @@ icalld = 0;
 for i = 1:nfiles
   if (tout(i)>=tlast && tout(i)<=tend) 
     fname = sfiles{i};
-        
-    [sdata sintegrals tstamps sno lx1 selt maxtsaves x y timeout hdr] = readsurf(fname,ifhdr);
+
+    ndim=2;    
+    [sdata sintegrals tstamps sno lx1 selt maxtsaves x y timeout hdr] = readsurf(fname,ifhdr,ndim);
 
     if (lx1(1)==6)
       sty_top = sty_top5;
@@ -274,7 +281,7 @@ for i = 1:nfiles
       end
     end    
       
-    for it = 1:length(tstamps)
+    for it = 1:-1 %length(tstamps)
       if (tstamps(it)>=tlast && tstamps(it)<=tend)
          if ifplot && nplots>0
            delete(pvar)
@@ -339,11 +346,12 @@ for i = 1:nfiles
          cpy = cp.*(sty_ref'); 
 
          if (ifplot)
+           figure(h1)
            if (ifcp)
              pvar = plot(xsort,cp, 'b.', 'MarkerSize', 6);
              grid on
              set(gca,'Ydir', 'reverse')
-             ylim([-1.1 0.1]);
+%             ylim([-1.1 0.1]);
              ylabel('C_{p}', 'Interpreter', 'tex', 'Fontsize', fs);
              xlabel('x/C', 'Interpreter', 'tex', 'Fontsize', fs);
            else        
@@ -360,38 +368,37 @@ for i = 1:nfiles
 
          end      % ifplot 
 
-         if (lx1(1)==6)   
-           surf_x5 = [surf_x5; xsort'/Chord];
-           surf_t5 = [surf_t5; tstamps(it)*ones(1,length(xsort))];
-           surf_v5 = [surf_v5; cf'];
-           surf_c5 = [surf_c5; sign(cf)'];
-           surf_p5 = [surf_p5; cp'];
-           npts5=npts5+1;
-         elseif(lx1(1)==7)    
-           surf_x8 = [surf_x8; xsort'/Chord];
-           surf_t8 = [surf_t8; tstamps(it)*ones(1,length(xsort))];
-           surf_v8 = [surf_v8; cf'];
-           surf_c8 = [surf_c8; sign(cf)'];
-           surf_p8 = [surf_p8; cp'];
-           npts8=npts8+1;
-         elseif(lx1(1)==9)    
-           surf_x8 = [surf_x8; xsort'/Chord];
-           surf_t8 = [surf_t8; tstamps(it)*ones(1,length(xsort))];
-           surf_v8 = [surf_v8; cf'];
-           surf_c8 = [surf_c8; sign(cf)'];
-           surf_p8 = [surf_p8; cp'];
-           npts8=npts8+1;
-         elseif(lx1(1)==10)    
-           surf_x9 = [surf_x9; xsort'/Chord];
-           surf_t9 = [surf_t9; tstamps(it)*ones(1,length(xsort))];
-           surf_v9 = [surf_v9; cf'];
-           surf_c9 = [surf_c9; sign(cf)'];
-           surf_p9 = [surf_p9; cp'];
-           npts9=npts9+1;
-         end
-
-         cz = [cz sintegrals(it,2,3)];
-         cz_time = [cz_time tstamps(it)];   
+         if (surf_save)
+           if (lx1(1)==6)   
+             surf_x5 = [surf_x5; xsort'/Chord];
+             surf_t5 = [surf_t5; tstamps(it)*ones(1,length(xsort))];
+             surf_v5 = [surf_v5; cf'];
+             surf_c5 = [surf_c5; sign(cf)'];
+             surf_p5 = [surf_p5; cp'];
+             npts5=npts5+1;
+           elseif(lx1(1)==7)    
+             surf_x8 = [surf_x8; xsort'/Chord];
+             surf_t8 = [surf_t8; tstamps(it)*ones(1,length(xsort))];
+             surf_v8 = [surf_v8; cf'];
+             surf_c8 = [surf_c8; sign(cf)'];
+             surf_p8 = [surf_p8; cp'];
+             npts8=npts8+1;
+           elseif(lx1(1)==9)    
+             surf_x8 = [surf_x8; xsort'/Chord];
+             surf_t8 = [surf_t8; tstamps(it)*ones(1,length(xsort))];
+             surf_v8 = [surf_v8; cf'];
+             surf_c8 = [surf_c8; sign(cf)'];
+             surf_p8 = [surf_p8; cp'];
+             npts8=npts8+1;
+           elseif(lx1(1)==10)    
+             surf_x9 = [surf_x9; xsort'/Chord];
+             surf_t9 = [surf_t9; tstamps(it)*ones(1,length(xsort))];
+             surf_v9 = [surf_v9; cf'];
+             surf_c9 = [surf_c9; sign(cf)'];
+             surf_p9 = [surf_p9; cp'];
+             npts9=npts9+1;
+           end
+         end      % surf_save
 
          ind2 = find(cf<0,1);
          xbub_st = xsort(ind2);
@@ -408,7 +415,16 @@ for i = 1:nfiles
       if (ifplot)
         pause(0.01)
       end
-    end
+    end     % it=1:length(tstamps)
+
+    if (ifint(1)>0 && ifint(2)>0)
+%      figure(h2)
+%      plot(tstamps,sintegrals(:,ifint(1),ifint(2))); hold on
+%      grid on
+      cz = [cz sintegrals(:,ifint(1),ifint(2))];
+      cz_time = [cz_time tstamps]; 
+    end        
+   
   end
 end           
 
@@ -416,6 +432,9 @@ end
 if ifdatasave
   save(datafile)
 end
+
+plot(cz_time(:),cz(:))
+
 
 %splot_impulse
 

@@ -15,7 +15,6 @@ close all
 %load naca0012_5_10_fine2.mat
 load nacatrunc.mat
 
-
 skiplayers = 3;         % Need to skip some layers since its smaller than the others
 curvedef   = 'mv ';
 ifvtk      = 1;

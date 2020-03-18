@@ -19,6 +19,7 @@ nu = 0;
 ifboyd = 0;
 destn  = 'plots/';
 ifplot = 0;
+ifsave = 0;
 ifdiv  = 1;
 gltot  = 0;     %    Global number of elements 
 
@@ -224,14 +225,15 @@ pause(2)
 if (ifplot)
   filename=['spectra_conv_N' num2str(Nx), '_Nxd' num2str(Nxd) '_nelv' num2str(nelv) '.eps'];
   if (bdfkstability) 
-    xlabel('\lambda_{r}\Delta t', 'FontSize', 18)  
-    ylabel('\lambda_{i}\Delta t', 'FontSize', 18)
+    xlabel('$\lambda_{r}\Delta t$', 'FontSize', 18)  
+    ylabel('$\lambda_{i}\Delta t$', 'FontSize', 18)
   else
-    xlabel('\lambda_{r}', 'FontSize', 18)  
-    ylabel('\lambda_{i}', 'FontSize', 18)
+    xlabel('$\lambda_{r}$', 'FontSize', 18)  
+    ylabel('$\lambda_{i}$', 'FontSize', 18)
   end  
-
-  SaveFig(eigfigure,filename,destn,1);
+  if (ifsave)
+    SaveFig(eigfigure,filename,destn,1);
+  end    
 end
 %
 %%% (Convective - Forcing) matrix eigenvalues
@@ -253,8 +255,10 @@ if (ifplot)
   else
     xlabel('$\lambda_{r}$', 'FontSize', 18)  
     ylabel('$\lambda_{i}$', 'FontSize', 18)
+  end
+  if (ifsave) 
+    SaveFig(eigfigure,filename,destn,1);
   end  
-  SaveFig(eigfigure,filename,destn,1);
 end
 
 %% Testing dealiased convection operator.
