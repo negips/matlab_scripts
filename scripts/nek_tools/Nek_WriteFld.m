@@ -7,7 +7,7 @@ function [status] = Nek_WriteFld(ndim,N,nel,xgll,ygll,zgll,U,V,W,P,T,nps,ifx,ifu
   lx1 = N+1;
 
 % write header
-  wdsz=4;
+  wdsz=8;
   lr1=ones(3,1);
   for i=1:ndim
     lr1(i)=lx1;
@@ -61,7 +61,7 @@ function [status] = Nek_WriteFld(ndim,N,nel,xgll,ygll,zgll,U,V,W,P,T,nps,ifx,ifu
 
 % Endian tag
   etag = 6.54321;
-  fwrite(fid,etag,realtype);
+  fwrite(fid,etag,'float32');
   
 % Global Element map
   fwrite(fid,Glno,'int32');

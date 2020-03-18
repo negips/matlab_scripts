@@ -7,7 +7,7 @@ close all
 % addpath '/home/prabal/workstation/git_kth/matlabscripts/scripts/'
 % addpath '/scratch/negi/git_repos/matlabscripts/scripts/'
 
-fol = 're750k_impulsek0.4/';
+fol = 'seck0.4_t0/';
 ifhdr = 1;
 fs = 16;                % fontsize
 lfs = 16;               % legend fontsize
@@ -19,7 +19,7 @@ tend = 1.2;             % stop at this time
 destn = 'plots/';
 ifcp = 0;               % plot pressure instead of cf
 ifdatasave=1;           % save data into a mat file
-  datafile='re750k_impulsek04.mat';
+  datafile='sec_k04_t00.mat';
 lafs = 22;              % Latex font size
 
 U0=1.;

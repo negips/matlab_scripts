@@ -12,22 +12,22 @@ uy = 1.*sin(alpha);
 ux = 1*cos(alpha);
 uinf = 1.;
 
-Rec = 150*1000;
+Rec = 77*1000;
 rho = 1.0;
 nu = 1/Rec;
 nu_nek=nu;
 
-yplusmin = 0.64;
-yplusmax = 12;
+yplusmin = 0.3;
+yplusmax = 8;
 xplus = 10.0;
 zplus = 8;
 ifxavg = 1;
 ifzavg = 1;
-lz = 0.20;
+lz = 0.10;
 
 % Data from xfoil
 
-xfoil = importdata('integral_vals_re150k_naca_alpha00.out');
+xfoil = importdata('integral_vals_re77k_naca_alpha00.out');
 l1 = length(xfoil.data(:,7));
 x0 = xfoil.data(1,2);
 cnt=0;
@@ -51,7 +51,7 @@ tauwb = transpose(abs(xfoil.data(indb,7))*0.5);
 utb = sqrt(tauwb/rho);
 
 
-N = 16;
+N = 10;
 
 figure(1)
 plot(xa,ut)

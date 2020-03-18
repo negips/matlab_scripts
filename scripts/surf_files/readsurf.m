@@ -107,7 +107,7 @@ for i=1:maxtsaves
 end    
 
 %---------------------------------------- 
-ndim=2;
+ndim=3;
 sintegrals = zeros(maxtsaves,ndim,ns);
 for i=1:ns
   for j=1:ndim

@@ -7,7 +7,7 @@ close all
 % addpath '/home/prabal/workstation/git_kth/matlabscripts/scripts/'
 % addpath '/scratch/negi/git_repos/matlabscripts/scripts/'
 
-fol = 're750k_impulse';
+fol = 're750k_aoa44_7';
 ifhdr = 1;
 fs = 16;                % fontsize
 lfs = 16;               % legend fontsize
@@ -18,8 +18,8 @@ destn = 'plots/';
 [sfiles tout] = LoadSurfFiles(fol);
 
 nfiles = length(sfiles);
-tlast = 0.00;
-tmax = 500.00001;
+tlast = 50.45;
+tmax = 403.65000;
 maxframes = nfiles*100;
 
 h1=figure('units','normalized','outerposition',[0 0 0.4 0.6]);
@@ -27,14 +27,25 @@ h1=figure('units','normalized','outerposition',[0 0 0.4 0.6]);
 %mov(1:maxframes) = struct('cdata', [],'colormap', []);            % Just allocating
 %mov = VideoWriter('cp_movie.avi');
 
+surf_x = [];
+surf_y = [];
+surf_t = [];
+surf_v = [];
+surf_p = [];
+
+
+
 cfavg = [];
 cfavgx = [];
 cfavgy = [];
 ncf_pts = 0;
-cf_start=531.25;
-cf_end = 538.04;
+cf_start=50.450;
+cf_end = 53.65;
 ifcfplot = 1;
 nplots = 0;
+ifrollingcf=1;
+rollcf=0;
+
 for i = 1:nfiles
   if (tout(i)>=tlast)
     fname = sfiles{i};
@@ -112,23 +123,38 @@ for i = 1:nfiles
 
          end
 
-         if (tstamps(it)>cf_end) && (ifcfplot==0)
+         if (tstamps(it)>cf_end) && (ifcfplot==1)
            cfplot = plot(cfavgx,cfavg, ' .r');
            ifcfplot=1; 
+         end
+
+         if (tstamps(it)>cf_start) && (ifrollingcf)
+           if (rollcf>0)
+             delete(rollcfplot)
+           end  
+           rollcf=rollcf+1;
+           rollcfplot = plot(cfavgx,cfavg, ' .m');
          end    
+
+%         surf_x = [surf_x; xsort'/Chord];
+%         surf_y = [surf_y; ysort'/Chord];
+%         surf_t = [surf_t; tstamps(it)*ones(1,length(xsort))];
+%         surf_v = [surf_v; cf'];
+%         surf_p = [surf_p; cp'];
+
 %%
          
          figure(h1)      
 %         pvar = plot(x(:)/Chord,dtmp_v(:), 'b.', 'MarkerSize', 10);
-         pvar = plot(xsort/Chord,cp, 'b.', 'MarkerSize', 10);
-%         pvar = plot(xsort/Chord,cf, 'b.', 'MarkerSize', 10);
+%         pvar = plot(xsort/Chord,cp, 'b.', 'MarkerSize', 10);
+         pvar = plot(xsort/Chord,cf, 'b.', 'MarkerSize', 10);
 %         pvar = plot(xsort,ysort, 'b.', 'MarkerSize', 10);
         
-         set(gca,'Ydir', 'reverse')
-         ylim([-0.4 0.6]);
-         xlim ([0. 1]);
+%         set(gca,'Ydir', 'reverse')
+%         ylim([-0.4 0.6]);
+         xlim ([0.01 1.0000]);
 %         xlim([-0.01 1.000])
-         ylim([-1.1 1.1])    
+%         ylim([-1.1 1.1])    
          grid on   
          hold on
          lgs{1} =  ['T=' num2str(tstamps(it))]; 

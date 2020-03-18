@@ -11,7 +11,6 @@ function [A,B] = CouetteMatrix(N,alpha,beta,Re);
 
     global D0 D1 D2 D4
 
-
     zi=sqrt(-1);
 
     % mean velocity

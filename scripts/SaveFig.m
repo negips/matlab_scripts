@@ -18,7 +18,7 @@ if ~isempty(strfind(lower(filename), '.eps'))
   end  
 
 elseif ~isempty(strfind(lower(filename), '.pdf'))
-  print( h, reso, '-dpdf', filename)
+  print(h, reso, '-dpdf', '-bestfit', filename)
   if ~isempty(destn) 
     movefile([filename],destn)
   end  
@@ -42,6 +42,7 @@ else
  
 end
 
+disp(['Figure Saved: ', destn, ' ', filename])
 
 end
 

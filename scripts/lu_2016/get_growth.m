@@ -12,10 +12,15 @@ ifsave = 0;
 %svname3='cossu_growth.eps';
 %svname4='cossu_omega.eps';
 
-svname1='lu_evol.eps';
-svname2='lu_peaks.eps';
-svname3='lu_growth.eps';
-svname4='lu_omega.eps';
+%svname1='lu_evol.eps';
+%svname2='lu_peaks.eps';
+%svname3='lu_growth.eps';
+%svname4='lu_omega.eps';
+
+%svname1='re23_evol.eps';
+%svname2='re23_peaks.eps';
+%svname3='re23_growth.eps';
+%svname4='re23_omega.eps';
 
 
 outpos = [0.10 0.30 0.40 0.60];
@@ -129,6 +134,15 @@ i=i+1; % 22
 file{i}='fsi_ugis_re45_nl.out';
 legen{i}='Nonlinear';% Re23.512 n=1/7
 
+i=i+1; % 23
+file{i}='fsi_23_lin.out';
+legen{i}='Linear';% Re23.512 n=1/7
+
+i=i+1; % 24
+file{i}='fsi_23_nl.out';
+legen{i}='Nonlinear';% Re23.512 n=1/7
+
+
 ind=[21,22];
 
 file=file(ind);
@@ -143,7 +157,7 @@ mkr_step=1000;
 iskip=10;          % no of initial peaks to skip
 eskip=0;          % no of end peaks to skip
 tstart=-700;
-tend  =650;
+tend  = 800;
 
 %re45
 %tstart=950;

@@ -36,12 +36,12 @@
 %    beta   = input('Enter beta: ');
 %    Tmax   = input('Enter Tmax: '); 
     iflow=3;
-    N=1024;
+    N=200;
 %    Re=54385;
-    Re=500;
-    alpha=1.0;
-    beta=1.0;
-    Tmax=100;
+    Re=10;
+    alpha=2.5;
+    beta=0.0;
+    Tmax=50;
 
     T      = [0 Tmax];
     %...generate Chebyshev differentiation matrices
@@ -52,6 +52,8 @@
       [A,B] = PoiseuilleMatrix(N,alpha,beta,Re);
     elseif (iflow == 2)
       [A,B] = CouetteMatrix(N,alpha,beta,Re);
+    elseif (iflow == 3)
+      [A,B] = JetMatrix(N,alpha,beta,Re);
     else
       [A,B] = SuctionMatrix(N,alpha,beta,Re);
     end
